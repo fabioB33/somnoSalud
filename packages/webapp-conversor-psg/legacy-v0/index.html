@@ -1,0 +1,1887 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Conversor PSG Multi-Equipo → CSV</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root{
+    --bg:#0f172a; --panel:#1e293b; --panel2:#334155;
+    --text:#e2e8f0; --muted:#94a3b8; --accent:#38bdf8; --accent2:#0284c7;
+    --ok:#22c55e; --warn:#f59e0b; --err:#ef4444; --border:#475569;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:var(--bg);color:var(--text);min-height:100vh;padding:24px}
+  .container{max-width:960px;margin:0 auto}
+  h1{font-size:24px;margin:0 0 4px;color:var(--accent)}
+  .subtitle{color:var(--muted);font-size:14px;margin-bottom:24px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:24px;margin-bottom:16px}
+  .dropzone{border:2px dashed var(--border);border-radius:12px;padding:48px 24px;
+    text-align:center;cursor:pointer;transition:all .2s;background:var(--panel)}
+  .dropzone:hover,.dropzone.drag{border-color:var(--accent);background:var(--panel2)}
+  .dropzone svg{width:48px;height:48px;opacity:.6;margin-bottom:12px}
+  .dropzone p{margin:4px 0;font-size:15px}
+  .dropzone .hint{color:var(--muted);font-size:13px}
+  input[type=file]{display:none}
+  .btn{background:var(--accent2);color:white;border:none;padding:10px 18px;
+    border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;transition:.2s}
+  .btn:hover{background:var(--accent)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn.small{padding:6px 12px;font-size:12px}
+  .btn.secondary{background:var(--panel2);border:1px solid var(--border)}
+  .btn.ok{background:var(--ok)}
+  .actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+  .file-list{margin-top:16px}
+  .file-row{display:flex;align-items:center;gap:12px;padding:12px;
+    background:var(--panel2);border-radius:8px;margin-bottom:8px}
+  .file-row .name{flex:1;font-size:13px;word-break:break-word}
+  .file-row .status{font-size:12px;padding:3px 8px;border-radius:4px;white-space:nowrap}
+  .status.pending{background:#475569;color:white}
+  .status.processing{background:var(--warn);color:white}
+  .status.success{background:var(--ok);color:white}
+  .status.error{background:var(--err);color:white}
+  .log{font-family:ui-monospace,monospace;font-size:11px;background:#020617;
+    color:var(--muted);padding:12px;border-radius:6px;max-height:200px;
+    overflow:auto;margin-top:12px;white-space:pre-wrap}
+  details{margin-top:16px}
+  summary{cursor:pointer;color:var(--muted);font-size:13px;padding:6px 0}
+  summary:hover{color:var(--accent)}
+  .warn-box{background:#422006;border-left:3px solid var(--warn);
+    padding:12px 16px;border-radius:6px;font-size:13px;margin-top:12px}
+  .info-box{background:#0c2540;border-left:3px solid var(--accent);
+    padding:12px 16px;border-radius:6px;font-size:13px;margin-top:12px}
+  .mini-preview{display:none;margin-top:12px;padding:12px;background:#020617;
+    border-radius:6px;max-height:260px;overflow:auto}
+  .mini-preview table{font-size:11px;font-family:ui-monospace,monospace;
+    border-collapse:collapse;width:100%}
+  .mini-preview td{padding:2px 8px;border-bottom:1px solid #1e293b}
+  .mini-preview td:first-child{color:var(--muted);white-space:nowrap}
+  .mini-preview td:last-child{color:var(--accent);text-align:right}
+  footer{margin-top:24px;text-align:center;color:var(--muted);font-size:11px}
+  /* ENGINE */
+  #enginePanel{display:none;margin-top:16px}
+  #enginePanel.visible{display:block}
+  .engine-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px}
+  .engine-card-header{background:#1e293b;color:#e2e8f0;padding:8px 14px;font-size:13px;font-weight:600}
+  .engine-card-body{padding:14px}
+  .engine-results-full{grid-column:1/-1}
+  .engine-tabs-bar{display:flex;gap:0;background:#1e293b;padding:0 14px;border-radius:8px 8px 0 0}
+  .engine-tab-btn{background:transparent;border:none;color:#94a3b8;padding:8px 16px;cursor:pointer;font-size:12px;font-weight:600;border-bottom:2px solid transparent;transition:.2s}
+  .engine-tab-btn:hover{color:#e2e8f0}
+  .engine-tab-btn.active{color:#fff;border-bottom-color:#38bdf8}
+  .engine-tab-content{display:none}
+  .engine-tab-content.active{display:block;padding:14px}
+  .score-display{text-align:center;padding:24px 16px}
+  .score-big{font-size:64px;font-weight:800;line-height:1}
+  .score-label{font-size:13px;color:#94a3b8;margin-top:4px}
+  .score-cat{font-size:16px;font-weight:700;margin-top:6px}
+  .score-desc{font-size:12px;color:#94a3b8;margin-top:4px;max-width:480px;margin-left:auto;margin-right:auto}
+  .metrics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin:12px 0}
+  .metric-card{background:#0f172a;border:1px solid var(--border);border-radius:8px;padding:8px 10px;text-align:center}
+  .metric-card .mv{font-size:18px;font-weight:700;color:var(--accent)}
+  .metric-card .ml{font-size:10px;color:#94a3b8;margin-top:2px}
+  .metric-card.na{opacity:0.4}
+  .breakdown-item{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12px}
+  .breakdown-bar{flex:1;height:16px;background:#1e293b;border-radius:4px;overflow:hidden}
+  .breakdown-fill{height:100%;border-radius:4px;transition:width .5s}
+  .breakdown-label{min-width:120px;color:#e2e8f0;font-weight:500}
+  .breakdown-value{min-width:45px;text-align:right;font-weight:700;color:#e2e8f0}
+  .profile-badge{display:inline-block;padding:3px 12px;border-radius:6px;font-weight:700;font-size:13px}
+  .flag-list{list-style:none;padding:0;margin:8px 0}
+  .flag-list li{padding:5px 8px;margin:3px 0;border-radius:6px;font-size:12px}
+  .flag-list li.crit{background:rgba(239,68,68,0.15);border-left:3px solid #ef4444;color:#fca5a5}
+  .flag-list li.warn{background:rgba(245,158,11,0.15);border-left:3px solid #f59e0b;color:#fcd34d}
+  .detail-table{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0}
+  .detail-table th{background:#0f172a;color:#94a3b8;padding:5px 8px;text-align:left;font-weight:600}
+  .detail-table td{padding:4px 8px;border-bottom:1px solid #334155;color:#e2e8f0}
+  .detail-table tr:nth-child(even) td{background:rgba(30,41,59,0.5)}
+  .method-section{margin:16px 0;padding:14px;background:#0f172a;border-radius:8px;border:1px solid var(--border)}
+  .method-section h3{color:#e2e8f0;font-size:14px;margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:5px}
+  .method-section h4{color:var(--accent);font-size:12px;margin:10px 0 4px}
+  .method-section p{font-size:12px;line-height:1.5;margin-bottom:5px;color:#cbd5e1}
+  .method-section .ref{font-size:10px;color:#64748b;font-style:italic}
+  .method-table{width:100%;border-collapse:collapse;font-size:11px;margin:6px 0}
+  .method-table th{background:#334155;color:#fff;padding:4px 6px;text-align:left}
+  .method-table td{padding:3px 6px;border-bottom:1px solid #334155;color:#cbd5e1}
+  .method-formula{background:#0f172a;color:#38bdf8;padding:6px 10px;border-radius:6px;font-family:monospace;font-size:11px;margin:6px 0}
+  .score-leve{color:#4ade80}.score-moderada{color:#fbbf24}.score-alta{color:#fb923c}.score-critica{color:#f87171}
+  .na-note{background:#334155;color:#94a3b8;padding:6px 10px;border-radius:6px;font-size:11px;margin:8px 0;font-style:italic}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Conversor PSG Multi-Equipo → CSV</h1>
+  <div class="subtitle">Tirá uno o varios reportes PDF de <strong>cualquier equipo</strong> (Philips Sleepware G3, Alice NightOne, BrainWave, ResMed AirView, BMC). Auto-detecta el formato y exporta CSV long (3 columnas). 100% local.</div>
+
+  <div class="card">
+    <label for="fileInput" class="dropzone" id="dropzone">
+      <div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 5v14M5 12l7-7 7 7"/>
+          <path d="M5 21h14"/>
+        </svg>
+      </div>
+      <p><strong>Arrastrá los PDF acá</strong> o hacé clic para elegir archivos</p>
+      <p class="hint">Reportes de Philips (Sleepware G3, NightOne), BrainWave, ResMed AirView, BMC · Múltiples archivos</p>
+      <input type="file" id="fileInput" accept="application/pdf" multiple>
+    </label>
+    <div class="actions">
+      <button class="btn" id="processBtn" disabled>Procesar archivos</button>
+      <button class="btn ok" id="downloadAllBtn" disabled>Descargar todos (ZIP)</button>
+      <button class="btn secondary" id="clearBtn">Limpiar lista</button>
+    </div>
+    <div class="file-list" id="fileList"></div>
+    <details>
+      <summary>Ver log técnico</summary>
+      <div class="log" id="log"></div>
+    </details>
+  </div>
+
+  <div class="info-box">
+    <strong>Formato del nombre de archivo:</strong> <code>Apellido_Nombre_YYYYMMDD_HHMM.csv</code><br>
+    Ej: <code>Osinaga_Matias_20260326_2155.csv</code> · La hora se toma del "apagado de luces".
+  </div>
+
+  <div class="warn-box">
+    <strong>Verificá siempre un archivo manualmente.</strong> El sistema auto-detecta el equipo y aplica el parser correspondiente. Los campos disponibles varían según el equipo y tipo de estudio.<br><br>
+    <strong>Equipos soportados:</strong> Philips Sleepware G3 (PSG), Alice NightOne (Poligrafía), BrainWave (PSG), ResMed AirView (Diagnóstico y Tratamiento), BMC (Tratamiento). El reporte BMC de poligrafía diagnóstica tiene datos limitados (mayormente imágenes).<br><br>
+    <strong>Mapeo al Informe:</strong> La 3ra columna contiene la etiqueta del formulario IFN. Los reportes de tratamiento (CPAP) tienen un subconjunto reducido de campos: presión, adherencia, IAH residual.
+  </div>
+
+  <div id="enginePanel"></div>
+
+  <footer>
+    Procesamiento 100% local · Multi-equipo (Philips, BW, ResMed, BMC) · pdf.js 3.11.174 · JSZip 3.10.1
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+// ============== ESTADO ==============
+const STATE = { files: [] }; // { file, status, data, csv, filename, error }
+
+// ============== UTIL: LOGGING ==============
+function log(msg){
+  const el = document.getElementById("log");
+  el.textContent += `[${new Date().toLocaleTimeString()}] ${msg}\n`;
+  el.scrollTop = el.scrollHeight;
+}
+
+// ============== UTIL: FECHAS ==============
+function parseSpanishDate(s){
+  // "26/3/2026" → { iso: "2026-03-26", compact: "20260326" }
+  const m = String(s).trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(!m) return null;
+  const dd = m[1].padStart(2,"0"), mm = m[2].padStart(2,"0"), yyyy = m[3];
+  return { iso: `${yyyy}-${mm}-${dd}`, compact: `${yyyy}${mm}${dd}` };
+}
+function parseHour(s){
+  // "21:55:07" → { hhmm: "2155" }
+  const m = String(s).trim().match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+  if(!m) return null;
+  return { hhmm: m[1].padStart(2,"0") + m[2] };
+}
+function titleCase(s){
+  return String(s).toLowerCase().split(/\s+/).map(w => w ? w[0].toUpperCase()+w.slice(1) : "").join("");
+}
+
+// ============== UTIL: NÚMEROS ==============
+function num(s){
+  if(s==null) return "";
+  const v = String(s).trim().replace(",",".");
+  if(v==="" || v==="-" || v==="--") return "";
+  const n = parseFloat(v);
+  return isNaN(n) ? "" : n;
+}
+
+// ============== EXTRACCIÓN DE TEXTO DEL PDF ==============
+async function extractText(file){
+  const buf = file._preloadedBuffer || await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({data: buf}).promise;
+  let full = "";
+  for(let i=1;i<=pdf.numPages;i++){
+    const page = await pdf.getPage(i);
+    const tc = await page.getTextContent();
+    const pageText = tc.items.map(it => it.str).join(" ");
+    full += pageText + "\n";
+  }
+  return full;
+}
+
+// Bridge for parent iframe injection — accepts pre-read ArrayBuffer + filename
+function loadFromBuffer(buffer, filename) {
+  const fakeFile = { name: filename, type: 'application/pdf', _preloadedBuffer: buffer,
+    arrayBuffer: () => Promise.resolve(buffer) };
+  STATE.files.push({ file: fakeFile, status: "pending" });
+  render();
+  log("Archivo recibido: " + filename);
+  processAll();
+}
+
+// ============== AUTO-DETECCIÓN DE FORMATO ==============
+// Examina el texto extraído del PDF y determina el equipo/formato.
+// Retorna { format, label, type } donde type es "diagnostico" o "tratamiento".
+function detectFormat(rawText) {
+  const t = rawText.replace(/\s+/g, " ").trim();
+
+  // Philips Sleepware G3 — PSG completa
+  if (/Sleepware\s*G3\s*Philips\s*Respironics/i.test(t)) {
+    return { format: "philips_sleepware_g3", label: "Philips Sleepware G3 (PSG)", type: "diagnostico" };
+  }
+
+  // Philips Alice NightOne — Poligrafía
+  if (/Alice\s*NightOne/i.test(t) && /Informe\s*de\s*prueba\s*del\s*su/i.test(t)) {
+    return { format: "philips_nightone", label: "Philips Alice NightOne (Poligrafía)", type: "diagnostico" };
+  }
+
+  // ResMed AirView — Diagnóstico (poligrafía)
+  if (/ResMed\s*AirView/i.test(t) && /Informe\s*de\s*diagn[oó]stico/i.test(t)) {
+    return { format: "resmed_diagnostico", label: "ResMed AirView (Diagnóstico)", type: "diagnostico" };
+  }
+
+  // ResMed AirView — Tratamiento (cumplimiento + detallado)
+  if (/ResMed\s*AirView/i.test(t) && (/Informe\s*de\s*cumplimiento/i.test(t) || /Informe\s*de\s*tratamiento/i.test(t) || /Informe\s*detallado/i.test(t))) {
+    return { format: "resmed_tratamiento", label: "ResMed AirView (Tratamiento/CPAP)", type: "tratamiento" };
+  }
+
+  // ResMed genérico (si tiene AirView pero no matcheó arriba)
+  if (/ResMed\s*AirView/i.test(t)) {
+    return { format: "resmed_tratamiento", label: "ResMed AirView", type: "tratamiento" };
+  }
+
+  // BMC — Tratamiento (CPAP)
+  if (/BMC\s*Medical\s*Co/i.test(t) && /INFORME\s*DE\s*TRATAMIENTO/i.test(t)) {
+    return { format: "bmc_tratamiento", label: "BMC (Tratamiento/CPAP)", type: "tratamiento" };
+  }
+
+  // BMC — Poligrafía diagnóstica (poco texto extraíble, mayormente imágenes)
+  if (/BMC/i.test(t) && (/Arquitectura\s*del\s*Sue[ñn]o/i.test(t) || /Evento\s*Respiratorio/i.test(t) || /SWStaging/i.test(t))) {
+    return { format: "bmc_poligrafo", label: "BMC (Poligrafía diagnóstica)", type: "diagnostico" };
+  }
+
+  // BrainWave (BW) — PSG completa. Formato muy similar a Sleepware G3 pero sin el tag "Sleepware G3".
+  // El texto del PDF puede venir con letras separadas: "I N F O R M E  P O L I S O M N O G R Á F I C O"
+  // Colapsamos letras sueltas para detectar
+  const tCollapsed = t.replace(/(?<=[A-ZÁÉÍÓÚÑ]) (?=[A-ZÁÉÍÓÚÑ] |[A-ZÁÉÍÓÚÑ]$)/g, "");
+  if (/INFORME\s*POLISOMNOG/i.test(tCollapsed) && /AC\s+AO\s+AM\s+Apnea/i.test(t) && !/Sleepware\s*G3/i.test(t)) {
+    return { format: "brainwave_psg", label: "BrainWave (PSG)", type: "diagnostico" };
+  }
+
+  // Fallback: si tiene estructura de PSG con tablas respiratorias, intentar como genérico Sleepware-like
+  // Esto cubre BW y cualquier otro software que use formato similar
+  if (/Nombre del paciente/i.test(t) && /AC\s+AO\s+AM/i.test(t)) {
+    // Si tiene estructura BW (estadificación neumológica o fecha tipo DD-MM-YYYY)
+    if (/estadificaci[oó]n neum/i.test(tCollapsed) || /\d{2}-\d{2}-\d{4}/.test(t)) {
+      return { format: "brainwave_psg", label: "BrainWave (PSG)", type: "diagnostico" };
+    }
+    if (/Tiempo de sueño total/i.test(t)) {
+      return { format: "sleepware_like", label: "PSG genérico (formato Sleepware-like)", type: "diagnostico" };
+    }
+  }
+
+  return { format: "unknown", label: "Formato no reconocido", type: "unknown" };
+}
+
+// ============== ROUTER DE PARSERS ==============
+// Llama al parser correcto según el formato detectado.
+function parseByFormat(rawText, formatInfo) {
+  switch (formatInfo.format) {
+    case "philips_sleepware_g3":
+    case "sleepware_like":
+      return parsePhilipsSleepwareG3(rawText);
+    case "brainwave_psg":
+      return parseBrainWavePSG(rawText);
+    case "philips_nightone":
+      return parsePhilipsNightOne(rawText);
+    case "resmed_diagnostico":
+      return parseResMedDiagnostico(rawText);
+    case "resmed_tratamiento":
+      return parseResMedTratamiento(rawText);
+    case "bmc_tratamiento":
+      return parseBMCTratamiento(rawText);
+    case "bmc_poligrafo":
+      return parseBMCPoligrafo(rawText);
+    default:
+      throw new Error(`Formato no reconocido. No se puede parsear este PDF automáticamente.`);
+  }
+}
+
+// ============== PARSER: PHILIPS SLEEPWARE G3 (PSG) ==============
+// Todo apoyado en texto normalizado con un único espacio.
+function parsePhilipsSleepwareG3(rawText){
+  const t = rawText.replace(/\s+/g, " ").trim();
+  const d = {};
+  const miss = [];
+
+  const get = (re, name) => {
+    const m = t.match(re);
+    if(!m){ miss.push(name); return null; }
+    return m;
+  };
+
+  // --- PACIENTE ---
+  const name = get(/Nombre del paciente:\s*([A-ZÁÉÍÓÚÑa-záéíóúñ' .-]+),\s*([A-ZÁÉÍÓÚÑa-záéíóúñ' .-]+?)\s+(?:Sexo|Sleepware|INFORME|FDN)/, "paciente");
+  if(name){
+    d.paciente_apellido = name[1].trim();
+    d.paciente_nombre = name[2].trim();
+  }
+  const sexo = get(/Sexo:\s*([MFmfXx])\b/, "sexo");
+  if(sexo) d.paciente_sexo = sexo[1].toUpperCase();
+
+  const fdn = get(/FDN[:\s]+(\d{1,2}\/\d{1,2}\/\d{4})/, "fdn");
+  if(fdn){
+    const p = parseSpanishDate(fdn[1]);
+    if(p) d.paciente_fecha_nacimiento = p.iso;
+  }
+  const edad = get(/Edad:\s*(\d+)\s*años/, "edad");
+  if(edad) d.paciente_edad_anios = parseInt(edad[1]);
+
+  // --- ESTUDIO ---
+  const fecha = get(/Fecha del estudio:\s*(\d{1,2}\/\d{1,2}\/\d{4})/, "fecha_estudio");
+  if(fecha){
+    const p = parseSpanishDate(fecha[1]);
+    if(p) d.estudio_fecha = p.iso;
+  }
+  d.estudio_tipo = "Polisomnografia nocturna";
+  if(/Sleepware G3 Philips Respironics/.test(t)) d.estudio_software = "Sleepware G3 Philips Respironics";
+  const epoca = get(/épocas de (\d+) segundos/, "epoca");
+  if(epoca) d.estudio_epoca_segundos = parseInt(epoca[1]);
+  const crit = get(/AASM\.?\s*VIII\s*4\.B\s*\((\d+)%\s*desaturación\)/i, "criterio_hipopnea");
+  if(crit) d.estudio_criterio_hipopnea = `AASM VIII4.B (${crit[1]}% desaturacion)`;
+
+  // --- ARQUITECTURA DEL SUEÑO ---
+  const apagado = get(/Hora de apagado de luces:\s*(\d{1,2}:\d{2}:\d{2})/, "apagado");
+  if(apagado) d.hora_apagado_luces = apagado[1];
+  const encendido = get(/Hora de encendido de luces:\s*(\d{1,2}:\d{2}:\d{2})/, "encendido");
+  if(encendido) d.hora_encendido_luces = encendido[1];
+
+  const pairs = [
+    ["tiempo_grabacion_total_min", /Tiempo de grabación total \(TGT\):\s*([\d.]+)\s*minutos/],
+    ["tiempo_en_cama_min",         /Tiempo en cama \(TC\):\s*([\d.]+)\s*minutos/],
+    ["tiempo_periodo_sueno_min",   /Tiempo de período de sueño \(TPS\):\s*([\d.]+)\s*minutos/],
+    ["tiempo_sueno_total_min",     /Tiempo de sueño total \(TST\):\s*([\d.]+)\s*minutos/],
+    ["eficiencia_sueno_porc",      /Eficiencia del sueño:\s*([\d.]+)\s*%/],
+    ["latencia_sueno_min",         /Comienzo del sueño:\s*([\d.]+)\s*minutos/],
+    ["wake_after_sleep_onset_waso_min", /DTIS:\s*([\d.]+)\s*minutos/],
+    ["latencia_rem_desde_inicio_sueno_min", /Latencia REM \(desde comienzo del sueño\):\s*([\d.]+)\s*minutos/],
+    ["latencia_rem_desde_apagado_luces_min", /Latencia REM \(desde apagado de luces\):\s*([\d.]+)\s*minutos/],
+  ];
+  for(const [k,re] of pairs){
+    const m = get(re, k);
+    if(m) d[k] = num(m[1]);
+  }
+
+  // --- ESTADIFICACIÓN ---
+  // La tabla aparece concatenada en el texto en orden: N1 dur %TST N1lat N2 dur %TST N2lat ...
+  // Estrategia robusta: buscar cada etapa individualmente
+  const stage = (etiqueta, latSep, keyDur, keyPct, keyLat) => {
+    // "N 1: 6.0 minutos 1.9 % N 1: 88.5 minutos"
+    // "N 2: 143.0 minutos 45.7 % N 2: 90.5 minutos"
+    // "R: 22.5 minutos 7.2 % R: minutos 315.5 minutos" (formato peculiar en R)
+    const re = new RegExp(`${etiqueta}:?\\s*([\\d.]+)\\s*minutos\\s*([\\d.]+)\\s*%`);
+    const m = t.match(re);
+    if(m){ d[keyDur] = num(m[1]); d[keyPct] = num(m[2]); }
+    else miss.push(keyDur);
+    // latencia: después del % viene "<etiqueta>: X minutos" o "<etiqueta>: minutos X minutos"
+    const reLat = new RegExp(`${etiqueta}:?\\s*[\\d.]+\\s*minutos\\s*[\\d.]+\\s*%.*?${etiqueta}:?\\s*(?:minutos\\s*)?([\\d.]+)(?:\\s*minutos)?`);
+    const m2 = t.match(reLat);
+    if(m2) d[keyLat] = num(m2[1]);
+    else miss.push(keyLat);
+  };
+  stage("N 1","", "n1_duracion_min","n1_porc_tst","n1_latencia_min");
+  stage("N 2","", "n2_duracion_min","n2_porc_tst","n2_latencia_min");
+  stage("N 3","", "n3_duracion_min","n3_porc_tst","n3_latencia_min");
+  stage("R", "",  "rem_duracion_min","rem_porc_tst","rem_latencia_min");
+
+  // Pie chart: WK (26.0%) REM (5.3%) N1 (1.4%) N2 (33.8%) N3 (33.5%)
+  const hip = {
+    hipnograma_wake_porc: /WK\s*\(([\d.]+)\s*%\)/,
+    hipnograma_rem_porc:  /REM\s*\(([\d.]+)\s*%\)/,
+    hipnograma_n1_porc:   /N1\s*\(([\d.]+)\s*%\)/,
+    hipnograma_n2_porc:   /N2\s*\(([\d.]+)\s*%\)/,
+    hipnograma_n3_porc:   /N3\s*\(([\d.]+)\s*%\)/,
+  };
+  for(const [k,re] of Object.entries(hip)){
+    const m = t.match(re);
+    if(m) d[k] = num(m[1]);
+  }
+
+  // --- DATOS RESPIRATORIOS (tabla de 8 columnas: AC AO AM Apnea Hipop A+H RERA Total) ---
+  const respCols = ["apneas_centrales","apneas_obstructivas","apneas_mixtas","apneas_total","hipopneas","iah_eventos","rera","eventos_respiratorios_total"];
+  const respSuffix = ["numero","duracion_media_seg","duracion_maxima_seg","duracion_total_min","porc_tst","indice_por_hora","recuento_rem","recuento_nrem","indice_rem","indice_nrem"];
+  const respRows = [
+    ["Número", 0],
+    ["Dur\\. media \\(s\\)", 1],
+    ["Dur\\. máx\\. \\(s\\)", 2],
+    ["Dur\\. total \\(min\\)", 3],
+    ["% de TST", 4],
+    ["Índice \\(n\\.º/h TST\\)", 5],
+    ["Recuento de REM", 6],
+    ["Recuento de NREM", 7],
+    ["Índice de REM", 8],
+    ["Índice de NREM", 9],
+  ];
+  for(const [label, rowIdx] of respRows){
+    const re = new RegExp(`${label}\\s*:?\\s*([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)`);
+    const m = t.match(re);
+    if(m){
+      for(let c=0;c<8;c++){
+        const key = respCols[c] + "_" + respSuffix[rowIdx];
+        d[key] = num(m[c+1]);
+      }
+    } else {
+      miss.push(`resp_row:${label}`);
+    }
+  }
+  // Para IAH el suffix "numero" debe renombrarse a "eventos_numero", etc. según la plantilla que creamos.
+  // Renombramos algunas columnas específicas para respetar el schema wide de 212 columnas:
+  const renames = {
+    "iah_eventos_numero":"iah_eventos_numero",
+    "iah_eventos_duracion_media_seg":"iah_eventos_duracion_media_seg",
+    "iah_eventos_duracion_maxima_seg":"iah_eventos_duracion_maxima_seg",
+    "iah_eventos_duracion_total_min":"iah_eventos_duracion_total_min",
+    "iah_eventos_porc_tst":"iah_eventos_porc_tst",
+    "iah_eventos_indice_por_hora":"iah_global_por_hora",
+    "iah_eventos_recuento_rem":"iah_recuento_rem",
+    "iah_eventos_recuento_nrem":"iah_recuento_nrem",
+    "iah_eventos_indice_rem":"iah_indice_rem_por_hora",
+    "iah_eventos_indice_nrem":"iah_indice_nrem_por_hora",
+    "rera_indice_por_hora":"rera_indice_por_hora",
+    "eventos_respiratorios_total_indice_por_hora":"eventos_respiratorios_total_indice_por_hora",
+    "eventos_respiratorios_total_recuento_rem": null, "eventos_respiratorios_total_recuento_nrem":null,
+    "eventos_respiratorios_total_indice_rem":null, "eventos_respiratorios_total_indice_nrem":null,
+    "rera_recuento_rem":"rera_recuento_rem", "rera_recuento_nrem":"rera_recuento_nrem",
+    "rera_indice_rem":null, "rera_indice_nrem":null,
+  };
+  for(const [from,to] of Object.entries(renames)){
+    if(from in d){
+      if(to && to !== from){ d[to] = d[from]; delete d[from]; }
+      else if(to === null){ delete d[from]; }
+    }
+  }
+  // RDI = índice total
+  if("eventos_respiratorios_total_indice_por_hora" in d){
+    d["rdi_indice_trastornos_respiratorios"] = d["eventos_respiratorios_total_indice_por_hora"];
+  }
+
+  // --- POSICIÓN CORPORAL ---
+  // "Supino 0 0.00" y "ARRIBA: 326.5 95.9 6.9 89.0 0 2 0 15 3.3 0 3.3 15"
+  const supino = t.match(/Supino\s+(\d+)\s+([\d.]+)/);
+  if(supino){
+    d.pos_supino_duracion_min = num(supino[1]);
+    d.pos_supino_iah = num(supino[2]);
+  } else {
+    d.pos_supino_duracion_min = 0;
+    d.pos_supino_iah = 0;
+  }
+  const arriba = t.match(/ARRIBA:?\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+([\d.]+)\s+(\d+)\s+([\d.]+)\s+(\d+)/);
+  if(arriba){
+    d.pos_no_supino_duracion_min = num(arriba[1]);
+    d.pos_no_supino_porc_sueno = num(arriba[2]);
+    d.pos_no_supino_porc_rem = num(arriba[3]);
+    d.pos_no_supino_porc_nrem = num(arriba[4]);
+    d.pos_no_supino_apneas_centrales_numero = num(arriba[5]);
+    d.pos_no_supino_apneas_obstructivas_numero = num(arriba[6]);
+    d.pos_no_supino_apneas_mixtas_numero = num(arriba[7]);
+    d.pos_no_supino_hipopneas_numero = num(arriba[8]);
+    d.pos_no_supino_iah_por_hora = num(arriba[9]);
+    d.pos_no_supino_rera_numero = num(arriba[10]);
+    d.pos_no_supino_itr_por_hora = num(arriba[11]);
+    d.pos_no_supino_desaturaciones_numero = num(arriba[12]);
+  } else {
+    miss.push("pos_no_supino");
+  }
+
+  // --- DESPERTARES LIGEROS ---
+  // Tabla: 6 columnas (REM, NREM, Desp ligeros, Despertares, Dl+D, Índice Dl+D)
+  const arousalRow = (label, prefix) => {
+    const re = new RegExp(`${label}:?\\s*(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+([\\d.]+)`);
+    const m = t.match(re);
+    if(m){
+      d[`${prefix}_rem`] = num(m[1]);
+      d[`${prefix}_nrem`] = num(m[2]);
+      d[`${prefix}_desp_ligeros`] = num(m[3]);
+      d[`${prefix}_despertares`] = num(m[4]);
+      d[`${prefix}_dl_mas_d`] = num(m[5]);
+      d[`${prefix}_indice_dl_mas_d`] = num(m[6]);
+    } else miss.push(`arousal:${label}`);
+  };
+  arousalRow("Respiratorio", "arousal_respiratorio");
+  arousalRow("Movimiento de piernas", "arousal_movimiento_piernas");
+  arousalRow("Ronquidos", "arousal_ronquidos");
+  arousalRow("Espontáneo", "arousal_espontaneo");
+  arousalRow("Total", "arousal_total");
+
+  // Índice de despertares ligeros (fila final)
+  const idxAr = t.match(/Índice de despertares ligeros:?\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)/);
+  if(idxAr){
+    d.indice_despertares_ligeros_rem = num(idxAr[1]);
+    d.indice_despertares_ligeros_nrem = num(idxAr[2]);
+    d.indice_despertares_ligeros_global = num(idxAr[3]);
+    d.indice_despertares_completos = num(idxAr[4]);
+  } else miss.push("idx_despertares_ligeros");
+
+  // --- MOVIMIENTOS DE EXTREMIDADES ---
+  const mpTotal = t.match(/Movimiento de piernas total:?\s*(\d+)\s+([\d.]+)/);
+  if(mpTotal){
+    d.movimientos_piernas_total_recuento = num(mpTotal[1]);
+    d.movimientos_piernas_total_indice_por_hora = num(mpTotal[2]);
+  }
+  const mpe = t.match(/MPE:?\s*(\d+)\s+([\d.]+)/);
+  if(mpe){
+    d.mpe_movimientos_periodicos_recuento = num(mpe[1]);
+    d.mpe_movimientos_periodicos_indice_por_hora = num(mpe[2]);
+  }
+  const mpeAr = t.match(/Despertares ligeros por MPE:?\s*(\d+)\s+([\d.]+)/);
+  if(mpeAr){
+    d.mpe_con_arousal_recuento = num(mpeAr[1]);
+    d.mpe_con_arousal_indice_por_hora = num(mpeAr[2]);
+  }
+
+  // --- RONQUIDOS ---
+  const ronq = t.match(/Episodios de ronquidos:?\s*(\d+)/);
+  if(ronq) d.ronquidos_episodios_numero = num(ronq[1]);
+  const ronqT = t.match(/Tiempo con ronquidos total:?\s*(\d+)\s*min/);
+  if(ronqT) d.ronquidos_tiempo_total_min = num(ronqT[1]);
+
+  // --- SATURACIÓN DE OXÍGENO ---
+  // N.º de desat. rel. DESPERTAR NREM REM Total: "0 13 2 15"
+  const nDesat = t.match(/N\.º de desat\.?\s*rel\.?\s*(\d+)\s+(\d+)\s+(\d+)\s+(\d+)/);
+  if(nDesat){
+    d.desaturaciones_relevantes_despertar_numero = num(nDesat[1]);
+    d.desaturaciones_relevantes_nrem_numero = num(nDesat[2]);
+    d.desaturaciones_relevantes_rem_numero = num(nDesat[3]);
+    d.desaturaciones_relevantes_total_numero = num(nDesat[4]);
+  } else miss.push("n_desat");
+  // % SpO2 media: "96 96 96 96"
+  const spo2Media = t.match(/%\s*de SpO2 media:?\s*(\d+)\s+(\d+)\s+(\d+)\s+(\d+)/);
+  if(spo2Media){
+    d.spo2_media_despertar_porc = num(spo2Media[1]);
+    d.spo2_media_nrem_porc = num(spo2Media[2]);
+    d.spo2_media_rem_porc = num(spo2Media[3]);
+    d.spo2_media_total_porc = num(spo2Media[4]);
+  }
+  const spo2Min = t.match(/%\s*de SpO2 mínima:?\s*(\d+)/);
+  if(spo2Min) d.spo2_minima_porc = num(spo2Min[1]);
+
+  // ODI calculado (no reportado): desat totales / TST(h)
+  if(d.desaturaciones_relevantes_total_numero != null && d.tiempo_sueno_total_min){
+    d.odi_indice_desaturacion_calculado_por_hora = Math.round(
+      (d.desaturaciones_relevantes_total_numero / (d.tiempo_sueno_total_min/60)) * 10
+    ) / 10;
+  }
+
+  // Niveles SpO2: cada fila tiene 8 columnas (Desp min%, NREM min%, REM min%, TC min%)
+  const spo2Row = (label, prefix) => {
+    // Acepta ':' o ';' (o nada) como separador — el template los mezcla en algunas filas
+    const re = new RegExp(`${label}\\s*[:;]?\\s*([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)`);
+    const m = t.match(re);
+    if(m){
+      d[`${prefix}_despertar_min`] = num(m[1]);
+      d[`${prefix}_despertar_porc`] = num(m[2]);
+      d[`${prefix}_nrem_min`] = num(m[3]);
+      d[`${prefix}_nrem_porc`] = num(m[4]);
+      d[`${prefix}_rem_min`] = num(m[5]);
+      d[`${prefix}_rem_porc`] = num(m[6]);
+      d[`${prefix}_tc_min`] = num(m[7]);
+      d[`${prefix}_tc_porc`] = num(m[8]);
+    } else miss.push(`spo2:${label}`);
+  };
+  spo2Row("<95%", "spo2_menor_95");
+  spo2Row("<90%", "spo2_menor_90");
+  spo2Row("<85%", "spo2_menor_85_full");  // se guardan todos, luego extraemos subset
+  spo2Row("<80%", "spo2_menor_80_full");
+  spo2Row("<\\s*75%", "spo2_menor_75_full");  // el PDF a veces lo trae con ";" en vez de ":"
+  spo2Row("<70%", "spo2_menor_70_full");
+  spo2Row("<60%", "spo2_menor_60_full");
+  spo2Row("<\\s*50%", "spo2_menor_50_full");
+
+  // Reducir niveles profundos a campos por TC (schema wide consolidado)
+  const reduce = [
+    ["spo2_menor_85_full","spo2_menor_85"],
+    ["spo2_menor_80_full","spo2_menor_80"],
+    ["spo2_menor_75_full","spo2_menor_75"],
+    ["spo2_menor_70_full","spo2_menor_70"],
+    ["spo2_menor_60_full","spo2_menor_60"],
+    ["spo2_menor_50_full","spo2_menor_50"],
+  ];
+  for(const [fp,tp] of reduce){
+    if(d[`${fp}_tc_min`]!=null){ d[`${tp}_tc_min`] = d[`${fp}_tc_min`]; }
+    if(d[`${fp}_tc_porc`]!=null){ d[`${tp}_tc_porc`] = d[`${fp}_tc_porc`]; }
+    // limpiar los _full
+    ["despertar_min","despertar_porc","nrem_min","nrem_porc","rem_min","rem_porc","tc_min","tc_porc"]
+      .forEach(k => delete d[`${fp}_${k}`]);
+  }
+
+  // T90 = tiempo total con SpO2 < 90% en TC
+  if(d.spo2_menor_90_tc_min != null){
+    d.t90_tiempo_spo2_menor_90_min = d.spo2_menor_90_tc_min;
+  }
+
+  // Artefactos SpO2: "Artefacto/datos erróneos: 24.5 - 0.0 - 0.0 - 24.5 -"
+  const artef = t.match(/Artefacto\/datos\s*err[óo]neos:?\s*([\d.]+)\s*[-–]?\s*([\d.]+)\s*[-–]?\s*([\d.]+)\s*[-–]?\s*([\d.]+)/);
+  if(artef){
+    d.spo2_artefacto_despertar_min = num(artef[1]);
+    d.spo2_artefacto_nrem_min = num(artef[2]);
+    d.spo2_artefacto_rem_min = num(artef[3]);
+    d.spo2_artefacto_tc_min = num(artef[4]);
+  } else miss.push("artefacto");
+
+  return { data: d, missing: miss };
+}
+
+// ============== PARSER: BRAINWAVE (PSG) ==============
+// Formato muy similar a Sleepware G3 con variantes menores:
+// - Fecha: "23-03-2026" en vez de "23/3/2026"
+// - Hora luces: "23/03/2026 10:08 PM" en vez de "22:14:43"
+// - SpO2: umbrales desde <88% en vez de <95%
+// - Arousals: tabla con columnas REM NREM TST Índice (sin Dl+D separado)
+// - Criterio hipopnea puede ser AASM.4.A y/o 4.B
+function parseBrainWavePSG(rawText) {
+  const t = rawText.replace(/\s+/g, " ").trim();
+  const d = {};
+  const miss = [];
+  const get = (re, name) => { const m = t.match(re); if(!m){ miss.push(name); return null; } return m; };
+
+  // --- PACIENTE ---
+  const name = get(/Nombre del paciente:\s*([A-ZÁÉÍÓÚÑa-záéíóúñ' .-]+?)(?:\s+Sexo|\s+I\s*N\s*F)/,"paciente");
+  if(name) {
+    // BW puede traer "LAURA GABRIELA GONZALEZ" sin coma
+    const parts = name[1].trim();
+    const commaIdx = parts.indexOf(",");
+    if (commaIdx > 0) {
+      d.paciente_apellido = parts.substring(0, commaIdx).trim();
+      d.paciente_nombre = parts.substring(commaIdx + 1).trim();
+    } else {
+      // Sin coma: el primer token puede ser nombre o apellido. Asumimos último token = apellido.
+      const tokens = parts.split(/\s+/);
+      if (tokens.length >= 2) {
+        d.paciente_apellido = tokens[tokens.length - 1];
+        d.paciente_nombre = tokens.slice(0, -1).join(" ");
+      } else {
+        d.paciente_apellido = parts;
+        d.paciente_nombre = "";
+      }
+    }
+  }
+  const sexo = get(/Sexo:\s*(Femenino|Masculino|F|M)\b/i, "sexo");
+  if(sexo) d.paciente_sexo = sexo[1].charAt(0).toUpperCase();
+  const edad = get(/Edad:\s*(\d+)\s*años/, "edad");
+  if(edad) d.paciente_edad_anios = parseInt(edad[1]);
+
+  // --- ESTUDIO ---
+  // Fecha: "23-03-2026" o "23/3/2026"
+  const fecha = get(/Fecha del estudio:\s*(\d{1,2}[\/-]\d{1,2}[\/-]\d{4})/, "fecha_estudio");
+  if(fecha){
+    const raw = fecha[1].replace(/-/g, "/");
+    const m = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if(m) d.estudio_fecha = `${m[3]}-${m[2].padStart(2,"0")}-${m[1].padStart(2,"0")}`;
+  }
+  d.estudio_tipo = "Polisomnografia nocturna";
+  d.estudio_software = "BrainWave";
+  const epoca = get(/épocas de (\d+) segundos/, "epoca");
+  if(epoca) d.estudio_epoca_segundos = parseInt(epoca[1]);
+  const crit = get(/AASM[.\s]*(\d+\.\w[^.]*?)(?:\.\s|\s)/i, "criterio_hipopnea");
+  if(crit) d.estudio_criterio_hipopnea = crit[1].trim();
+
+  // --- ARQUITECTURA DEL SUEÑO ---
+  // BW puede tener "23/03/2026 10:08 PM" en vez de "22:14:43"
+  const apagado = t.match(/Hora de apagado de luces:\s*(?:\d{1,2}\/\d{1,2}\/\d{4}\s+)?(\d{1,2}:\d{2}(?::\d{2})?)\s*(AM|PM)?/i);
+  if(apagado) {
+    let h = apagado[1];
+    if (apagado[2]) {
+      // Convertir 12h a 24h
+      const parts = h.split(":");
+      let hr = parseInt(parts[0]);
+      if (apagado[2].toUpperCase() === "PM" && hr !== 12) hr += 12;
+      if (apagado[2].toUpperCase() === "AM" && hr === 12) hr = 0;
+      h = `${String(hr).padStart(2,"0")}:${parts[1]}${parts[2] ? ":" + parts[2] : ":00"}`;
+    }
+    d.hora_apagado_luces = h;
+  } else miss.push("apagado");
+
+  const encendido = t.match(/Hora de encendido de luces:\s*(?:\d{1,2}\/\d{1,2}\/\d{4}\s+)?(\d{1,2}:\d{2}(?::\d{2})?)\s*(AM|PM)?/i);
+  if(encendido) {
+    let h = encendido[1];
+    if (encendido[2]) {
+      const parts = h.split(":");
+      let hr = parseInt(parts[0]);
+      if (encendido[2].toUpperCase() === "AM" && hr === 12) hr = 0;
+      if (encendido[2].toUpperCase() === "PM" && hr !== 12) hr += 12;
+      h = `${String(hr).padStart(2,"0")}:${parts[1]}${parts[2] ? ":" + parts[2] : ":00"}`;
+    }
+    d.hora_encendido_luces = h;
+  } else miss.push("encendido");
+
+  // Mismos campos que Sleepware G3 (estructura idéntica)
+  const pairs = [
+    ["tiempo_grabacion_total_min", /Tiempo de grabación total \(TGT\):\s*([\d.]+)\s*minutos/],
+    ["tiempo_en_cama_min",         /Tiempo en cama \(TC\):\s*([\d.]+)\s*minutos/],
+    ["tiempo_periodo_sueno_min",   /Tiempo de período de sueño \(TPS\):\s*([\d.]+)\s*minutos/],
+    ["tiempo_sueno_total_min",     /Tiempo de sueño total \(TST\):\s*([\d.]+)\s*minutos/],
+    ["eficiencia_sueno_porc",      /Eficiencia del sueño:\s*([\d.]+)\s*%/],
+    ["latencia_sueno_min",         /Comienzo del sueño:\s*([\d.]+)\s*minutos/],
+    ["wake_after_sleep_onset_waso_min", /DTIS:\s*([\d.]+)\s*minutos/],
+    ["latencia_rem_desde_inicio_sueno_min", /Latencia REM \(desde comienzo del sueño\):\s*([\d.]+)/],
+    ["latencia_rem_desde_apagado_luces_min", /Latencia REM \(desde apagado de luces\):\s*([\d.]+)/],
+  ];
+  for(const [k,re] of pairs){
+    const m = get(re, k);
+    if(m) d[k] = num(m[1]);
+  }
+
+  // Estadificación — mismo formato
+  const stage = (etiqueta, keyDur, keyPct, keyLat) => {
+    const re = new RegExp(`${etiqueta}:?\\s*([\\d.]+)\\s*minutos\\s*([\\d.]+)\\s*%`);
+    const m = t.match(re);
+    if(m){ d[keyDur] = num(m[1]); d[keyPct] = num(m[2]); }
+    else { d[keyDur] = 0; d[keyPct] = 0; }
+    const reLat = new RegExp(`${etiqueta}:?\\s*([\\d.]+(?:\\s*minutos)?\\s*[\\d.]+\\s*%).*?${etiqueta}:?\\s*(?:minutos\\s*)?([\\d.]+)`);
+    const m2 = t.match(reLat);
+    if(m2) d[keyLat] = num(m2[2]);
+    // BW alternativo: "N 1: --- " (sin latencia)
+    const reLat2 = new RegExp(`Latencia.*?${etiqueta}:?\\s*([\\d.]+|---)`);
+    if (!d[keyLat]) {
+      const m3 = t.match(reLat2);
+      if (m3 && m3[1] !== "---") d[keyLat] = num(m3[1]);
+    }
+  };
+  stage("N 1", "n1_duracion_min","n1_porc_tst","n1_latencia_min");
+  stage("N 2", "n2_duracion_min","n2_porc_tst","n2_latencia_min");
+  stage("N 3", "n3_duracion_min","n3_porc_tst","n3_latencia_min");
+  stage("R",   "rem_duracion_min","rem_porc_tst","rem_latencia_min");
+
+  // --- DATOS RESPIRATORIOS (misma tabla 8 columnas) ---
+  const respCols = ["apneas_centrales","apneas_obstructivas","apneas_mixtas","apneas_total","hipopneas","iah_eventos","rera","eventos_respiratorios_total"];
+  const respSuffix = ["numero","duracion_media_seg","duracion_maxima_seg","duracion_total_min","indice_por_hora"];
+  const respRows = [
+    ["Número", 0],
+    ["Dur\\. media \\(s\\)", 1],
+    ["Dur\\. máx\\. \\(s\\)", 2],
+    ["Dur\\. total \\(min\\)", 3],
+    ["Índice \\(n\\.?º?\\/h(?:\\s*TST)?\\)", 4],
+  ];
+  for(const [label, rowIdx] of respRows){
+    const re = new RegExp(`${label}\\s*:?\\s*([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)`);
+    const m = t.match(re);
+    if(m){
+      for(let c=0;c<8;c++){
+        d[respCols[c] + "_" + respSuffix[rowIdx]] = num(m[c+1]);
+      }
+    } else miss.push(`resp_row:${label}`);
+  }
+  // Renombrar IAH
+  if(d.iah_eventos_indice_por_hora != null) { d.iah_global_por_hora = d.iah_eventos_indice_por_hora; delete d.iah_eventos_indice_por_hora; }
+  if(d.eventos_respiratorios_total_indice_por_hora != null) { d.rdi_indice_trastornos_respiratorios = d.eventos_respiratorios_total_indice_por_hora; }
+
+  // Recuentos REM/NREM
+  const remRow = t.match(/Recuento de REM:?\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)/);
+  if(remRow) { d.iah_recuento_rem = num(remRow[6]); }
+  const nremRow = t.match(/Recuento de NREM:?\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)/);
+  if(nremRow) { d.iah_recuento_nrem = num(nremRow[6]); }
+  const remIdx = t.match(/Índice de REM:?\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)/);
+  if(remIdx) { d.iah_indice_rem_por_hora = num(remIdx[6]); }
+  const nremIdx = t.match(/Índice de NREM:?\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)/);
+  if(nremIdx) { d.iah_indice_nrem_por_hora = num(nremIdx[6]); }
+
+  // --- POSICIÓN CORPORAL ---
+  // BW usa "No-Supino" en vez de "ARRIBA"
+  const supino = t.match(/Supino\s+([\d.]+)\s+([\d.]+)/);
+  if(supino){ d.pos_supino_duracion_min = num(supino[1]); d.pos_supino_iah = num(supino[2]); }
+  const noSup = t.match(/No-Supino\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+([\d.]+)\s+(\d+)\s+([\d.]+)/);
+  if(noSup){
+    d.pos_no_supino_duracion_min = num(noSup[1]);
+    d.pos_no_supino_porc_sueno = num(noSup[2]);
+    d.pos_no_supino_porc_rem = num(noSup[3]);
+    d.pos_no_supino_porc_nrem = num(noSup[4]);
+    d.pos_no_supino_apneas_centrales_numero = num(noSup[5]);
+    d.pos_no_supino_apneas_obstructivas_numero = num(noSup[6]);
+    d.pos_no_supino_apneas_mixtas_numero = num(noSup[7]);
+    d.pos_no_supino_hipopneas_numero = num(noSup[8]);
+    d.pos_no_supino_iah_por_hora = num(noSup[9]);
+    d.pos_no_supino_rera_numero = num(noSup[10]);
+    d.pos_no_supino_itr_por_hora = num(noSup[11]);
+  }
+
+  // --- AROUSALS (BW tiene tabla simplificada: REM NREM TST Índice) ---
+  const arousalBW = (label, prefix) => {
+    const re = new RegExp(`${label}:?\\s*(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+([\\d.]+)`);
+    const m = t.match(re);
+    if(m){
+      d[`${prefix}_rem`] = num(m[1]);
+      d[`${prefix}_nrem`] = num(m[2]);
+      d[`${prefix}_dl_mas_d`] = num(m[3]); // TST total ≈ dl+d
+      d[`${prefix}_indice_dl_mas_d`] = num(m[4]);
+    }
+  };
+  arousalBW("Respiratorio", "arousal_respiratorio");
+  arousalBW("Movimiento de\\s*piernas", "arousal_movimiento_piernas");
+  arousalBW("Ronquidos", "arousal_ronquidos");
+  arousalBW("Espontáneo", "arousal_espontaneo");
+  arousalBW("Total", "arousal_total");
+
+  const idxAr = t.match(/Índice de despertares\s*ligeros:?\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)/);
+  if(idxAr){
+    d.indice_despertares_ligeros_rem = num(idxAr[1]);
+    d.indice_despertares_ligeros_nrem = num(idxAr[2]);
+    d.indice_despertares_ligeros_global = num(idxAr[3]);
+  }
+
+  // --- MOVIMIENTOS EXTREMIDADES ---
+  const mpTotal = t.match(/Movimiento de piernas total:?\s*(\d+)\s+([\d.]+)/);
+  if(mpTotal){ d.movimientos_piernas_total_recuento = num(mpTotal[1]); d.movimientos_piernas_total_indice_por_hora = num(mpTotal[2]); }
+  const mpe = t.match(/MPE:?\s*(\d+)\s+([\d.]+)/);
+  if(mpe){ d.mpe_movimientos_periodicos_recuento = num(mpe[1]); d.mpe_movimientos_periodicos_indice_por_hora = num(mpe[2]); }
+  const mpeAr = t.match(/Despertares ligeros por MPE:?\s*(\d+)\s+([\d.]+)/);
+  if(mpeAr){ d.mpe_con_arousal_recuento = num(mpeAr[1]); d.mpe_con_arousal_indice_por_hora = num(mpeAr[2]); }
+
+  // --- RONQUIDOS ---
+  const ronq = t.match(/Episodios de ronquidos:?\s*(\d+)/);
+  if(ronq) d.ronquidos_episodios_numero = num(ronq[1]);
+
+  // --- SpO2 (BW usa <88% como primer umbral) ---
+  const nDesat = t.match(/N\.º de desat\.?\s*rel\.?\s*(\d+)\s+(\d+)\s+(\d+)\s+(\d+)/);
+  if(nDesat){
+    d.desaturaciones_relevantes_despertar_numero = num(nDesat[1]);
+    d.desaturaciones_relevantes_nrem_numero = num(nDesat[2]);
+    d.desaturaciones_relevantes_rem_numero = num(nDesat[3]);
+    d.desaturaciones_relevantes_total_numero = num(nDesat[4]);
+  }
+  const spo2Media = t.match(/%\s*de SpO2 media:?\s*(\d+)\s+(\d+)\s+(\d+)\s+(\d+)/);
+  if(spo2Media){
+    d.spo2_media_despertar_porc = num(spo2Media[1]);
+    d.spo2_media_nrem_porc = num(spo2Media[2]);
+    d.spo2_media_rem_porc = num(spo2Media[3]);
+    d.spo2_media_total_porc = num(spo2Media[4]);
+  }
+  const spo2Min = t.match(/%\s*de SpO2\s*m[ií]nima:?\s*(\d+)/);
+  if(spo2Min) d.spo2_minima_porc = num(spo2Min[1]);
+
+  // BW SpO2 rows: <88%, <92%, <90%, <85%, <80%, <70%, <60%, <50%
+  const spo2Row = (label, prefix) => {
+    const re = new RegExp(`${label}\\s*[:;]?\\s*([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)`);
+    const m = t.match(re);
+    if(m){
+      d[`${prefix}_despertar_min`] = num(m[1]); d[`${prefix}_despertar_porc`] = num(m[2]);
+      d[`${prefix}_nrem_min`] = num(m[3]); d[`${prefix}_nrem_porc`] = num(m[4]);
+      d[`${prefix}_rem_min`] = num(m[5]); d[`${prefix}_rem_porc`] = num(m[6]);
+      d[`${prefix}_tc_min`] = num(m[7]); d[`${prefix}_tc_porc`] = num(m[8]);
+    }
+  };
+  spo2Row("<88%", "spo2_menor_88");
+  spo2Row("<92%", "spo2_menor_92");
+  spo2Row("<90%", "spo2_menor_90");
+  spo2Row("<85%", "spo2_menor_85");
+  spo2Row("<80%", "spo2_menor_80");
+  spo2Row("<70%", "spo2_menor_70");
+  spo2Row("<60%", "spo2_menor_60");
+  spo2Row("<\\s*50%", "spo2_menor_50");
+
+  if(d.spo2_menor_90_tc_min != null) d.t90_tiempo_spo2_menor_90_min = d.spo2_menor_90_tc_min;
+
+  // ODI calculado
+  if(d.desaturaciones_relevantes_total_numero != null && d.tiempo_sueno_total_min){
+    d.odi_indice_desaturacion_calculado_por_hora = Math.round(
+      (d.desaturaciones_relevantes_total_numero / (d.tiempo_sueno_total_min/60)) * 10
+    ) / 10;
+  }
+
+  return { data: d, missing: miss };
+}
+
+// ============== PARSER: PHILIPS ALICE NIGHTONE (Poligrafía) ==============
+function parsePhilipsNightOne(rawText) {
+  const t = rawText.replace(/\s+/g, " ").trim();
+  const d = {};
+  const miss = [];
+
+  // --- PACIENTE ---
+  const name = t.match(/Nombre\s*del\s*paciente:\s*([A-ZÁÉÍÓÚÑa-záéíóúñ' .-]+,\s*[A-ZÁÉÍÓÚÑa-záéíóúñ' .-]+)/);
+  if(name){
+    const parts = name[1].split(",");
+    d.paciente_apellido = parts[0].trim();
+    d.paciente_nombre = (parts[1]||"").trim();
+  }
+  const sexo = t.match(/Sexo:\s*([MFmf])\b/);
+  if(sexo) d.paciente_sexo = sexo[1].toUpperCase();
+  const edad = t.match(/Edad:\s*(\d+)\s*(?:años|years)/);
+  if(edad) d.paciente_edad_anios = parseInt(edad[1]);
+  const fdn = t.match(/FDN[:\s]+(\d{1,2}\/\d{1,2}\/\d{4})/);
+  if(fdn){ const p = parseSpanishDate(fdn[1]); if(p) d.paciente_fecha_nacimiento = p.iso; }
+
+  // --- ESTUDIO ---
+  const fecha = t.match(/Study Date:\s*(\d{1,2}\/\d{1,2}\/\d{4})/);
+  if(fecha){ const p = parseSpanishDate(fecha[1]); if(p) d.estudio_fecha = p.iso; }
+  d.estudio_tipo = "Poligrafia respiratoria";
+  d.estudio_software = "Philips Alice NightOne";
+
+  // Tiempos
+  const tgt = t.match(/Tiempo de grabación total \(TGT\):\s*([\d.]+)\s*minutes?/);
+  if(tgt) d.tiempo_grabacion_total_min = num(tgt[1]);
+  const tc = t.match(/Tiempo en cama \(TC\):\s*([\d.]+)\s*minutes?/);
+  if(tc) d.tiempo_en_cama_min = num(tc[1]);
+  const tm = t.match(/Tiempo de monitorización \(TM\):\s*([\d.]+)\s*minutes?/);
+  if(tm) d.tiempo_sueno_total_min = num(tm[1]); // En poligrafía, TM ≈ TST estimado
+
+  // --- EVENTOS RESPIRATORIOS ---
+  const evRows = [
+    [/Apneas centrales\s+([\d.]+)\s+(\d+)/, "apneas_centrales"],
+    [/Apneas obstructivas\s+([\d.]+)\s+(\d+)/, "apneas_obstructivas"],
+    [/Apneas mixtas\s+([\d.]+)\s+(\d+)/, "apneas_mixtas"],
+    [/Hipopneas\s+([\d.]+)\s+(\d+)/, "hipopneas"],
+    [/Apneas \+ hipopneas\s+([\d.]+)\s+(\d+)/, "iah_eventos"],
+    [/RERA\s+([\d.]+)\s+(\d+)/, "rera"],
+    [/Total\s+([\d.]+)\s+(\d+)/, "eventos_respiratorios_total"],
+  ];
+  for(const [re, prefix] of evRows){
+    const m = t.match(re);
+    if(m){
+      d[`${prefix}_indice_por_hora`] = num(m[1]);
+      d[`${prefix}_numero`] = num(m[2]);
+    }
+  }
+  if(d.iah_eventos_indice_por_hora != null) d.iah_global_por_hora = d.iah_eventos_indice_por_hora;
+  if(d.eventos_respiratorios_total_indice_por_hora != null) d.rdi_indice_trastornos_respiratorios = d.eventos_respiratorios_total_indice_por_hora;
+
+  // Duración media/máx por tipo (tabla extendida)
+  const durRow = t.match(/N\.º total de.*?Duración\s*media \(s\)\s*Duración máx\.\s*\(s\)/);
+  // NightOne tiene tabla con columnas: Índice, N.º total, Duración media, Duración máx, por posición
+  // Parsear líneas individuales
+  const durParse = (label, prefix) => {
+    const re = new RegExp(`${label}\\s+[\\d.]+\\s+(\\d+)\\s+([\\d.]+)\\s+([\\d.]+)`);
+    const m = t.match(re);
+    if(m){ d[`${prefix}_duracion_media_seg`] = num(m[2]); d[`${prefix}_duracion_maxima_seg`] = num(m[3]); }
+  };
+
+  // --- POSICIÓN ---
+  const supRatio = t.match(/IER\s*Supino\s*\/\s*IER\s*No\s*supina\s*Ratio[:\s]*([\d.]+)/i);
+  // Positional data
+  const posData = t.match(/Supino\s+(\d+)\s+([\d.]+)\s*(?:\n|$)/);
+  if(posData){
+    d.pos_supino_duracion_min = num(posData[1]);
+    d.pos_supino_iah = num(posData[2]);
+  }
+
+  // --- SpO2 ---
+  const spo2Min = t.match(/%\s*de\s*SpO2\s*más\s*baja\s*durante\s*el\s*sueño.*?(\d+)/i) || t.match(/Lowest\s*Desat\s*(\d+)/i);
+  if(spo2Min) d.spo2_minima_porc = num(spo2Min[1]);
+
+  const spo2Media = t.match(/Media\s*\(%\)\s*(?:\n\s*)?(\d+)/);
+  if(spo2Media) d.spo2_media_total_porc = num(spo2Media[1]);
+
+  const nDesat = t.match(/N\.º total de desat\.\s*(\d+)/i) || t.match(/Total\s*de\s*desat[.\s]*(\d+)/i);
+  if(nDesat) d.desaturaciones_relevantes_total_numero = num(nDesat[1]);
+
+  const odi = t.match(/[ÍI]ndice\s*desat\.\s*\(n\.?º?\/?hora\)\s*([\d.]+)/i);
+  if(odi) d.odi_indice_desaturacion_calculado_por_hora = num(odi[1]);
+
+  // Tiempo bajo umbrales
+  const t90 = t.match(/<90\s*%\s*([\d.]+)/);
+  if(t90) d.t90_tiempo_spo2_menor_90_min = num(t90[1]);
+  const t85 = t.match(/<85\s*%\s*([\d.]+)/);
+  if(t85) d.spo2_menor_85_tc_min = num(t85[1]);
+
+  // Frecuencia cardíaca
+  const fcMedia = t.match(/FC\s*media\s*durante\s*el\s*sueño\s*([\d.]+)/i);
+  if(fcMedia) d.fc_media_sueno_lpm = num(fcMedia[1]);
+
+  // Ronquidos
+  const ronq = t.match(/Episodios de ronquidos totales\s*(\d+)/i);
+  if(ronq) d.ronquidos_episodios_numero = num(ronq[1]);
+
+  return { data: d, missing: miss };
+}
+
+// ============== PARSER: RESMED AIRVIEW DIAGNÓSTICO (Poligrafía) ==============
+function parseResMedDiagnostico(rawText) {
+  const t = rawText.replace(/\s+/g, " ").trim();
+  const d = {};
+  const miss = [];
+
+  // --- PACIENTE ---
+  // ResMed pone el nombre al inicio de la segunda línea o en encabezado
+  const name = t.match(/^\d{1,2}\/\d{1,2}\/\d{4}\s*([A-ZÁÉÍÓÚÑa-záéíóúñ' .-]+,\s*[A-ZÁÉÍÓÚÑa-záéíóúñ' .-]+)/);
+  if(name){
+    const parts = name[1].split(",");
+    d.paciente_apellido = parts[0].trim();
+    d.paciente_nombre = (parts[1]||"").trim();
+  } else {
+    // Intentar formato "Apellido, Nombre" suelto
+    const name2 = t.match(/([A-ZÁÉÍÓÚÑa-záéíóúñ]+),\s*([A-ZÁÉÍÓÚÑa-záéíóúñ ]+?)(?:INSTITUTO|Identificación|Fecha)/);
+    if(name2){ d.paciente_apellido = name2[1].trim(); d.paciente_nombre = name2[2].trim(); }
+  }
+  const fdn = t.match(/Fecha de nacimiento:\s*(\d{1,2}\/\d{1,2}\/\d{4})/);
+  if(fdn){ const p = parseSpanishDate(fdn[1]); if(p) d.paciente_fecha_nacimiento = p.iso; }
+  const edad = t.match(/Edad:\s*(\d+)/);
+  if(edad) d.paciente_edad_anios = parseInt(edad[1]);
+
+  // --- ESTUDIO ---
+  const fecha = t.match(/Datos de la grabaci[oó]n\s+(\d{1,2}\/\d{1,2}\/\d{4})/);
+  if(fecha){ const p = parseSpanishDate(fecha[1]); if(p) d.estudio_fecha = p.iso; }
+  d.estudio_tipo = "Poligrafia respiratoria";
+
+  // Dispositivo
+  const disp = t.match(/Dispositivo\s+([\w\s]+?)\s+Tipo:\s*(II+)/i);
+  if(disp) d.estudio_software = `ResMed ${disp[1].trim()} (Tipo ${disp[2]})`;
+  else d.estudio_software = "ResMed AirView";
+
+  // Duración
+  const durEval = t.match(/Evaluación del flujo.*?Duración\s*[–-]\s*h:\s*(\d+):(\d+)/);
+  if(durEval) d.tiempo_sueno_total_min = parseInt(durEval[1]) * 60 + parseInt(durEval[2]);
+
+  // --- ÍNDICES RESPIRATORIOS ---
+  const iah = t.match(/[ÍI]ndice de eventos\s*IAH:\s*([\d.]+)\s*IA:\s*([\d.]+)\s*IH:\s*([\d.]+)/);
+  if(iah){
+    d.iah_global_por_hora = num(iah[1]);
+    d.apneas_total_indice_por_hora = num(iah[2]);
+    d.hipopneas_indice_por_hora = num(iah[3]);
+  }
+  const evTot = t.match(/Eventos totales\s*Apneas:\s*(\d+)\s*Hipo(?:a)?pneas:\s*(\d+)/i);
+  if(evTot){
+    d.apneas_total_numero = num(evTot[1]);
+    d.hipopneas_numero = num(evTot[2]);
+    d.iah_eventos_numero = num(evTot[1]) + num(evTot[2]);
+    d.eventos_respiratorios_total_numero = d.iah_eventos_numero;
+  }
+  const aiTypes = t.match(/AI\s*Obstructiva:\s*([\d.]+)\s*Central:\s*([\d.]+)\s*Mixta:\s*([\d.]+)/);
+  if(aiTypes){
+    d.apneas_obstructivas_indice_por_hora = num(aiTypes[1]);
+    d.apneas_centrales_indice_por_hora = num(aiTypes[2]);
+    d.apneas_mixtas_indice_por_hora = num(aiTypes[3]);
+  }
+  // Cheyne-Stokes
+  const cs = t.match(/Cheyne-Stokes\s*Tiempo\s*[–-]\s*h:\s*(\d+):(\d+)\s*Porcentaje:\s*(\d+)/);
+  if(cs) d.cheyne_stokes_porc = num(cs[3]);
+
+  // --- SpO2 ---
+  const ido = t.match(/Desaturaci[oó]n de ox[ií]geno\s*IDO:\s*([\d.]+)/);
+  if(ido) d.odi_indice_desaturacion_calculado_por_hora = num(ido[1]);
+  const spo2 = t.match(/%\s*de saturaci[oó]n de ox[ií]geno\s*L[ií]nea\s*basal:\s*(\d+)\s*Promedio:\s*(\d+)\s*M[ií]nimo:\s*(\d+)/i);
+  if(spo2){
+    d.spo2_media_despertar_porc = num(spo2[1]); // línea basal ≈ despierto
+    d.spo2_media_total_porc = num(spo2[2]);
+    d.spo2_minima_porc = num(spo2[3]);
+  }
+  // Tiempo bajo umbrales
+  const sat90 = t.match(/<=90%\s*sat:\s*(\d+)/);
+  // T88
+  const sat88 = t.match(/<=88%\s*(?:sat:)?\s*(?:tiempo-h:)?\s*(\d+):?(\d+)?/i);
+  if(sat88) {
+    const mins = parseInt(sat88[1]) * 60 + (parseInt(sat88[2]) || 0);
+    d.t90_tiempo_spo2_menor_90_min = mins; // aproximación: <=88% como proxy
+  }
+
+  // --- POSICIÓN ---
+  const posSupino = t.match(/Supino\s*Tiempo\s*[–-]\s*h\s*([\d:]+)\s*([\d.]+)/);
+  if(posSupino){
+    const parts = posSupino[1].split(":");
+    d.pos_supino_duracion_min = parseInt(parts[0]) * 60 + parseInt(parts[1] || 0);
+  }
+  const iahSup = t.match(/Supino.*?IAH:\s*([\d.]+)/);
+  if(iahSup) d.pos_supino_iah = num(iahSup[1]);
+  const iahNoSup = t.match(/No supino.*?IAH:\s*([\d.]+)/);
+  if(iahNoSup) d.pos_no_supino_iah_por_hora = num(iahNoSup[1]);
+
+  // Pulso
+  const pulso = t.match(/Pulso\s*[–-]\s*rpm\s*M[ií]n\.?:\s*(\d+)\s*Promedio:\s*(\d+)\s*M[áa]x\.?:\s*(\d+)/);
+  if(pulso){ d.fc_minima_lpm = num(pulso[1]); d.fc_media_sueno_lpm = num(pulso[2]); d.fc_maxima_lpm = num(pulso[3]); }
+
+  // Ronquidos
+  const ronq = t.match(/Ronquidos:\s*(\d+)/);
+  if(ronq) d.ronquidos_episodios_numero = num(ronq[1]);
+
+  // RDI
+  if(d.iah_global_por_hora != null) d.rdi_indice_trastornos_respiratorios = d.iah_global_por_hora;
+
+  // Criterio
+  const critRM = t.match(/Criterios análisis:\s*(AASM[^;]+)/i);
+  if(critRM) d.estudio_criterio_hipopnea = critRM[1].trim();
+
+  return { data: d, missing: miss };
+}
+
+// ============== PARSER: RESMED AIRVIEW TRATAMIENTO (CPAP) ==============
+function parseResMedTratamiento(rawText) {
+  const t = rawText.replace(/\s+/g, " ").trim();
+  const d = {};
+  const miss = [];
+
+  // --- PACIENTE ---
+  const name = t.match(/Identificaci[oó]n del paciente:\s*([A-ZÁÉÍÓÚÑa-záéíóúñ ]+)/);
+  if(name){
+    const parts = name[1].trim().split(/\s+/);
+    if(parts.length >= 2){
+      d.paciente_apellido = parts[0];
+      d.paciente_nombre = parts.slice(1).join(" ");
+    } else d.paciente_apellido = parts[0];
+  }
+  const fdn = t.match(/Fecha de nacimiento:\s*(\d{1,2}\/\d{1,2}\/\d{4})/);
+  if(fdn){ const p = parseSpanishDate(fdn[1]); if(p) d.paciente_fecha_nacimiento = p.iso; }
+  const edad = t.match(/Edad:\s*(\d+)\s*años/);
+  if(edad) d.paciente_edad_anios = parseInt(edad[1]);
+
+  // --- DISPOSITIVO ---
+  const disp = t.match(/(AirSense\s*\d+\s*\w+)/i);
+  if(disp) d.estudio_software = `ResMed ${disp[1]}`;
+  else d.estudio_software = "ResMed AirView CPAP";
+  d.estudio_tipo = "Titulacion CPAP";
+
+  // --- FECHA ---
+  // "20/04/2026 - 21/04/2026" o fecha individual
+  const fechaRange = t.match(/(\d{1,2}\/\d{1,2}\/\d{4})\s*-\s*(\d{1,2}\/\d{1,2}\/\d{4})/);
+  if(fechaRange){
+    const p = parseSpanishDate(fechaRange[1]);
+    if(p) d.estudio_fecha = p.iso;
+    const p2 = parseSpanishDate(fechaRange[2]);
+    if(p2) d.estudio_fecha_fin = p2.iso;
+  }
+
+  // --- USO ---
+  const uso = t.match(/Uso promedio.*?(\d+)\s*horas?\s*(\d+)\s*minutos?/i) || t.match(/Uso\/d[ií]a.*?(\d+)\s*h(?:oras?)?\s*(\d+)/i);
+  if(uso) d.cpap_uso_promedio_min = parseInt(uso[1]) * 60 + parseInt(uso[2]);
+  const usoDias = t.match(/D[ií]as de uso\s*(\d+)\/(\d+)/);
+  if(usoDias){ d.cpap_dias_uso = parseInt(usoDias[1]); d.cpap_dias_total = parseInt(usoDias[2]); }
+  const uso4h = t.match(/>=\s*4\s*horas?\s*(\d+)\s*(?:d[ií]as?)?\s*\((\d+)%\)/);
+  if(uso4h) d.cpap_dias_4h_porc = num(uso4h[2]);
+
+  // --- PRESIÓN ---
+  const presP95 = t.match(/Percentil\s*95[:\s]*([\d.]+)\s*cmH2O/i) || t.match(/Percentil\s*95\s*\(promedio\)\s*([\d.]+)/i);
+  if(presP95) d.cpap_presion_p95_cmh2o = num(presP95[1]);
+  const presMediana = t.match(/Presi[oó]n.*?Mediana[:\s]*([\d.]+)/i);
+  if(presMediana) d.cpap_presion_mediana_cmh2o = num(presMediana[1]);
+
+  // --- ÍNDICES RESPIRATORIOS ---
+  const iah = t.match(/IAH[:\s]*([\d.]+)/);
+  if(iah) d.iah_global_por_hora = num(iah[1]);
+  const ia = t.match(/\bIA[:\s]*([\d.]+)/);
+  if(ia) d.apneas_total_indice_por_hora = num(ia[1]);
+  const ih = t.match(/\bIH[:\s]*([\d.]+)/);
+  if(ih) d.hipopneas_indice_por_hora = num(ih[1]);
+  const iac = t.match(/IAC[:\s]*([\d,.]+)/);
+  if(iac) d.apneas_centrales_indice_por_hora = num(iac[1]);
+  const iao = t.match(/IAO[:\s]*([\d,.]+)/);
+  if(iao) d.apneas_obstructivas_indice_por_hora = num(iao[1]);
+  const rera = t.match(/RERA[:\s]*([\d,.]+)/);
+  if(rera) d.rera_indice_por_hora = num(rera[1]);
+
+  // Cheyne-Stokes
+  const cs = t.match(/Cheyne-Stokes.*?(\d+)\s*minutos?\s*\((\d+)%\)/i) || t.match(/CSR%\s*([\d.]+)/);
+  if(cs) d.cheyne_stokes_porc = num(cs[2] || cs[1]);
+
+  // --- SpO2 ---
+  const spo2Med = t.match(/SpO2.*?Mediana[:\s]*(\d+)/i);
+  if(spo2Med) d.spo2_media_total_porc = num(spo2Med[1]);
+  const spo2P95 = t.match(/SpO2.*?Percentil\s*95[:\s]*(\d+)/i);
+  const t88 = t.match(/Tiempo\s*<\s*88%[:\s]*(\d+)\s*min/i);
+  if(t88) d.t90_tiempo_spo2_menor_90_min = num(t88[1]); // proxy
+
+  // Fuga
+  const fugaP95 = t.match(/Fuga.*?Percentil\s*95[:\s]*([\d.]+)/i);
+  if(fugaP95) d.cpap_fuga_p95_lpm = num(fugaP95[1]);
+
+  if(d.iah_global_por_hora != null) d.rdi_indice_trastornos_respiratorios = d.iah_global_por_hora;
+
+  return { data: d, missing: miss };
+}
+
+// ============== PARSER: BMC TRATAMIENTO (CPAP) ==============
+function parseBMCTratamiento(rawText) {
+  const t = rawText.replace(/\s+/g, " ").trim();
+  const d = {};
+  const miss = [];
+
+  // --- PACIENTE ---
+  const name = t.match(/Nombre del paciente:\s*([A-ZÁÉÍÓÚÑa-záéíóúñ' .-]+,\s*[A-ZÁÉÍÓÚÑa-záéíóúñ' .-]+)/);
+  if(name){
+    const parts = name[1].split(",");
+    d.paciente_apellido = parts[0].trim();
+    d.paciente_nombre = (parts[1]||"").trim();
+  }
+  const sexo = t.match(/Género:\s*(Masculino|Femenino|M|F)/i);
+  if(sexo) d.paciente_sexo = sexo[1].charAt(0).toUpperCase();
+  const edad = t.match(/Edad:\s*(\d+)/);
+  if(edad) d.paciente_edad_anios = parseInt(edad[1]);
+  const fdn = t.match(/Fecha de nacimiento:\s*(\d{4}\/\d{1,2}\/\d{1,2})/);
+  if(fdn){ const parts = fdn[1].split("/"); d.paciente_fecha_nacimiento = `${parts[0]}-${parts[1].padStart(2,"0")}-${parts[2].padStart(2,"0")}`; }
+
+  // --- DISPOSITIVO ---
+  const tipo = t.match(/Tipo de dispositivo:\s*([^\n]+?)(?:\s*Modelo|\s*SN)/i);
+  if(tipo) d.estudio_software = `BMC ${tipo[1].trim()}`;
+  else d.estudio_software = "BMC CPAP";
+  d.estudio_tipo = "Titulacion CPAP";
+
+  // --- FECHA ---
+  const fecha = t.match(/Fecha de inicio\s*(\d{4}-\d{2}-\d{2})/);
+  if(fecha) d.estudio_fecha = fecha[1];
+  else {
+    const fecha2 = t.match(/Informe generado en:\s*(\d{4}\/\d{1,2}\/\d{1,2})/);
+    if(fecha2){ const parts = fecha2[1].split("/"); d.estudio_fecha = `${parts[0]}-${parts[1].padStart(2,"0")}-${parts[2].padStart(2,"0")}`; }
+  }
+
+  // --- USO ---
+  const usoPromedio = t.match(/Promedio tiempo de uso diario\(solo d[ií]as de uso\)\s*(\d+):(\d+)/);
+  if(usoPromedio) d.cpap_uso_promedio_min = parseInt(usoPromedio[1]) * 60 + parseInt(usoPromedio[2]);
+  const usoPorcGe4 = t.match(/%\s*De d[ií]as usados >= 4\.0 horas\s*(\d+)%/);
+  if(usoPorcGe4) d.cpap_dias_4h_porc = num(usoPorcGe4[1]);
+
+  // --- PRESIÓN ---
+  const presP95 = t.match(/Percentil 95:\s*([\d.]+)\s*cmH2O/);
+  if(presP95) d.cpap_presion_p95_cmh2o = num(presP95[1]);
+  const presPromedio = t.match(/Promedio:\s*([\d.]+)\s*cmH2O/);
+  if(presPromedio) d.cpap_presion_mediana_cmh2o = num(presPromedio[1]);
+
+  // --- ÍNDICES RESPIRATORIOS ---
+  const ahi = t.match(/[ÍI]ndice de apnea hipopnea \(AHI\):\s*([\d.]+)/);
+  if(ahi) d.iah_global_por_hora = num(ahi[1]);
+  const ai = t.match(/[ÍI]ndice de apnea \(AI\):\s*([\d.]+)/);
+  if(ai) d.apneas_total_indice_por_hora = num(ai[1]);
+  const hi = t.match(/[ÍI]ndice de hipopnea \(HI\):\s*([\d.]+)/);
+  if(hi) d.hipopneas_indice_por_hora = num(hi[1]);
+  const oai = t.match(/[ÍI]ndice de apnea obstructiva \(OAI\):\s*([\d.]+)/);
+  if(oai) d.apneas_obstructivas_indice_por_hora = num(oai[1]);
+  const cai = t.match(/[ÍI]ndice de apnea central \(CAI\):\s*([\d.]+)/);
+  if(cai) d.apneas_centrales_indice_por_hora = num(cai[1]);
+
+  // Fuga
+  const fugaP95 = t.match(/Fuga.*?Percentil 95:\s*([\d.]+)\s*LPM/i);
+  if(fugaP95) d.cpap_fuga_p95_lpm = num(fugaP95[1]);
+
+  if(d.iah_global_por_hora != null) d.rdi_indice_trastornos_respiratorios = d.iah_global_por_hora;
+
+  return { data: d, missing: miss };
+}
+
+// ============== PARSER: BMC POLIGRAFÍA (diagnóstico — mayormente imágenes) ==============
+function parseBMCPoligrafo(rawText) {
+  const t = rawText.replace(/\s+/g, " ").trim();
+  const d = {};
+  const miss = [];
+
+  // Este formato de BMC tiene casi todo embebido como imágenes (gráficos).
+  // Solo podemos extraer datos mínimos del poco texto disponible.
+  d.estudio_tipo = "Poligrafia respiratoria";
+  d.estudio_software = "BMC";
+
+  // Intentar extraer lo que haya
+  const name = t.match(/Nombre del paciente:\s*([A-ZÁÉÍÓÚÑa-záéíóúñ' .-]+,\s*[A-ZÁÉÍÓÚÑa-záéíóúñ' .-]+)/);
+  if(name){
+    const parts = name[1].split(",");
+    d.paciente_apellido = parts[0].trim();
+    d.paciente_nombre = (parts[1]||"").trim();
+  }
+
+  // Marcar que los datos son limitados
+  miss.push("ADVERTENCIA: El reporte BMC de poligrafía diagnóstica tiene la mayor parte de los datos como imágenes. Solo se extraen datos mínimos del texto disponible.");
+
+  return { data: d, missing: miss };
+}
+
+// ============== SCHEMA DE 212 COLUMNAS ==============
+// Orden canónico (coincide con el CSV de OSINAGA generado previamente)
+const SCHEMA = [
+  "paciente_apellido","paciente_nombre","paciente_sexo","paciente_fecha_nacimiento","paciente_edad_anios",
+  "estudio_fecha","estudio_tipo","estudio_software","estudio_epoca_segundos","estudio_criterio_hipopnea",
+  "hora_apagado_luces","hora_encendido_luces","tiempo_grabacion_total_min","tiempo_en_cama_min",
+  "tiempo_periodo_sueno_min","tiempo_sueno_total_min","eficiencia_sueno_porc","latencia_sueno_min",
+  "wake_after_sleep_onset_waso_min","latencia_rem_desde_inicio_sueno_min","latencia_rem_desde_apagado_luces_min",
+  "n1_duracion_min","n1_porc_tst","n1_latencia_min","n2_duracion_min","n2_porc_tst","n2_latencia_min",
+  "n3_duracion_min","n3_porc_tst","n3_latencia_min","rem_duracion_min","rem_porc_tst","rem_latencia_min",
+  "hipnograma_wake_porc","hipnograma_rem_porc","hipnograma_n1_porc","hipnograma_n2_porc","hipnograma_n3_porc",
+  "apneas_centrales_numero","apneas_centrales_duracion_media_seg","apneas_centrales_duracion_maxima_seg",
+  "apneas_centrales_duracion_total_min","apneas_centrales_porc_tst","apneas_centrales_indice_por_hora",
+  "apneas_centrales_recuento_rem","apneas_centrales_recuento_nrem","apneas_centrales_indice_rem","apneas_centrales_indice_nrem",
+  "apneas_obstructivas_numero","apneas_obstructivas_duracion_media_seg","apneas_obstructivas_duracion_maxima_seg",
+  "apneas_obstructivas_duracion_total_min","apneas_obstructivas_porc_tst","apneas_obstructivas_indice_por_hora",
+  "apneas_obstructivas_recuento_rem","apneas_obstructivas_recuento_nrem","apneas_obstructivas_indice_rem","apneas_obstructivas_indice_nrem",
+  "apneas_mixtas_numero","apneas_mixtas_duracion_media_seg","apneas_mixtas_duracion_maxima_seg",
+  "apneas_mixtas_duracion_total_min","apneas_mixtas_porc_tst","apneas_mixtas_indice_por_hora",
+  "apneas_mixtas_recuento_rem","apneas_mixtas_recuento_nrem","apneas_mixtas_indice_rem","apneas_mixtas_indice_nrem",
+  "apneas_total_numero","apneas_total_duracion_media_seg","apneas_total_duracion_maxima_seg",
+  "apneas_total_duracion_total_min","apneas_total_porc_tst","apneas_total_indice_por_hora",
+  "apneas_total_recuento_rem","apneas_total_recuento_nrem","apneas_total_indice_rem","apneas_total_indice_nrem",
+  "hipopneas_numero","hipopneas_duracion_media_seg","hipopneas_duracion_maxima_seg","hipopneas_duracion_total_min",
+  "hipopneas_porc_tst","hipopneas_indice_por_hora","hipopneas_recuento_rem","hipopneas_recuento_nrem",
+  "hipopneas_indice_rem","hipopneas_indice_nrem",
+  "iah_eventos_numero","iah_eventos_duracion_media_seg","iah_eventos_duracion_maxima_seg","iah_eventos_duracion_total_min",
+  "iah_eventos_porc_tst","iah_global_por_hora","iah_recuento_rem","iah_recuento_nrem","iah_indice_rem_por_hora","iah_indice_nrem_por_hora",
+  "rera_numero","rera_duracion_media_seg","rera_duracion_maxima_seg","rera_duracion_total_min","rera_porc_tst",
+  "rera_indice_por_hora","rera_recuento_rem","rera_recuento_nrem",
+  "eventos_respiratorios_total_numero","eventos_respiratorios_total_duracion_media_seg","eventos_respiratorios_total_duracion_maxima_seg",
+  "eventos_respiratorios_total_duracion_total_min","eventos_respiratorios_total_porc_tst","eventos_respiratorios_total_indice_por_hora",
+  "rdi_indice_trastornos_respiratorios",
+  "pos_supino_duracion_min","pos_supino_iah","pos_no_supino_duracion_min","pos_no_supino_porc_sueno",
+  "pos_no_supino_porc_rem","pos_no_supino_porc_nrem","pos_no_supino_apneas_centrales_numero",
+  "pos_no_supino_apneas_obstructivas_numero","pos_no_supino_apneas_mixtas_numero","pos_no_supino_hipopneas_numero",
+  "pos_no_supino_iah_por_hora","pos_no_supino_rera_numero","pos_no_supino_itr_por_hora","pos_no_supino_desaturaciones_numero",
+  "arousal_respiratorio_rem","arousal_respiratorio_nrem","arousal_respiratorio_desp_ligeros","arousal_respiratorio_despertares",
+  "arousal_respiratorio_dl_mas_d","arousal_respiratorio_indice_dl_mas_d",
+  "arousal_movimiento_piernas_rem","arousal_movimiento_piernas_nrem","arousal_movimiento_piernas_desp_ligeros",
+  "arousal_movimiento_piernas_despertares","arousal_movimiento_piernas_dl_mas_d","arousal_movimiento_piernas_indice_dl_mas_d",
+  "arousal_ronquidos_rem","arousal_ronquidos_nrem","arousal_ronquidos_desp_ligeros","arousal_ronquidos_despertares",
+  "arousal_ronquidos_dl_mas_d","arousal_ronquidos_indice_dl_mas_d",
+  "arousal_espontaneo_rem","arousal_espontaneo_nrem","arousal_espontaneo_desp_ligeros","arousal_espontaneo_despertares",
+  "arousal_espontaneo_dl_mas_d","arousal_espontaneo_indice_dl_mas_d",
+  "arousal_total_rem","arousal_total_nrem","arousal_total_desp_ligeros","arousal_total_despertares",
+  "arousal_total_dl_mas_d","arousal_total_indice_dl_mas_d",
+  "indice_despertares_ligeros_rem","indice_despertares_ligeros_nrem","indice_despertares_ligeros_global","indice_despertares_completos",
+  "movimientos_piernas_total_recuento","movimientos_piernas_total_indice_por_hora",
+  "mpe_movimientos_periodicos_recuento","mpe_movimientos_periodicos_indice_por_hora",
+  "mpe_con_arousal_recuento","mpe_con_arousal_indice_por_hora",
+  "ronquidos_episodios_numero","ronquidos_tiempo_total_min",
+  "spo2_media_despertar_porc","spo2_media_nrem_porc","spo2_media_rem_porc","spo2_media_total_porc","spo2_minima_porc",
+  "desaturaciones_relevantes_despertar_numero","desaturaciones_relevantes_nrem_numero",
+  "desaturaciones_relevantes_rem_numero","desaturaciones_relevantes_total_numero","odi_indice_desaturacion_calculado_por_hora",
+  "spo2_menor_95_despertar_min","spo2_menor_95_despertar_porc","spo2_menor_95_nrem_min","spo2_menor_95_nrem_porc",
+  "spo2_menor_95_rem_min","spo2_menor_95_rem_porc","spo2_menor_95_tc_min","spo2_menor_95_tc_porc",
+  "spo2_menor_90_despertar_min","spo2_menor_90_despertar_porc","spo2_menor_90_nrem_min","spo2_menor_90_nrem_porc",
+  "spo2_menor_90_rem_min","spo2_menor_90_rem_porc","spo2_menor_90_tc_min","spo2_menor_90_tc_porc",
+  "t90_tiempo_spo2_menor_90_min",
+  "spo2_menor_85_tc_min","spo2_menor_85_tc_porc","spo2_menor_80_tc_min","spo2_menor_80_tc_porc",
+  "spo2_menor_75_tc_min","spo2_menor_75_tc_porc","spo2_menor_70_tc_min","spo2_menor_70_tc_porc",
+  "spo2_menor_60_tc_min","spo2_menor_60_tc_porc","spo2_menor_50_tc_min","spo2_menor_50_tc_porc",
+  "spo2_artefacto_despertar_min","spo2_artefacto_nrem_min","spo2_artefacto_rem_min","spo2_artefacto_tc_min",
+  // Campos adicionales para reportes de tratamiento (CPAP) y poligrafía
+  "cpap_uso_promedio_min","cpap_dias_uso","cpap_dias_total","cpap_dias_4h_porc",
+  "cpap_presion_mediana_cmh2o","cpap_presion_p95_cmh2o","cpap_fuga_p95_lpm",
+  "cheyne_stokes_porc","fc_media_sueno_lpm","fc_minima_lpm","fc_maxima_lpm",
+  "estudio_fecha_fin"
+];
+
+// ============== MAPEO CONTRA INFORME PERSONALIZADO (formulario IFN) ==============
+// Mapa: snake_case de mi schema -> etiqueta exacta del campo en el formulario
+const MAPPING_INFORME = {
+  // Arquitectura del sueño
+  "tiempo_grabacion_total_min": "Tiempo de grabación total (TGT)",
+  "eficiencia_sueno_porc": "Eficiencia de Sueño",
+  "latencia_sueno_min": "Latencia",
+  "wake_after_sleep_onset_waso_min": "DTIS/WASO",
+  "latencia_rem_desde_inicio_sueno_min": "Latencia REM",
+  "n1_porc_tst": "Superficial N1",
+  "n2_porc_tst": "Superficial N2",
+  "n3_porc_tst": "Sueño profundo N3",
+  "rem_porc_tst": "REM",
+  // MPP
+  "mpe_con_arousal_indice_por_hora": "Despertares Ligeros por MPE",
+  "mpe_movimientos_periodicos_indice_por_hora": "Indice MPP TST",
+  // Apneas
+  "apneas_obstructivas_numero": "Obstructivas",
+  "apneas_obstructivas_duracion_maxima_seg": "Obstructivas duración máxima (en segundos)",
+  "apneas_centrales_numero": "Centrales",
+  "apneas_centrales_duracion_maxima_seg": "Centrales duración máxima (en segundos)",
+  "apneas_mixtas_numero": "Mixtas",
+  "apneas_mixtas_duracion_maxima_seg": "Mixtas duración máxima (en segundos)",
+  "hipopneas_numero": "Hipoapneas",
+  "hipopneas_duracion_maxima_seg": "Hipoapneas duración máxima (en segundos)",
+  "iah_eventos_numero": "Totales en el Estudio",
+  // Saturación
+  "spo2_media_total_porc": "Saturación Promedio",
+  "spo2_minima_porc": "Saturación Min",
+  // REM IPR
+  "iah_recuento_rem": "Obstructivas en REM",
+  "iah_recuento_nrem": "Obstructivas en NREM",
+  "iah_indice_rem_por_hora": "Indice REM (IPR)",
+  "iah_indice_nrem_por_hora": "Indice NREM (IPR)",
+  "eventos_respiratorios_total_numero": "IPR total de la noche"
+};
+
+// Campos del formulario que NO existen en el PDF Philips (se agregan como filas vacías)
+const EXTRA_INFORME = [
+  ["distribucion_sueno", "Distribución del sueño"],
+  ["descripcion_arquitectura_sueno", "Descripción (arquitectura del sueño)"],
+  ["comentario_adicional_arquitectura_sueno", "Comentario adicional (arquitectura del sueño)"],
+  ["indice_mpp_rem", "Indice MPP REM"],
+  ["indice_mpp_nrem", "Indice MPP NREM"],
+  ["rera_eventos_hiperresistencia_si_no", "RERA / Eventos de Hiperresistencia"],
+  ["ronquidos_regularidad", "Ronquidos"],
+  ["ronquido_intensidad", "Ronquido"],
+  ["patron_sat", "Patrón SAT"],
+  ["tiempo_bajo_86_porc_min", "Tiempo bajo 86%"],
+  ["saturacion_basal_porc", "Saturacion Basal"],
+  ["cheyne_stokes_porc", "Cheyne Stokes"],
+  ["arritmias_si_no", "Arritmias"],
+  ["comentario_adicional_cardio", "Comentario Adicional (Cardio)"],
+  ["conclusion_general", "Conclusión General"],
+  ["recomendaciones_generales", "Recomendaciones Generales"],
+  ["evolucion_estudios_previos", "Evolución Estudios Previos"],
+  ["calidad_inicio_despues_22", "Inició después de 22:00"],
+  ["calidad_duracion_7hs_o_mas", "Duró 7hs o más"],
+  ["calidad_senal", "Buena calidad señal"],
+  ["calidad_oximetria", "Buena calidad oxi"],
+  ["calidad_piernas", "Buena calidad piernas"],
+  ["calidad_termino_en_rem", "Terminó en REM"],
+  ["calificacion_general_estudio", "Calificación General del Estudio"],
+  ["sintesis_del_estudio", "Síntesis del Estudio"]
+];
+
+// ============== CSV BUILDER (formato long: parametro, valor, campo_informe_personalizado) ==============
+function toCSV(data){
+  const esc = v => {
+    if(v == null) return "";
+    v = String(v);
+    return /[,"\n]/.test(v) ? `"${v.replace(/"/g,'""')}"` : v;
+  };
+  const lines = ["parametro,valor,campo_informe_personalizado"];
+  for(const k of SCHEMA){
+    const v = data[k];
+    const campo = MAPPING_INFORME[k] || "";
+    lines.push(`${esc(k)},${esc(v)},${esc(campo)}`);
+  }
+  // Filas extras: campos del formulario que no existen en el PDF (valor vacío)
+  for(const [k, campo] of EXTRA_INFORME){
+    lines.push(`${esc(k)},,${esc(campo)}`);
+  }
+  return lines.join("\n") + "\n";
+}
+
+function buildFilename(data){
+  const ap = data.paciente_apellido ? titleCase(data.paciente_apellido) : "Paciente";
+  const no = data.paciente_nombre ? titleCase(data.paciente_nombre) : "SinNombre";
+  let datePart = "FechaDesconocida";
+  if(data.estudio_fecha){
+    datePart = data.estudio_fecha.replace(/-/g,"");
+  }
+  let hourPart = "0000";
+  if(data.hora_apagado_luces){
+    const p = parseHour(data.hora_apagado_luces);
+    if(p) hourPart = p.hhmm;
+  }
+  // Sanitizar caracteres problemáticos para nombre de archivo
+  const safe = s => s.replace(/[^A-Za-z0-9_-]/g,"");
+  return `${safe(ap)}_${safe(no)}_${datePart}_${hourPart}.csv`;
+}
+
+// ============== UI ==============
+const fileInput = document.getElementById("fileInput");
+const dropzone = document.getElementById("dropzone");
+const processBtn = document.getElementById("processBtn");
+const downloadAllBtn = document.getElementById("downloadAllBtn");
+const clearBtn = document.getElementById("clearBtn");
+const fileList = document.getElementById("fileList");
+
+dropzone.addEventListener("dragover", e => { e.preventDefault(); dropzone.classList.add("drag"); });
+dropzone.addEventListener("dragleave", () => dropzone.classList.remove("drag"));
+dropzone.addEventListener("drop", e => {
+  e.preventDefault(); dropzone.classList.remove("drag");
+  addFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener("change", () => addFiles(fileInput.files));
+clearBtn.addEventListener("click", () => {
+  STATE.files = [];
+  fileInput.value = "";
+  render();
+  log("Lista limpiada.");
+});
+processBtn.addEventListener("click", processAll);
+downloadAllBtn.addEventListener("click", downloadZip);
+
+function addFiles(fl){
+  for(const f of fl){
+    if(f.type !== "application/pdf" && !/\.pdf$/i.test(f.name)){
+      log(`Ignorado (no es PDF): ${f.name}`);
+      continue;
+    }
+    STATE.files.push({ file: f, status: "pending" });
+  }
+  render();
+  log(`Agregados ${fl.length} archivo(s). Total en cola: ${STATE.files.length}.`);
+}
+
+function render(){
+  fileList.innerHTML = "";
+  STATE.files.forEach((entry, i) => {
+    const row = document.createElement("div");
+    row.className = "file-row";
+    row.innerHTML = `
+      <div class="name">${entry.file.name}${entry.filename ? ` → <strong>${entry.filename}</strong>` : ""}</div>
+      <span class="status ${entry.status}">${
+        entry.status === "pending" ? "Pendiente" :
+        entry.status === "processing" ? "Procesando..." :
+        entry.status === "success" ? "Listo" : "Error"
+      }</span>
+    `;
+    if(entry.status === "success"){
+      const btn = document.createElement("button");
+      btn.className = "btn small";
+      btn.textContent = "Descargar CSV";
+      btn.onclick = () => downloadSingle(i);
+      row.appendChild(btn);
+      const btnPrev = document.createElement("button");
+      btnPrev.className = "btn small secondary";
+      btnPrev.textContent = "Preview";
+      btnPrev.onclick = () => togglePreview(i, row);
+      row.appendChild(btnPrev);
+      // Engine Hipóxico solo para formatos que tienen datos oximétricos suficientes
+      if(entry.formatInfo && entry.formatInfo.type === "diagnostico"){
+        const btnEng = document.createElement("button");
+        btnEng.className = "btn small";
+        btnEng.style.background = "linear-gradient(135deg,#1e3a5f,#2563eb)";
+        btnEng.style.color = "#fff";
+        btnEng.textContent = "Engine Hipóxico";
+        btnEng.onclick = () => showEnginePSG(i);
+        row.appendChild(btnEng);
+      }
+      // Badge de formato
+      if(entry.formatInfo){
+        const badge = document.createElement("span");
+        badge.style.cssText = "font-size:10px;padding:2px 8px;border-radius:4px;background:#334155;color:#94a3b8;margin-left:8px;white-space:nowrap;";
+        badge.textContent = entry.formatInfo.label;
+        row.appendChild(badge);
+      }
+    }
+    if(entry.status === "error"){
+      const span = document.createElement("span");
+      span.style.color = "var(--err)";
+      span.style.fontSize = "11px";
+      span.textContent = entry.error || "Error desconocido";
+      row.appendChild(span);
+    }
+    fileList.appendChild(row);
+  });
+  processBtn.disabled = !STATE.files.some(f => f.status === "pending");
+  downloadAllBtn.disabled = !STATE.files.some(f => f.status === "success");
+}
+
+function togglePreview(idx, row){
+  const existing = row.nextElementSibling;
+  if(existing && existing.classList.contains("mini-preview")){
+    existing.remove(); return;
+  }
+  const entry = STATE.files[idx];
+  const preview = document.createElement("div");
+  preview.className = "mini-preview";
+  preview.style.display = "block";
+  // Mostrar los campos más importantes
+  const keys = [
+    "paciente_apellido","paciente_nombre","paciente_edad_anios","estudio_fecha",
+    "tiempo_sueno_total_min","eficiencia_sueno_porc","latencia_sueno_min",
+    "wake_after_sleep_onset_waso_min","iah_global_por_hora","iah_indice_rem_por_hora",
+    "rdi_indice_trastornos_respiratorios","spo2_minima_porc","spo2_media_total_porc",
+    "odi_indice_desaturacion_calculado_por_hora","t90_tiempo_spo2_menor_90_min",
+    "mpe_movimientos_periodicos_indice_por_hora","indice_despertares_ligeros_global"
+  ];
+  const tbl = document.createElement("table");
+  keys.forEach(k => {
+    const tr = document.createElement("tr");
+    const td1 = document.createElement("td"); td1.textContent = k;
+    const td2 = document.createElement("td"); td2.textContent = entry.data[k] ?? "—";
+    tr.appendChild(td1); tr.appendChild(td2); tbl.appendChild(tr);
+  });
+  preview.appendChild(tbl);
+  row.parentNode.insertBefore(preview, row.nextSibling);
+}
+
+async function processAll(){
+  for(let i=0;i<STATE.files.length;i++){
+    const entry = STATE.files[i];
+    if(entry.status !== "pending") continue;
+    entry.status = "processing";
+    render();
+    try {
+      log(`Procesando: ${entry.file.name}`);
+      const text = await extractText(entry.file);
+
+      // AUTO-DETECT formato
+      const formatInfo = detectFormat(text);
+      log(`  Formato detectado: ${formatInfo.label} (${formatInfo.type})`);
+      entry.formatInfo = formatInfo;
+
+      if(formatInfo.format === "unknown"){
+        throw new Error("Formato no reconocido. El PDF no corresponde a ningún equipo soportado (Philips, BrainWave, ResMed, BMC).");
+      }
+
+      // Parsear con el parser correcto
+      const { data, missing } = parseByFormat(text, formatInfo);
+
+      // Validación flexible: para tratamiento CPAP a veces no hay apellido separado
+      if(!data.paciente_apellido && !data.estudio_fecha){
+        throw new Error(`Se detectó formato ${formatInfo.label} pero no se pudieron extraer datos mínimos del paciente.`);
+      }
+
+      const csv = toCSV(data);
+      const filename = buildFilename(data);
+      entry.data = data; entry.csv = csv; entry.filename = filename;
+      entry.status = "success";
+      if(missing.length) log(`  ⚠ Campos no encontrados: ${missing.join(", ")}`);
+      log(`  ✔ ${filename} [${formatInfo.label}]`);
+    } catch(e){
+      entry.status = "error";
+      entry.error = e.message;
+      log(`  ✗ ${e.message}`);
+    }
+    render();
+  }
+}
+
+function downloadSingle(idx){
+  const entry = STATE.files[idx];
+  // BOM UTF-8 para compatibilidad con Excel en español
+  const blob = new Blob(["\ufeff" + entry.csv], {type:"text/csv;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = entry.filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function downloadZip(){
+  const zip = new JSZip();
+  for(const e of STATE.files){
+    if(e.status === "success") zip.file(e.filename, "\ufeff" + e.csv);
+  }
+  const blob = await zip.generateAsync({type:"blob"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const ts = new Date().toISOString().replace(/[:.]/g,"-").slice(0,19);
+  a.href = url; a.download = `CSV_PSG_${ts}.zip`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// ================================================================
+// ENGINE HIPÓXICO — PSG (score parcial desde datos del informe)
+// ================================================================
+function computeHypoxicScorePSG(d) {
+  // Mapear campos del parseReport a inputs del engine
+  const tst_h = (d.tiempo_sueno_total_min || 420) / 60;
+  const odi = d.odi_indice_desaturacion_calculado_por_hora || 0;
+  const nadir = d.spo2_minima_porc || 100;
+  const spo2_basal = d.spo2_media_despertar_porc || d.spo2_media_total_porc || 95;
+  const t90_min = d.t90_tiempo_spo2_menor_90_min || d.spo2_menor_90_tc_min || 0;
+  const t90_pct = tst_h > 0 ? (t90_min / 60) / tst_h * 100 : 0;
+  const t85_min = d.spo2_menor_85_tc_min || 0;
+  const t85_pct = tst_h > 0 ? (t85_min / 60) / tst_h * 100 : 0;
+  const t80_min = d.spo2_menor_80_tc_min || 0;
+  const t80_pct = tst_h > 0 ? (t80_min / 60) / tst_h * 100 : 0;
+  const iah = d.iah_global_por_hora || 0;
+  const iah_rem = d.iah_indice_rem_por_hora || 0;
+  const iah_nrem = d.iah_indice_nrem_por_hora || 0;
+
+  // HB: NO disponible (requiere señal cruda). Estimación grosera: ODI × profundidad media estimada × duración media / 60
+  // NO computamos HB — lo dejamos en 0 y lo marcamos como NA
+  const hb = 0;
+  const hb_available = false;
+
+  // PASO 1: CARGA (0-40) — sin HB, solo T90 + bonus
+  let hb_score = 0; // NA
+  let t90_score; if(t90_pct<1)t90_score=0;else if(t90_pct<3)t90_score=2;else if(t90_pct<5)t90_score=4;else if(t90_pct<10)t90_score=7;else if(t90_pct<15)t90_score=10;else if(t90_pct<30)t90_score=13;else t90_score=16;
+  let bonus_t85=0; if(t85_pct>0&&t90_pct>0){const r=t85_pct/t90_pct;if(r>0.7)bonus_t85=4;else if(r>0.5)bonus_t85=2;}
+  let bonus_t80=0; if(t80_pct>5)bonus_t80=4;else if(t80_pct>1)bonus_t80=2;
+  const carga_available = Math.min(24, t90_score+bonus_t85+bonus_t80); // max 24 sin HB (de 40)
+  const carga = carga_available;
+
+  // PASO 2: CICLICIDAD (0-16)
+  let ciclicidad; if(odi<5)ciclicidad=0;else if(odi<10)ciclicidad=3;else if(odi<15)ciclicidad=5;else if(odi<25)ciclicidad=8;else if(odi<35)ciclicidad=11;else if(odi<50)ciclicidad=14;else ciclicidad=16;
+
+  // PASO 3: PROFUNDIDAD (0-20)
+  let prof_base; if(nadir>=88)prof_base=0;else if(nadir>=85)prof_base=3;else if(nadir>=80)prof_base=6;else if(nadir>=75)prof_base=10;else if(nadir>=70)prof_base=14;else prof_base=16;
+  let bonus_nadir=0; // pct_nadir80 no disponible
+  const profundidad = Math.min(20, prof_base);
+
+  // PASO 4: MOD BASAL (0-8)
+  let mod_basal=0; if(spo2_basal<88)mod_basal=8;else if(spo2_basal<90)mod_basal=6;else if(spo2_basal<92)mod_basal=4;else if(spo2_basal<95)mod_basal=2;
+
+  // PASO 5: MOD TEMPORAL (0-8) — PSG tiene IAH REM/NREM!
+  let mod_temporal=0;
+  if (iah_rem > 0 && iah_nrem > 0 && iah > 5) {
+    const ratio = iah_rem / iah_nrem;
+    if (ratio >= 2) mod_temporal += 4; // REM-predominant
+    else if (ratio >= 1.5) mod_temporal += 2;
+  }
+  // Clustering no disponible sin señal cruda
+  mod_temporal = Math.min(8, mod_temporal);
+
+  // PASO 6: MOD CLÍNICO (0-8)
+  const mod_clinico = 0;
+
+  const rawTotal = carga+ciclicidad+profundidad+mod_basal+mod_temporal+mod_clinico;
+  const maxPossible = 24+16+20+8+8+0; // 76 sin HB ni clustering ni pct_nadir80 ni mod clínico
+  const total = Math.max(1, Math.min(100, rawTotal));
+
+  let categoria,catClass,catDesc;
+  if(total<=15){categoria='Carga hipóxica leve';catClass='leve';catDesc='Daño esperable mínimo.';}
+  else if(total<=39){categoria='Carga hipóxica moderada';catClass='moderada';catDesc='Daño relevante. Iniciar PAP.';}
+  else if(total<=69){categoria='Carga hipóxica alta';catClass='alta';catDesc='Daño significativo. Prioridad terapéutica.';}
+  else{categoria='Carga hipóxica crítica';catClass='critica';catDesc='Daño severo activo.';}
+
+  // Perfil: sin HB no se puede clasificar A o B estrictamente
+  let perfil='—', perfilDesc='<strong>Perfil no clasificable.</strong> Sin señal cruda de SpO₂, no se puede computar HB para clasificar perfiles A/B/C.';
+  if (odi>=15 && nadir>=85) { perfil='C (probable)'; perfilDesc='<strong>Oscilador rápido superficial (probable).</strong> ODI alto sin profundidad. Requiere HB para confirmar.'; }
+
+  const flags=[];
+  if(spo2_basal<92)flags.push({t:'crit',m:`SpO₂ basal (vigilia) ${spo2_basal}% — hipoxemia diurna.`});
+  if(nadir<70)flags.push({t:'crit',m:`Nadir ${nadir}% — desaturación extrema.`});
+  else if(nadir<80)flags.push({t:'warn',m:`Nadir ${nadir}% — zona de pendiente empinada curva Hb.`});
+  if(odi>=30)flags.push({t:'warn',m:`ODI ${odi} ev/h — ciclicidad muy elevada.`});
+  if(iah_rem>0&&iah_nrem>0&&(iah_rem/iah_nrem)>=2)flags.push({t:'warn',m:`IAH REM/NREM = ${(iah_rem/iah_nrem).toFixed(1)} — SAHOS REM-predominante.`});
+
+  return {
+    total,categoria,catClass,catDesc,carga,ciclicidad,profundidad,mod_basal,mod_temporal,mod_clinico,
+    hb_score,t90_score,bonus_t85,bonus_t80,prof_base,bonus_nadir,perfil,perfilDesc,flags,
+    hb_available, maxPossible,
+    odi,nadir,spo2_basal,t90_pct,t85_pct,t80_pct,iah,iah_rem,iah_nrem,
+    spo2_media: d.spo2_media_total_porc||0,
+    components:[
+      {label:'Carga acumulativa',value:carga,max:40,color:'#2563eb',note:'Sin HB (máx 24)'},
+      {label:'Ciclicidad',value:ciclicidad,max:16,color:'#7c3aed'},
+      {label:'Profundidad',value:profundidad,max:20,color:'#dc2626',note:'Sin % nadir<80'},
+      {label:'Mod. línea basal',value:mod_basal,max:8,color:'#0891b2'},
+      {label:'Mod. temporal',value:mod_temporal,max:8,color:'#ca8a04',note:'REM/NREM (sin clustering)'},
+      {label:'Mod. clínico',value:mod_clinico,max:8,color:'#059669',note:'No implementado'}
+    ]
+  };
+}
+
+function switchEngineTab(tabId, btn) {
+  document.querySelectorAll('.engine-tab-content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.engine-tab-btn').forEach(el=>el.classList.remove('active'));
+  document.getElementById('engine-tab-'+tabId).classList.add('active');
+  btn.classList.add('active');
+}
+
+function showEnginePSG(idx) {
+  const entry = STATE.files[idx];
+  if (!entry || !entry.data) return;
+  const d = entry.data;
+  const s = computeHypoxicScorePSG(d);
+  const scoreColors = {leve:'#4ade80',moderada:'#fbbf24',alta:'#fb923c',critica:'#f87171'};
+  const sc = scoreColors[s.catClass]||'#e2e8f0';
+
+  let h = '';
+  h += `<div class="engine-tabs-bar">
+    <button class="engine-tab-btn active" onclick="switchEngineTab('results',this)">Resultados</button>
+    <button class="engine-tab-btn" onclick="switchEngineTab('methodology',this)">Metodología del cálculo</button>
+    <button class="engine-tab-btn" onclick="document.getElementById('enginePanel').className=''" style="color:#f87171">✕ Cerrar</button>
+  </div>`;
+
+  // Results tab
+  h += `<div id="engine-tab-results" class="engine-tab-content active">`;
+  // Patient info
+  h += `<div class="engine-card"><div class="engine-card-header">${d.paciente_apellido||''}, ${d.paciente_nombre||''} — ${d.estudio_fecha||''}</div>
+    <div class="engine-card-body" style="font-size:12px;color:#94a3b8">IAH: ${s.iah} ev/h · TST: ${d.tiempo_sueno_total_min||'—'} min · Eficiencia: ${d.eficiencia_sueno_porc||'—'}%</div></div>`;
+
+  // NA warning
+  h += `<div class="na-note">⚠ Score parcial — sin señal cruda de SpO₂. HB, clustering y % nadir&lt;80 no son computables desde el informe PDF. Máximo teórico alcanzable: ${s.maxPossible}/100.</div>`;
+
+  // Score display
+  h += `<div class="engine-card"><div class="engine-card-header">Score Hipóxico (parcial desde informe PSG)</div>
+    <div class="engine-card-body score-display">
+      <div class="score-big" style="color:${sc}">${s.total}</div>
+      <div class="score-label">de ${s.maxPossible} posibles (de 100)</div>
+      <div class="score-cat score-${s.catClass}">${s.categoria}</div>
+      <div class="score-desc">${s.catDesc}</div>
+    </div></div>`;
+
+  // Metrics grid
+  h += `<div class="engine-card"><div class="engine-card-header">Métricas del informe</div><div class="engine-card-body"><div class="metrics-grid">`;
+  const cards = [
+    {l:'IAH',v:s.iah+' ev/h'},
+    {l:'IAH REM',v:s.iah_rem+' ev/h'},
+    {l:'IAH NREM',v:s.iah_nrem+' ev/h'},
+    {l:'ODI',v:s.odi+' ev/h'},
+    {l:'T90',v:s.t90_pct.toFixed(1)+'%'},
+    {l:'T85',v:s.t85_pct.toFixed(1)+'%'},
+    {l:'T80',v:s.t80_pct.toFixed(1)+'%'},
+    {l:'SpO₂ basal',v:s.spo2_basal+'%'},
+    {l:'SpO₂ media',v:s.spo2_media+'%'},
+    {l:'SpO₂ nadir',v:s.nadir+'%'},
+    {l:'HB',v:'N/A',na:true},
+    {l:'Clustering',v:'N/A',na:true},
+  ];
+  cards.forEach(c => { h += `<div class="metric-card${c.na?' na':''}"><div class="mv">${c.v}</div><div class="ml">${c.l}</div></div>`; });
+  h += `</div></div></div>`;
+
+  // Breakdown bars
+  h += `<div class="engine-card"><div class="engine-card-header">Desglose por componente</div><div class="engine-card-body">`;
+  s.components.forEach(c => {
+    const pct = (c.value/c.max*100).toFixed(0);
+    h += `<div class="breakdown-item"><span class="breakdown-label">${c.label}${c.note?' <span style="color:#64748b;font-size:10px">('+c.note+')</span>':''}</span>
+      <div class="breakdown-bar"><div class="breakdown-fill" style="width:${pct}%;background:${c.color}"></div></div>
+      <span class="breakdown-value">${c.value}/${c.max}</span></div>`;
+  });
+  h += `</div></div>`;
+
+  // Profile
+  const profColors = {A:'#f87171',B:'#fb923c',C:'#fbbf24','—':'#64748b','C (probable)':'#fbbf24'};
+  h += `<div class="engine-card"><div class="engine-card-header">Perfil hipóxico</div><div class="engine-card-body">
+    <span class="profile-badge" style="background:${(profColors[s.perfil]||'#64748b')}30;color:${profColors[s.perfil]||'#64748b'}">${s.perfil}</span>
+    <p style="margin-top:6px;font-size:12px;color:#cbd5e1">${s.perfilDesc}</p></div></div>`;
+
+  // Flags
+  if (s.flags.length) {
+    h += `<div class="engine-card"><div class="engine-card-header">Alertas clínicas</div><div class="engine-card-body"><ul class="flag-list">`;
+    s.flags.forEach(f => { h += `<li class="${f.t}">${f.m}</li>`; });
+    h += `</ul></div></div>`;
+  }
+
+  // Detail table
+  h += `<div class="engine-card"><div class="engine-card-header">Detalle paso a paso</div><div class="engine-card-body">
+    <table class="detail-table"><tr><th>Componente</th><th>Métrica</th><th>Valor</th><th>Puntos</th></tr>`;
+  h += `<tr><td rowspan="4">Carga (0-40)</td><td style="color:#64748b">HB</td><td style="color:#64748b">N/A</td><td style="color:#64748b">—/16</td></tr>`;
+  h += `<tr><td>T90</td><td>${s.t90_pct.toFixed(1)}%</td><td>${s.t90_score}/16</td></tr>`;
+  h += `<tr><td>Bonus T85/T90</td><td>${s.t85_pct>0&&s.t90_pct>0?(s.t85_pct/s.t90_pct).toFixed(2):'—'}</td><td>${s.bonus_t85}/4</td></tr>`;
+  h += `<tr><td>Bonus T80</td><td>${s.t80_pct.toFixed(1)}%</td><td>${s.bonus_t80}/4</td></tr>`;
+  h += `<tr><td>Ciclicidad (0-16)</td><td>ODI</td><td>${s.odi} ev/h</td><td>${s.ciclicidad}/16</td></tr>`;
+  h += `<tr><td rowspan="2">Profundidad (0-20)</td><td>Nadir</td><td>${s.nadir}%</td><td>${s.prof_base}/16</td></tr>`;
+  h += `<tr><td style="color:#64748b">% nadir<80</td><td style="color:#64748b">N/A</td><td style="color:#64748b">—/4</td></tr>`;
+  h += `<tr><td>Mod. basal (0-8)</td><td>SpO₂ basal</td><td>${s.spo2_basal}%</td><td>${s.mod_basal}/8</td></tr>`;
+  h += `<tr><td>Mod. temporal (0-8)</td><td>REM/NREM ratio</td><td>${s.iah_nrem>0?(s.iah_rem/s.iah_nrem).toFixed(1):'—'}</td><td>${s.mod_temporal}/8</td></tr>`;
+  h += `<tr><td>Mod. clínico (0-8)</td><td colspan="2" style="color:#64748b">No implementado</td><td>0/8</td></tr>`;
+  h += `<tr style="font-weight:700;background:#0f172a"><td colspan="3">TOTAL (parcial)</td><td>${s.total}/${s.maxPossible}</td></tr>`;
+  h += `</table></div></div>`;
+  h += `</div>`; // close results tab
+
+  // Methodology tab
+  h += `<div id="engine-tab-methodology" class="engine-tab-content">${buildMethodologyTabPSG()}</div>`;
+
+  const panel = document.getElementById('enginePanel');
+  panel.innerHTML = h;
+  panel.className = 'visible';
+  panel.scrollIntoView({behavior:'smooth'});
+}
+
+function buildMethodologyTabPSG() {
+  return `
+  <div class="engine-card engine-results-full">
+    <div class="engine-card-header">Metodología — Score Hipóxico desde Informe PSG (parcial)</div>
+    <div class="engine-card-body">
+      <div class="method-section">
+        <h3>Concepto</h3>
+        <p>Score de 6 componentes (0-100). Desde un informe PDF de Sleepware G3, solo se dispone de métricas resumen (IAH, ODI, SpO₂, T90) sin señal cruda de SpO₂. Esto limita el score:</p>
+        <div class="method-formula">Componentes computables: T90, T85, T80 (parcial carga), ODI (ciclicidad), nadir (profundidad parcial), SpO₂ basal, IAH REM/NREM (temporal parcial)</div>
+        <div class="method-formula">Componentes NO computables: HB (requiere señal cruda), clustering (requiere señal cruda), % eventos nadir&lt;80 (requiere análisis evento por evento)</div>
+        <p class="ref">El score parcial tiene un máximo teórico de ~76/100. Para el score completo, usar datos de oximetría continua (O2Ring o EDF con canal SpO₂).</p>
+      </div>
+      <div class="method-section">
+        <h3>Ventaja PSG sobre oximetría ambulatoria</h3>
+        <p>La PSG aporta <strong>estadificación del sueño</strong>, lo que permite:</p>
+        <p>• IAH diferenciado por etapa (REM vs NREM) → modulador temporal más preciso</p>
+        <p>• T90 sobre TST real (no tiempo total de registro)</p>
+        <p>• Distinción apnea obstructiva/central/mixta</p>
+        <p>• Datos posicionales con AHI por posición</p>
+      </div>
+      <div class="method-section">
+        <h3>Tablas de puntuación</h3>
+        <p>Las mismas tablas que el Engine completo. Ver componentes 1-6 en la documentación principal.</p>
+        <table class="method-table"><tr><th>Score</th><th>Categoría</th></tr><tr><td>1–15</td><td style="color:#4ade80">Leve</td></tr><tr><td>16–39</td><td style="color:#fbbf24">Moderada</td></tr><tr><td>40–69</td><td style="color:#fb923c">Alta</td></tr><tr><td>70–100</td><td style="color:#f87171">Crítica</td></tr></table>
+      </div>
+      <div class="method-section">
+        <h3>Referencias</h3>
+        <p class="ref">Azarbarzin A, et al. (2019) Eur Heart J. DOI: 10.1093/eurheartj/ehy624</p>
+        <p class="ref">Lavie L. (2003) Sleep Med Rev. DOI: 10.1053/smrv.2002.0261</p>
+        <p class="ref">Dewan NA, et al. (2015) Chest. DOI: 10.1378/chest.14-0500</p>
+        <p class="ref">Somers VK, et al. (2008) Circulation. DOI: 10.1161/CIRCULATIONAHA.107.189375</p>
+        <p class="ref">Berry RB, et al. AASM Manual v3. 2023.</p>
+      </div>
+    </div>
+  </div>`;
+}
+
+log("Conversor listo. Arrastrá tus PDFs arriba.");
+</script>
+</body>
+</html>

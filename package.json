@@ -1,0 +1,49 @@
+{
+  "name": "somnosalud-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plataforma médica digital SomnoSalud — evaluación, diagnóstico orientativo y seguimiento de trastornos del sueño",
+  "homepage": "https://somnosalud.com.ar",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PaulFerrero/somnosalud.git"
+  },
+  "license": "PROPRIETARY",
+  "author": {
+    "name": "SomnoSalud Team",
+    "email": "pabloferrero@ifn.com.ar"
+  },
+  "contributors": [
+    {
+      "name": "Dr. Pablo Ferrero (IFN)",
+      "email": "pabloferrero@ifn.com.ar",
+      "role": "Owner clínico"
+    },
+    {
+      "name": "Jorge Leporace (Pampa Labs)",
+      "email": "info@pampalabs.com",
+      "role": "Partner técnico"
+    }
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "prettier": "^3.0.0",
+    "turbo": "^2.0.0",
+    "typescript": "^5.4.0"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}
