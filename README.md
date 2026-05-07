@@ -167,7 +167,7 @@ Refactor del HTML monolítico Conversor PSG a `psg-parser/` modular TypeScript +
 ### Fase 3 — Producto B2B + escalado (Semanas 10-16, 40-60 horas)
 Multi-tenant white-label para sleep specialists + OCR labs + integración wearables + freemium + PWA + i18n + accesibilidad WCAG 2.1 AA.
 
-Detalle completo en `/Pampa-Labs-Core/somnosalud-analysis-2026-05-07/ANALISIS-EXHAUSTIVO-SOMNOSALUD-2026-05-07.md`.
+Detalle completo en ``[Vault Pampa Labs]` docs/vault/clinical/somnosalud/ANALISIS-EXHAUSTIVO-SOMNOSALUD-2026-05-07.md`.
 
 ---
 
