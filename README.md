@@ -54,7 +54,7 @@ somnosalud-platform/
 
 ```bash
 # Clonar
-git clone https://github.com/PaulFerrero/somnosalud.git somnosalud-platform
+git clone https://github.com/itsomnosalud/Somnosalud.git somnosalud-platform
 cd somnosalud-platform
 
 # Instalar dependencias (todos los packages)
