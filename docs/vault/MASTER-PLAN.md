@@ -21,14 +21,15 @@ created: 2026-05-07
 
 ---
 
-## 📊 Estado actual (2026-05-07 noche)
+## 📊 Estado actual (2026-05-08 mañana)
 
 - ✅ **Fase 0.1 — Bootstrap monorepo** completado (pnpm workspaces + 5 packages + 25 source files importados + 55/55 tests passing)
 - ✅ **Fase 0.2 — Migración remote** a `itsomnosalud/Somnosalud` Private (force-push exitoso, 73 objects)
 - ✅ **Fase 0.3 — Setup Pampa Labs OS** (CLAUDE.md + Vault structure + 12 procesos + 6 LLs + 46 agents + .mcp.json + .gitignore extendido)
-- ⏳ **Fase 0.4 — Sprint 1 a iniciar:** commit `pnpm-lock.yaml` + CI verde + crear project Supabase + setear `supabase-somnosalud` MCP
+- ✅ **Fase 0.4 — Sprint 1 closed-verified (2026-05-08):** commit `pnpm-lock.yaml` ya estaba (`6f8f6c9`) + CI verde local triangulado + cleanup OS heredado (package-lock huérfano borrado, SETUP.sh archivado, análisis exhaustivo SSOT resuelto, 4 packages skeleton habilitados con turbo). Detalle: [[sprints/sprint-1-cleanup-os-heredado/SPRINT-1-CLEANUP-OS-HEREDADO]]. Sub-DEBTs abiertos para Sprint 2: [[debt/DEBT-curar-agents-pampalabs-os]], [[debt/DEBT-procesos-heredados-content-factory]], [[debt/DEBT-vitest-coverage-output]].
+- ⏳ **Fase 0.5 — Sprint 2 a iniciar:** curar `.claude/agents/` + reescribir QA-CHECKLIST/DEPLOY-WORKFLOW para SomnoSalud + crear project Supabase + setear `supabase-somnosalud` MCP.
 
-**Próxima sesión sugerida:** Sprint 1.
+**Próxima sesión sugerida:** Sprint 2.
 
 ---
 
@@ -41,8 +42,8 @@ created: 2026-05-07
 | 0.1 | Bootstrap monorepo + first commit | ✅ closed-verified | 4h ejecutadas |
 | 0.2 | Migración remote a itsomnosalud/Somnosalud | ✅ closed-verified | 0.5h |
 | 0.3 | Setup Pampa Labs OS en este repo | ✅ closed-verified | 2h |
-| 1 | Commit pnpm-lock + CI workflow verde | ⏳ pending | 1h |
-| 2 | Crear project Supabase Org Pampa Labs + MCP setup | ⏳ pending | 1h |
+| 1 | Cleanup OS heredado + CI verde local triangulado | ✅ closed-verified | 1.5h ejecutadas (2026-05-08) |
+| 2 | Curar agents + reescribir procesos heredados + crear Supabase Org Pampa Labs + MCP setup | ⏳ pending | 4-5h |
 | 3 | Deploy webapp-somnosalud preview a Vercel + dominio | ⏳ pending | 2h |
 | 4 | Deploy webapp-conversor-psg a GitHub Pages | ⏳ pending | 1h |
 
