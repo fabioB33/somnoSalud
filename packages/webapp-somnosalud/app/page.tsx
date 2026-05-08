@@ -1,25 +1,24 @@
+import Link from 'next/link';
 import { ArrowRight, Moon, ShieldCheck, Stethoscope } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
 
-// Demo de integracion con el clinical-engine: validamos que el workspace dep
-// se importa, ejecuta y devuelve el resultado esperado segun Bastien 2001.
-// Esta linea sera reemplazada en Sprint 7 por la UX real de los cuestionarios,
-// pero es la prueba empirica de H2 (workspace dep funciona) en este sprint.
-import { scoreISI } from 'somnosalud-clinical-engine';
-
+/**
+ * HomePage — pantalla de bienvenida de SomnoSalud.
+ *
+ * Server Component (default). El boton "Empezar evaluacion" navega a
+ * /disclaimer (Sprint 6 compliance gate flow): /disclaimer -> /terms ->
+ * /eval/profile -> /eval/safety -> ... (resto de pasos en Sprints 7-8).
+ *
+ * @see docs/vault/architecture/adr/ADR-003-compliance-gates-en-codigo.md
+ */
 export default function HomePage() {
-  // Caso canonico: respuestas con score 8 -> "Insomnio subclinico (leve)".
-  // Test equivalente al de tests/scoring.test.ts:38 del clinical-engine.
-  const isiDemo = scoreISI([2, 1, 1, 1, 1, 1, 1]);
-
   return (
     <main className="min-h-dvh">
       <header className="border-b border-border/40 backdrop-blur-sm">
@@ -55,12 +54,14 @@ export default function HomePage() {
           </p>
 
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Button size="lg" disabled aria-label="Empezar evaluación (próximamente)">
-              Empezar evaluación
-              <ArrowRight aria-hidden="true" />
+            <Button size="lg" asChild>
+              <Link href="/disclaimer">
+                Empezar evaluación
+                <ArrowRight aria-hidden="true" />
+              </Link>
             </Button>
             <p className="text-xs text-muted-foreground">
-              Habilitado en Sprint 6 (compliance gates).
+              Tarda ~10 minutos · 100% gratis · Disclaimer obligatorio
             </p>
           </div>
         </div>
@@ -103,40 +104,6 @@ export default function HomePage() {
             </CardHeader>
           </Card>
         </div>
-
-        {/* Verificación empírica del workspace dep clinical-engine.
-            Visible en pre-launch mientras validamos integraciones, se
-            elimina en Sprint 6 cuando arranque el flow real. */}
-        <Card className="mx-auto mt-16 max-w-3xl border-dashed">
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Smoke test — clinical-engine (workspace dep)
-            </CardTitle>
-            <CardDescription className="font-mono text-xs">
-              scoreISI([2,1,1,1,1,1,1]) →{' '}
-              <span className="text-somno-accent">
-                {isiDemo.totalScore}
-              </span>{' '}
-              · severity:{' '}
-              <span className="text-somno-accent">{isiDemo.severity}</span>
-              {' · '}
-              <em>{isiDemo.severityLabel}</em>
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-muted-foreground">
-              Reference:{' '}
-              <a
-                href={`https://doi.org/${isiDemo.reference.match(/DOI:\s*(\S+)/)?.[1] ?? ''}`}
-                className="underline-offset-4 hover:underline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {isiDemo.reference}
-              </a>
-            </p>
-          </CardContent>
-        </Card>
       </section>
 
       <footer className="border-t border-border/40 py-6">
