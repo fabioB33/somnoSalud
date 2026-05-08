@@ -26,10 +26,11 @@ created: 2026-05-07
 - ✅ **Fase 0.1 — Bootstrap monorepo** completado (pnpm workspaces + 5 packages + 25 source files importados + 55/55 tests passing)
 - ✅ **Fase 0.2 — Migración remote** a `itsomnosalud/Somnosalud` Private (force-push exitoso, 73 objects)
 - ✅ **Fase 0.3 — Setup Pampa Labs OS** (CLAUDE.md + Vault structure + 12 procesos + 6 LLs + 46 agents + .mcp.json + .gitignore extendido)
-- ✅ **Fase 0.4 — Sprint 1 closed-verified (2026-05-08):** commit `pnpm-lock.yaml` ya estaba (`6f8f6c9`) + CI verde local triangulado + cleanup OS heredado (package-lock huérfano borrado, SETUP.sh archivado, análisis exhaustivo SSOT resuelto, 4 packages skeleton habilitados con turbo). Detalle: [[sprints/sprint-1-cleanup-os-heredado/SPRINT-1-CLEANUP-OS-HEREDADO]]. Sub-DEBTs abiertos para Sprint 2: [[debt/DEBT-curar-agents-pampalabs-os]], [[debt/DEBT-procesos-heredados-content-factory]], [[debt/DEBT-vitest-coverage-output]].
-- ⏳ **Fase 0.5 — Sprint 2 a iniciar:** curar `.claude/agents/` + reescribir QA-CHECKLIST/DEPLOY-WORKFLOW para SomnoSalud + crear project Supabase + setear `supabase-somnosalud` MCP.
+- ✅ **Fase 0.4 — Sprint 1 closed-verified (2026-05-08):** commit `pnpm-lock.yaml` ya estaba (`6f8f6c9`) + CI verde local triangulado + cleanup OS heredado (package-lock huérfano borrado, SETUP.sh archivado, análisis exhaustivo SSOT resuelto, 4 packages skeleton habilitados con turbo). Detalle: [[sprints/sprint-1-cleanup-os-heredado/SPRINT-1-CLEANUP-OS-HEREDADO]].
+- ✅ **Fase 0.5 — Sprint 2.A closed-verified (2026-05-08):** curado de 46 agents heredados → 26 activos (25 mantenidos + 1 propio `compliance-anmat` AR/ANMAT) + 22 archivados con README. QA-CHECKLIST y DEPLOY-WORKFLOW reescritos para SomnoSalud (Vercel + GH Pages, sin VPS Docker). SCC Bloque F adaptado, TEMPLATE-DEBT con ejemplos reales SomnoSalud, 5 LLs con disclaimer cross-product. CLAUDE.md "Skills obligatorias" reescrita con lista curada en 10 categorías. Detalle: [[sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]]. Cierra DEBT-curar-agents-pampalabs-os y DEBT-procesos-heredados-content-factory.
+- ⏳ **Fase 0.6 — Sprint 2.B pending Fabio:** crear project Supabase `somnosalud-platform` en Org Pampa Labs (plan FREE, region São Paulo) + setear MCP `supabase-somnosalud` con project ref real. Runbook listo en [[sprints/sprint-2-curar-os-heredado/SPRINT-2B-RUNBOOK-SUPABASE]]. Ownership: Fabio (requiere credenciales Org Pampa Labs).
 
-**Próxima sesión sugerida:** Sprint 2.
+**Próxima sesión sugerida:** Sprint 2.B (Supabase setup) — ejecución por Fabio cuando agende ventana.
 
 ---
 
@@ -43,7 +44,7 @@ created: 2026-05-07
 | 0.2 | Migración remote a itsomnosalud/Somnosalud | ✅ closed-verified | 0.5h |
 | 0.3 | Setup Pampa Labs OS en este repo | ✅ closed-verified | 2h |
 | 1 | Cleanup OS heredado + CI verde local triangulado | ✅ closed-verified | 1.5h ejecutadas (2026-05-08) |
-| 2.A | Curar agents heredados + reescribir procesos heredados + adaptar SCC/TEMPLATE-DEBT | ⏳ in-progress (2026-05-08) | 4-5h |
+| 2.A | Curar agents heredados + reescribir procesos heredados + adaptar SCC/TEMPLATE-DEBT | ✅ closed-verified | ~3h ejecutadas (2026-05-08) |
 | 2.B | Crear project Supabase Org Pampa Labs + setear MCP `supabase-somnosalud` (ownership Fabio, requiere credenciales) | ⏳ pending Fabio | 1h |
 | 3 | Deploy webapp-somnosalud preview a Vercel + dominio | ⏳ pending | 2h |
 | 4 | Deploy webapp-conversor-psg a GitHub Pages | ⏳ pending | 1h |

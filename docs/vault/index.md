@@ -73,7 +73,8 @@ Los procesos viven en `processes/` y son **reutilizables cross-product**. Cualqu
 ## 🚀 Sprints
 
 - [[sprints/sprint-1-cleanup-os-heredado/SPRINT-1-CLEANUP-OS-HEREDADO]] — cleanup del OS heredado tras commit `6f8f6c9`: package-lock huérfano, SETUP.sh foot-gun, análisis exhaustivo duplicado, packages skeleton sin package.json. Cierra Fase 0.4 del MASTER-PLAN. Status: closed-verified.
-- [[sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]] — Sprint 2.A curar 46 agents heredados (archivar 21 irrelevantes) + crear `compliance-anmat` propio + reescribir QA-CHECKLIST y DEPLOY-WORKFLOW para SomnoSalud + adaptar SCC y TEMPLATE-DEBT. Cierra DEBT-curar-agents-pampalabs-os y DEBT-procesos-heredados-content-factory. Status: in-progress.
+- [[sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]] — Sprint 2.A curar 46 agents heredados → 26 activos (25 mantenidos + 1 propio `compliance-anmat`) + 22 archivados con README. Reescritura QA-CHECKLIST + DEPLOY-WORKFLOW para SomnoSalud. Adaptación SCC + TEMPLATE-DEBT + disclaimer 5 LLs. CLAUDE.md "Skills obligatorias" reescrita. Cierra DEBT-curar-agents-pampalabs-os y DEBT-procesos-heredados-content-factory. Status: closed-verified.
+- [[sprints/sprint-2-curar-os-heredado/SPRINT-2B-RUNBOOK-SUPABASE]] — Sprint 2.B runbook listo para Fabio (crear project Supabase Org Pampa Labs FREE São Paulo + setear MCP supabase-somnosalud con project ref real). Status: pending-fabio.
 
 Cada sprint vive en `sprints/sprint-NN-<slug>/SPRINT-NN-<SLUG>.md`. Convención de naming: ASCII-safe lowercase con guiones-medios (regla #12 CLAUDE.md).
 

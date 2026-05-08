@@ -1,15 +1,29 @@
 ---
 title: "Deuda Técnica — curar 46 agents heredados del Pampa Labs OS"
 date: 2026-05-08
-tags: [deuda-tecnica, agents, claude-code, pampalabs-os, governance, open]
-status: open
+updated: 2026-05-08
+tags: [deuda-tecnica, agents, claude-code, pampalabs-os, governance, sprint-2a, closed-verified]
+status: closed-verified
 priority: medium
 scope: sprint-2
 detected_during: sprint-1-cleanup-os-heredado
+closed_by: sprint-2-curar-os-heredado
 related:
   - "[[../sprints/sprint-1-cleanup-os-heredado/SPRINT-1-CLEANUP-OS-HEREDADO]]"
+  - "[[../sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]]"
   - "[[../../../CLAUDE]]"
+  - "[[../../archive/agents-2026-05-08/README]]"
+  - "[[../../../.claude/agents/compliance-anmat]]"
 ---
+
+> [!success] Status update 2026-05-08 — CLOSED-VERIFIED
+> **Sprint:** [[../sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]] (commits `2fb6030` → `ef879f1`).
+> **Resumen:** de los 46 agents que importó el commit `6f8f6c9`, 21 fueron archivados en `docs/vault/archive/agents-2026-05-08/` (con README explicativo) por irrelevancia (regulación China, stack incorrecto Drupal/Filament/Solidity/firmware, fuera de roadmap voice/email/data-engineer, drift conceptual NEXUS framework, choque filosofía rapid-prototyper). Se creó 1 agent propio `compliance-anmat.md` para AR/ANMAT/Ley 25.326+26.529 reemplazando al archivado `healthcare-marketing-compliance` (100% China). CLAUDE.md sección "Skills obligatorias" reescrita con lista curada en 10 categorías.
+> **Hipótesis falsadas/confirmadas:** H1 (46 archivos = 43 agents + 3 meta-docs) CONFIRMADA. H2 (≥18 irrelevantes) CONFIRMADA con margen (21). H3 (`healthcare-marketing-compliance` 100% China) CONFIRMADA. H4 (drift NEXUS conceptual) CONFIRMADA. H6 (CI verde post-cleanup) CONFIRMADA empíricamente (5/5 tasks successful, 55/55 tests).
+> **Triangulación 3 evidencias:**
+> - **E1 código:** `ls .claude/agents/*.md \| wc -l` → 26 (era 46) + `ls docs/vault/archive/agents-2026-05-08/*.md \| wc -l` → 22.
+> - **E2 CI local:** `pnpm install/lint/typecheck/test/build` → Tasks 5/5 successful c/u, 55/55 tests passing.
+> - **E3 Vault:** `grep -l "China\|NMPA\|Hulianwang" .claude/agents/*.md` → 0 hits. `grep -l "NEXUS" .claude/agents/*.md` → 0 hits. CLAUDE.md skills section sin referencias a agents archivados.
 
 # DEBT-curar-agents-pampalabs-os
 

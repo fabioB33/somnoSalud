@@ -1,16 +1,33 @@
 ---
 title: "Deuda Técnica — procesos heredados asumen Content Factory + VPS Docker"
 date: 2026-05-08
-tags: [deuda-tecnica, processes, qa-checklist, deploy-workflow, pampalabs-os, governance, open]
-status: open
+updated: 2026-05-08
+tags: [deuda-tecnica, processes, qa-checklist, deploy-workflow, pampalabs-os, governance, sprint-2a, closed-verified]
+status: closed-verified
 priority: medium
 scope: sprint-2
 detected_during: sprint-1-cleanup-os-heredado
+closed_by: sprint-2-curar-os-heredado
 related:
   - "[[../sprints/sprint-1-cleanup-os-heredado/SPRINT-1-CLEANUP-OS-HEREDADO]]"
+  - "[[../sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]]"
   - "[[DEBT-curar-agents-pampalabs-os]]"
   - "[[../../../CLAUDE]]"
 ---
+
+> [!success] Status update 2026-05-08 — CLOSED-VERIFIED
+> **Sprint:** [[../sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]] (commits `d24bc6e`, `63c781a`, `af2408d`).
+> **Resumen:** los 3 procesos heredados con drift severo fueron reescritos para SomnoSalud:
+> - `QA-CHECKLIST.md` reescrito completo: §A (clinical-engine 7 items + signoff Pablo obligatorio), §B (webapp placeholder Fase 1), §C (conversor-psg placeholder Fase 2).
+> - `DEPLOY-WORKFLOW.md` reescrito completo: §A (pre-requisitos universales), §B (Vercel webapp-somnosalud), §C (GitHub Pages webapp-conversor-psg), §D (schema checkpoint Supabase Sprint 5+), §E (lifecycle universal preservado), §F-G (frecuencia + cuándo NO deployar).
+> - `SPRINT-CLOSURE-CHECKLIST.md` Bloque F: path absoluto `/Users/elizabethuribe/Pampa-Labs-Core/CLAUDE.md` reemplazado por referencia relativa `./CLAUDE.md`.
+> - `TEMPLATE-DEBT.md`: ejemplos hardcoded de DEBTs cross-product reemplazados por los 3 DEBTs reales de SomnoSalud (Sprint 1).
+> - 5 LLs heredados (no el de filesystem que ya tenía callout): disclaimer "Lección heredada Pampa Labs Core" + analogía aplicable a SomnoSalud + ref regla #8.
+> **Hipótesis falsadas/confirmadas:** H5 (procesos con drift severo Content Factory) CONFIRMADA con margen (>5 hits hardcoded).
+> **Triangulación 3 evidencias:**
+> - **E1 código:** `grep -n "82.29.61.151\|elizabethuribe\|content-factory" docs/vault/processes/QA-CHECKLIST.md docs/vault/processes/DEPLOY-WORKFLOW.md docs/vault/processes/SPRINT-CLOSURE-CHECKLIST.md docs/vault/processes/TEMPLATE-DEBT.md` → solo hits en secciones de "Referencia histórica" / "Nota histórica" intencionales.
+> - **E2 CI local:** `pnpm install/lint/typecheck/test/build` → 5/5 successful c/u (los procesos son docs, no afectan pipeline).
+> - **E3 Vault:** los 4 procesos reescritos tienen frontmatter actualizado `last_synced_with_vault_reality: 2026-05-08` + cross-link a Sprint 2.A. Los 5 LLs tienen disclaimer.
 
 # DEBT-procesos-heredados-content-factory
 
