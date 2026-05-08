@@ -76,8 +76,34 @@ Los procesos viven en `processes/` y son **reutilizables cross-product**. Cualqu
 - [[sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]] — Sprint 2.A curar 46 agents heredados → 26 activos (25 mantenidos + 1 propio `compliance-anmat`) + 22 archivados con README. Reescritura QA-CHECKLIST + DEPLOY-WORKFLOW para SomnoSalud. Adaptación SCC + TEMPLATE-DEBT + disclaimer 5 LLs. CLAUDE.md "Skills obligatorias" reescrita. Cierra DEBT-curar-agents-pampalabs-os y DEBT-procesos-heredados-content-factory. Status: closed-verified.
 - [[sprints/sprint-2-curar-os-heredado/SPRINT-2B-RUNBOOK-SUPABASE]] — Sprint 2.B runbook listo para Fabio (crear project Supabase Org Pampa Labs FREE São Paulo + setear MCP supabase-somnosalud con project ref real). Status: pending-fabio.
 - [[sprints/sprint-5-scaffold-webapp-somnosalud/SPRINT-5-SCAFFOLD-WEBAPP-SOMNOSALUD]] — Sprint 5 scaffold inicial webapp-somnosalud (Next.js 14 App Router + Tailwind + shadcn/ui + tsconfig + workspace dep clinical-engine + welcome page con smoke test scoreISI en build-time). Salta Sprint 2.B y 3 por decisión equipo (no bloquean webapp client-side). Status: closed-verified.
+- [[sprints/sprint-5-5-documentacion-vault/SPRINT-5-5-DOCUMENTACION-VAULT]] — Sprint 5.5 complementario captura en Vault las decisiones técnicas + convenciones + stack inventory que vivían solo en commit messages post-Sprint 5. 7 docs nuevos: 3 ADRs + 1 convenciones + 1 stack inventory + 2 updates (overview.md + README webapp). Status: in-progress.
 
 Cada sprint vive en `sprints/sprint-NN-<slug>/SPRINT-NN-<SLUG>.md`. Convención de naming: ASCII-safe lowercase con guiones-medios (regla #12 CLAUDE.md).
+
+---
+
+## 🏛️ Architecture Decision Records (ADRs)
+
+Cada ADR documenta **una decisión arquitectural** del proyecto con contexto, alternativas, consecuencias. Son inmutables — si algo cambia, se crea ADR nueva con `supersedes: ADR-NNN`.
+
+- [[architecture/adr/README|ADRs index]] — listado canónico + template + cuándo escribir uno.
+- [[architecture/adr/ADR-001-stack-frontend-webapp-somnosalud|ADR-001]] — Stack frontend webapp-somnosalud (Next 14 + App Router + Tailwind 3 + RSC).
+- [[architecture/adr/ADR-002-workspace-dependency-clinical-engine|ADR-002]] — Workspace dependency strategy para `somnosalud-clinical-engine`.
+- [[architecture/adr/ADR-003-compliance-gates-en-codigo|ADR-003]] — Compliance gates en código (disclaimer + consent + edad + safety).
+
+## 📐 Concepts (guías vivas)
+
+Convenciones operativas día a día y patrones reutilizables. Distinto a ADRs — son guías que pueden actualizarse sin superseding.
+
+- [[concepts/README|Concepts index]].
+- [[concepts/CONVENCIONES-FRONTEND-WEBAPP|Convenciones frontend webapp-somnosalud]] — RSC vs client, naming, paths, accesibilidad mínima, cómo agregar pantalla nueva.
+
+## 📚 Reference (snapshots frozen-in-time)
+
+Stack inventories, snapshots de versiones, glosarios. Versionados con fecha en suffix.
+
+- [[reference/README|Reference index]].
+- [[reference/STACK-INVENTORY-2026-05-08|Stack inventory 2026-05-08]] — versiones reales instaladas post-Sprint 5.
 
 ---
 
