@@ -70,3 +70,26 @@ sentry.properties
 
 # Engineering files (legacy bundle from Drive — keep only source)
 **/legacy-source/
+
+# === Pampa Labs OS (heredado de pampalabs/core 2026-05-07) ===
+
+# Configs locales Claude Code (no compartir entre devs)
+.claude/settings.local.json
+**/.claude/settings.local.json
+
+# Configs locales Obsidian (preferencias visuales personales)
+**/.obsidian/workspace.json
+**/.obsidian/graph.json
+**/.obsidian/workspace-mobile.json
+
+# Outputs de cliente / deliverables locales (no source)
+clients/
+
+# Lockfiles temp Word/Office
+**/~$*
+
+# Tarballs intermedios de transferencias
+*.tar.gz
+*.tar.bz2
+
+# Repos externos accidentalmente anidados (defensivo)

@@ -1,0 +1,41 @@
+{
+  "_comment": "MCP servers para SomnoSalud Platform — heredado del patrón Pampa Labs OS 2026-05-07. Tokens NO van en plaintext, usar variables de entorno.",
+  "mcpServers": {
+    "github": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      },
+      "_comment": "Token: GitHub Fine-grained PAT con scopes Contents R/W + Issues R/W + Pull Requests R/W + Metadata R sobre repo itsomnosalud/Somnosalud. Setear con: export GITHUB_PERSONAL_ACCESS_TOKEN=github_pat_..."
+    },
+    "supabase-somnosalud": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest"
+      ],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}"
+      },
+      "_comment": "PENDIENTE Fase 0 setup: crear project Supabase 'somnosalud-platform' Org Pampa Labs (plan FREE inicial, scale a Pro Fase 1). Una vez creado, agregar el ref del project aqui. Token: usar el mismo SUPABASE_ACCESS_TOKEN del Org Pampa Labs."
+    }
+  },
+  "_pending_mcps": {
+    "_comment": "MCPs a agregar mas adelante segun necesidad",
+    "sentry": "Cuando se configure Sentry para error tracking (Fase 1)",
+    "n8n-somnosalud": "Si se usa n8n para automation/workflows (Fase 2+)",
+    "stripe": "Cuando se active billing freemium (Fase 3 B2B)"
+  },
+  "_excluded_from_pampalabs": {
+    "_comment": "MCPs del Pampa Labs OS que NO aplican a SomnoSalud",
+    "supabase-cf": "Es del Content Factory project — no aplica",
+    "meta-ads-pipeboard": "Marketing ads de otros clientes — no aplica",
+    "n8n-lure": "Workflows del cliente Lure — no aplica"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "alwaysUpdateLinks": true,
+  "newFileLocation": "current",
+  "showLineNumber": true,
+  "useTab": false,
+  "tabSize": 2,
+  "vimMode": false,
+  "promptDelete": true,
+  "newLinkFormat": "shortest",
+  "useMarkdownLinks": false,
+  "attachmentFolderPath": "./_attachments",
+  "showFrontmatter": true,
+  "trashOption": "system"
+}
