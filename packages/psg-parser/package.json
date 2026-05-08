@@ -1,0 +1,27 @@
+{
+  "name": "@somnosalud/psg-parser",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Parser modular de PDFs polisomnograficos (7 equipos: Philips Sleepware G3, Alice NightOne, BrainWave, ResMed Diagnostico/Tratamiento, BMC Tratamiento/Poligrafo). Skeleton — implementacion pendiente Fase 2 segun docs/vault/MASTER-PLAN.md",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "echo 'skeleton — implementacion pendiente Fase 2 (refactor desde packages/webapp-conversor-psg/legacy-v0/index.html)' && exit 0",
+    "test": "echo 'skeleton — tests con fixtures PSGs reales pendientes Fase 2' && exit 0",
+    "typecheck": "echo 'skeleton — sin .ts todavia' && exit 0",
+    "lint": "echo 'skeleton — sin .ts todavia' && exit 0",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "psg",
+    "polisomnografia",
+    "pdf",
+    "parser",
+    "philips",
+    "resmed",
+    "bmc",
+    "sleep"
+  ],
+  "author": "SomnoSalud Team",
+  "license": "PROPRIETARY"
+}

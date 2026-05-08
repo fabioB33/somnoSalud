@@ -1,0 +1,25 @@
+{
+  "name": "@somnosalud/shared-ui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Design system compartido entre webapp-somnosalud y webapp-conversor-psg (paleta gradient #1a1a2e -> #16213e + acento purpura #818cf8 + tipografia Inter). Skeleton — implementacion pendiente Fase 1 segun docs/vault/MASTER-PLAN.md",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "echo 'skeleton — implementacion pendiente Fase 1 (componentes Radix + Tailwind + tokens)' && exit 0",
+    "test": "echo 'skeleton — tests pendientes Fase 1' && exit 0",
+    "typecheck": "echo 'skeleton — sin .ts todavia' && exit 0",
+    "lint": "echo 'skeleton — sin .ts todavia' && exit 0",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "design-system",
+    "ui",
+    "react",
+    "tailwind",
+    "radix",
+    "shadcn"
+  ],
+  "author": "SomnoSalud Team",
+  "license": "PROPRIETARY"
+}

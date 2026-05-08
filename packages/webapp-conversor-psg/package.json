@@ -1,0 +1,25 @@
+{
+  "name": "@somnosalud/webapp-conversor-psg",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Frontend Vite + React + pdf.js + JSZip — utility client-side para parsear PDFs polisomnograficos. Engine Hipoxico 0-100 (Azarbarzin 2019). Legacy v0 monolitico vive en legacy-v0/index.html (1887 lineas). Refactor a TS modular pendiente Fase 2 segun docs/vault/MASTER-PLAN.md",
+  "scripts": {
+    "build": "echo 'skeleton — refactor desde legacy-v0/index.html a Vite+React modular pendiente Fase 2' && exit 0",
+    "dev": "echo 'skeleton — usar legacy-v0 mientras tanto: cd legacy-v0 && python3 -m http.server 8765' && exit 0",
+    "test": "echo 'skeleton — tests con fixtures PSGs reales pendientes Fase 2' && exit 0",
+    "typecheck": "echo 'skeleton — sin .ts todavia' && exit 0",
+    "lint": "echo 'skeleton — sin .ts todavia' && exit 0",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "vite",
+    "react",
+    "pdf",
+    "psg",
+    "polisomnografia",
+    "client-side",
+    "jszip"
+  ],
+  "author": "SomnoSalud Team",
+  "license": "PROPRIETARY"
+}

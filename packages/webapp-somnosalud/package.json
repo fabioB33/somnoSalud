@@ -1,0 +1,25 @@
+{
+  "name": "@somnosalud/webapp-somnosalud",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Frontend Next.js 14 (App Router) + Tailwind + shadcn/ui — webapp principal SomnoSalud (12 pasos de evaluacion). Skeleton — implementacion pendiente Fase 1 segun docs/vault/MASTER-PLAN.md",
+  "scripts": {
+    "build": "echo 'skeleton — implementacion pendiente Fase 1 (Next.js 14 + Supabase auth + persistence + RLS)' && exit 0",
+    "dev": "echo 'skeleton — pnpm dev disponible cuando exista app/ directory' && exit 0",
+    "test": "echo 'skeleton — tests E2E Playwright pendientes Fase 1' && exit 0",
+    "typecheck": "echo 'skeleton — sin .ts todavia' && exit 0",
+    "lint": "echo 'skeleton — sin .ts todavia' && exit 0",
+    "clean": "rm -rf .next out dist"
+  },
+  "keywords": [
+    "nextjs",
+    "webapp",
+    "supabase",
+    "tailwind",
+    "shadcn",
+    "sleep",
+    "evaluation"
+  ],
+  "author": "SomnoSalud Team",
+  "license": "PROPRIETARY"
+}
