@@ -1,184 +1,286 @@
 ---
-title: "Deploy Workflow — Playbook a VPS"
-date: 2026-04-19
-last_synced_with_vault_reality: 2026-04-19
-tags: [process, deploy, docker, vps, devops, schema-checkpoint, empirical-verification]
+title: "Deploy Workflow — SomnoSalud (Vercel + GitHub Pages)"
+date: 2026-05-08
+last_synced_with_vault_reality: 2026-05-08
+tags: [process, deploy, vercel, github-pages, somnosalud, schema-checkpoint, empirical-verification]
 status: active
-target: "VPS 82.29.61.151 (Ubuntu 24.04, Docker)"
+targets:
+  - "Vercel — webapp-somnosalud (Next.js 14, App Router)"
+  - "GitHub Pages — webapp-conversor-psg (Vite + React, 100% client-side)"
 related:
-  - "[[AUDITORIA-METODOLOGIA]]"
-  - "[[TEMPLATE-DEBT]]"
   - "[[QA-CHECKLIST]]"
-  - "[[../sprints/sprint-tiendanube-granularity-fix/LESSONS-LEARNED-TIENDANUBE-GRANULARITY]]"
+  - "[[SPRINT-CLOSURE-CHECKLIST]]"
+  - "[[TEMPLATE-DEBT]]"
+  - "[[../sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]]"
+  - "[[AUDITORIA-METODOLOGIA]]"
   - "[[SUPERPOWERS-MULTI-AGENT-WORKFLOW]]"
   - "[[GSD-WORKFLOW]]"
-  - "[[OBSIDIAN-VAULT-CONVENTIONS]]"
-  - "[[LOOP-7-STEPS]]"
 ---
 
-# Deploy Workflow
+# Deploy Workflow — SomnoSalud
 
-Deploy de `products/content-factory-web` (Playbook) al VPS de producción.
+> Reemplaza al DEPLOY-WORKFLOW heredado del Pampa Labs Core (que asumía VPS Docker `82.29.61.151`). SomnoSalud usa **Vercel** (webapp-somnosalud) + **GitHub Pages** (webapp-conversor-psg), sin VPS propio.
+>
+> El §C (Hotfix lifecycle + closed-verified pattern + triangulación 3 evidencias) se preserva tal cual del proceso original — es universal y aplica a cualquier deploy.
+>
+> Origen reescritura: [[../sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]] (2026-05-08), cerrando [[../debt/DEBT-procesos-heredados-content-factory]].
 
-## Pre-requisitos
+## Targets de deploy
 
-- [[QA-CHECKLIST]] completo ✓
-- Build local limpio
-- Cambios commiteados a `main`
+SomnoSalud tiene dos apps con flujos de deploy distintos:
 
-## Paso 1 — Verificación local
+| App | Target | Trigger | URL prod (post-Sprint 3-4) |
+|---|---|---|---|
+| `webapp-somnosalud` (Next.js 14) | **Vercel** | git push a `main` (auto) | `https://somnosalud.com.ar` (TBD Sprint 3) |
+| `webapp-conversor-psg` (Vite + React) | **GitHub Pages** | git push a `main` (workflow) | `https://itsomnosalud.github.io/Somnosalud/conversor-psg/` (TBD Sprint 4) |
+
+**Nota Fase 0 (2026-05-08):** ambos packages son skeleton hoy. Este workflow se aplica realmente cuando exista código en `webapp-somnosalud/src/app/` (Sprint 5+) y cuando se complete el refactor TS modular de `webapp-conversor-psg/` (Sprint 14+).
+
+---
+
+## §A — Pre-requisitos universales (cualquier deploy)
+
+Antes de cualquier merge a `main` que vaya a deployarse:
+
+- [ ] [[QA-CHECKLIST]] §A completo (clinical-engine 7 items + signoff Pablo si aplica) o §B (webapp) según el área tocada.
+- [ ] Build local limpio (`pnpm build` → 5/5 successful).
+- [ ] Tests verdes (`pnpm test` → 55/55 passing en clinical-engine + skeleton scripts noop OK).
+- [ ] CI GitHub Actions verde en el último commit antes del deploy.
+- [ ] Cambios commiteados a `main` siguiendo conventional commits (`feat:`, `fix:`, `clinical:`, `chore:`, `docs:`).
+- [ ] Variables de entorno de producción seteadas (Vercel UI / GitHub Secrets), ver `CLAUDE.md` sección "Variables de entorno globales".
+
+---
+
+## §B — Deploy de `webapp-somnosalud` a Vercel
+
+> Setup inicial documentado en Sprint 3 (Fase 0). Una vez configurado, los deploys son automáticos desde `main`.
+
+### B.1 Setup inicial (Sprint 3, una sola vez)
+
+1. **Conectar repo a Vercel** desde el dashboard del Org Pampa Labs:
+   - Import Project → `itsomnosalud/Somnosalud`
+   - **Root Directory:** `packages/webapp-somnosalud`
+   - **Framework Preset:** Next.js
+   - **Build Command:** `pnpm --filter @somnosalud/webapp-somnosalud build` (Vercel auto-detecta turbo/pnpm cuando ve `pnpm-workspace.yaml`)
+   - **Output Directory:** `.next` (default)
+   - **Install Command:** `pnpm install --frozen-lockfile` (root del monorepo)
+
+2. **Variables de entorno** (Vercel → Project Settings → Environment Variables):
+   - `NEXT_PUBLIC_SUPABASE_URL` (Production + Preview)
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Production + Preview)
+   - `SUPABASE_SERVICE_ROLE_KEY` (Production solo, NUNCA expose al client)
+   - `RESEND_API_KEY` (Production, Fase 1)
+   - `SENTRY_DSN`, `SENTRY_AUTH_TOKEN` (Production, Fase 1)
+   - `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` (Fase 1)
+
+3. **Dominio custom** (Sprint 3, decisión Pablo):
+   - Si `somnosalud.com.ar` (recomendado): apuntar A record / CNAME a Vercel + verificar SSL.
+   - Subdominio Pampa Labs alternativo: `somnosalud.pampalabs.com`.
+
+4. **Branch protection** GitHub:
+   - `main` requiere PR review + CI verde antes de merge.
+   - Vercel preview se genera automáticamente para cada PR.
+
+### B.2 Deploy operativo (cada cambio a main)
 
 ```bash
-cd ~/Pampa-Labs-Core
-git status                              # limpio
-git log -1 --oneline                    # último commit correcto
-cd products/content-factory-web
-npm run build                           # ✓ built sin errores
-```
+# Pre-merge (en branch o main local)
+pnpm install --frozen-lockfile
+pnpm --filter @somnosalud/webapp-somnosalud lint
+pnpm --filter @somnosalud/webapp-somnosalud typecheck
+pnpm --filter @somnosalud/webapp-somnosalud test
+pnpm --filter @somnosalud/webapp-somnosalud build
 
-## Paso 2 — Commit + push
-
-```bash
-cd ~/Pampa-Labs-Core
-git add -A
-git commit -m "sprint-NN: descripción del cambio"
+# Push a main → Vercel auto-deploy
 git push origin main
 ```
 
-## Paso 3 — Deploy al VPS
+Vercel toma el commit, instala deps, corre el build, y deploya. **Sin acción manual adicional.**
 
-SSH al VPS y pull + rebuild:
+### B.3 Smoke test post-deploy (obligatorio)
+
+Esperar 2-5 minutos a que Vercel termine el deploy. Verificar:
+
+- [ ] **Vercel dashboard:** deploy `Ready` (no `Error`, no `Building`).
+- [ ] **Smoke browser:**
+  - `https://somnosalud.com.ar/` → 200, página welcome renderiza.
+  - `https://somnosalud.com.ar/disclaimer` → 200, disclaimer visible.
+  - `https://somnosalud.com.ar/eval/profile` → 200 (o redirect a `/login` si auth requerida).
+  - `https://somnosalud.com.ar/eval/results` → disclaimer médico + M.N. Pablo Ferrero 119.783 visible.
+- [ ] **DevTools Console:** 0 errores JS en cada ruta.
+- [ ] **DevTools Network:** 0 requests fallidos (no 404/500), HTTPS en todos los recursos.
+- [ ] **Lighthouse:** Performance >70, Accessibility >85, Best Practices >85 (en `/eval/profile`).
+
+### B.4 Rollback Vercel
+
+Si algo falla en producción:
+
+1. **Vercel dashboard** → Deployments → seleccionar último deploy estable → click `Promote to Production`. Rollback en <30s, sin re-build.
+2. Documentar el bug en `docs/vault/incidents/INCIDENT-YYYY-MM-DD-<slug>.md` antes de reintentar deploy.
+3. Crear DEBT en `docs/vault/debt/DEBT-<slug>.md` con root cause + plan de fix.
+
+---
+
+## §C — Deploy de `webapp-conversor-psg` a GitHub Pages
+
+> Setup inicial documentado en Sprint 4 (Fase 0). Hoy el conversor sigue funcionando 100% en `legacy-v0/index.html`. El refactor TS modular es Fase 2.
+
+### C.1 Setup inicial (Sprint 4, una sola vez)
+
+1. **Crear workflow** `.github/workflows/deploy-conversor-psg.yml`:
+   ```yaml
+   name: Deploy Conversor PSG to GitHub Pages
+   on:
+     push:
+       branches: [main]
+       paths:
+         - 'packages/webapp-conversor-psg/**'
+         - 'packages/psg-parser/**'
+         - 'packages/clinical-engine/**'
+   permissions:
+     contents: read
+     pages: write
+     id-token: write
+   jobs:
+     deploy:
+       environment:
+         name: github-pages
+         url: ${{ steps.deployment.outputs.page_url }}
+       runs-on: ubuntu-latest
+       steps:
+         - uses: actions/checkout@v4
+         - uses: pnpm/action-setup@v3
+           with:
+             version: 9
+         - uses: actions/setup-node@v4
+           with:
+             node-version: 20
+             cache: 'pnpm'
+         - run: pnpm install --frozen-lockfile
+         - run: pnpm --filter @somnosalud/webapp-conversor-psg build
+         - uses: actions/upload-pages-artifact@v3
+           with:
+             path: packages/webapp-conversor-psg/dist
+         - id: deployment
+           uses: actions/deploy-pages@v4
+   ```
+
+2. **GitHub Settings → Pages:**
+   - Source: `GitHub Actions`
+   - Custom domain (opcional): TBD Pablo Sprint 4.
+
+3. **Vite config** (`packages/webapp-conversor-psg/vite.config.ts`):
+   ```ts
+   export default defineConfig({
+     base: process.env.NODE_ENV === 'production' ? '/Somnosalud/conversor-psg/' : '/',
+     // ...
+   });
+   ```
+
+### C.2 Deploy operativo (cada cambio a main)
 
 ```bash
-ssh root@82.29.61.151
+# Pre-merge
+pnpm --filter @somnosalud/webapp-conversor-psg build  # vite build, output a dist/
+pnpm --filter @somnosalud/webapp-conversor-psg test   # parser regression contra fixtures
 
-cd /root/Pampa-Labs-Core
-git pull origin main
-
-# Rebuild sin caché para garantizar cambios aplicados
-docker compose -f products/content-factory-web/docker-compose.yml build --no-cache
-
-# Up con recreate
-docker compose -f products/content-factory-web/docker-compose.yml up -d --force-recreate
-
-# Verificar que levantó
-docker compose -f products/content-factory-web/docker-compose.yml ps
-docker compose -f products/content-factory-web/docker-compose.yml logs --tail=50
+# Push a main → GitHub Actions ejecuta workflow → Pages se actualiza
+git push origin main
 ```
 
-## Paso 4 — Smoke test en producción
+GitHub Actions toma 2-4 minutos. Sin acción manual adicional.
 
-Desde browser (o `curl`):
+### C.3 Smoke test post-deploy (obligatorio)
 
-- [ ] `https://app.pampalabs.com/landing-v2` → 200, cinematic scroll visible
-- [ ] `https://app.pampalabs.com/login` → 200, form renderiza
-- [ ] `https://app.pampalabs.com/playbook` → redirige a login si sin sesión; renderiza dashboard si logueado
+- [ ] **GitHub Actions tab:** workflow `Deploy Conversor PSG` con status verde.
+- [ ] **GitHub Settings → Pages:** "Your site is live at https://itsomnosalud.github.io/Somnosalud/conversor-psg/".
+- [ ] **Smoke browser:**
+  - URL principal → 200, drag & drop área visible.
+  - Subir un PDF fixture conocido (Philips Sleepware G3 anonimizado) → CSV generado correctamente.
+  - Engine Hipóxico calcula score esperado para fixture canónico.
+- [ ] **DevTools Console:** 0 errores. PDF.js worker carga desde CDN (cdnjs).
+- [ ] **DevTools Network:** todos los recursos HTTPS, no mixed content.
 
-Health check local dentro del VPS:
+### C.4 Rollback GitHub Pages
+
+GitHub Pages no tiene "promote previous deployment" como Vercel. Rollback se hace por código:
+
 ```bash
-curl -s http://localhost:3000/health || echo "FAIL"
+git log --oneline -10                    # identificar último commit estable
+git revert <HASH_BAD_COMMIT>             # crear commit que reversa el cambio
+git push origin main                     # workflow re-deploya el estado anterior
 ```
 
-## Paso 4.5 — Schema checkpoint post-deploy (obligatorio si hubo migration o backfill)
+Documentar bug + crear DEBT antes de reintentar.
 
-> Formalizado 2026-04-19 como aplicación operacional de [[AUDITORIA-METODOLOGIA#Reglas de ejecución (no negociables)]] **Regla #12** (empirical verification antes de tags `no-blocker` / `resuelto` / `closed`). Origen empírico: [[../sprints/sprint-tiendanube-granularity-fix/LESSONS-LEARNED-TIENDANUBE-GRANULARITY]] #L2 y #L4 (backfill trunco ×23.5 detectado post-hoc).
+---
 
-**Aplicable si el deploy incluye**:
-- Migration SQL nueva (`products/content-factory/sql/NNN-*.sql`) que modifica schema.
-- Script de backfill histórico ejecutado en el VPS.
-- Cutover de legacy → modern (ej. dual-store credentials).
-- Cualquier cambio que altere **row counts esperados** en tablas target.
+## §D — Schema checkpoint Supabase (cuando aplique)
 
-**NO aplicable** si es solo deploy de frontend / código sin cambio de schema / sin backfill. En ese caso, Paso 4 smoke test basta.
+> **Aplicable desde Sprint 5 (Fase 1)** cuando exista schema Supabase. NO aplica a deploys frontend puros sin migration.
 
-### 4.5.1 — Baseline pre-deploy (ejecutar **antes** del Paso 3 deploy)
+Heredado del proceso original — es universal y crítico cuando se hace migration o backfill.
 
-Capturar snapshot de row counts en tablas target:
+**Aplicable si el deploy incluye:**
+- Migration SQL nueva (`infrastructure/supabase/migrations/NNN-*.sql`).
+- Script de backfill histórico ejecutado contra Supabase prod.
+- Cualquier cambio que altere row counts esperados en tablas target.
+
+**NO aplicable** si es solo deploy frontend / código sin cambio de schema. En ese caso §B.3 / §C.3 smoke test basta.
+
+### D.1 Baseline pre-deploy
+
+Capturar snapshot vía MCP `supabase-somnosalud`:
 
 ```sql
--- Ejemplo para sprint-tiendanube: target tables pb_ecom_orders, pb_ecom_order_items, brand_integrations
-SELECT 'pb_ecom_orders' AS table_name, COUNT(*) AS rows_pre FROM pb_ecom_orders WHERE brand_id = '<BRAND_ID>'
+-- Ejemplo Sprint 7 (persistencia evaluacion):
+SELECT 'evaluations' AS table_name, COUNT(*) AS rows_pre FROM evaluations
 UNION ALL
-SELECT 'pb_ecom_order_items', COUNT(*) FROM pb_ecom_order_items WHERE brand_id = '<BRAND_ID>'
+SELECT 'eval_responses', COUNT(*) FROM eval_responses
 UNION ALL
-SELECT 'brand_integrations', COUNT(*) FROM brand_integrations WHERE brand_id = '<BRAND_ID>' AND platform = 'tiendanube';
+SELECT 'audit_log', COUNT(*) FROM audit_log;
 ```
 
-Guardar el output en `docs/vault/sprints/<sprint-name>/CHECKPOINT-PRE-DEPLOY-<YYYY-MM-DD>.md` (o dentro del sprint doc).
+Guardar output en sprint doc bajo `## CHECKPOINT-PRE-DEPLOY`.
 
-### 4.5.2 — Expectativa declarada por el sprint runbook
+### D.2 Expectativa declarada por el sprint runbook
 
-El sprint doc DEBE declarar, **antes del deploy**, los valores esperados post-deploy:
+El sprint doc debe declarar antes del deploy los valores esperados post-deploy:
 
 ```md
 ## Expectativa post-deploy (schema checkpoint)
 
-- `pb_ecom_orders` rows for brand Lure: esperado ≥ 2985 paid (post-backfill completo con paginación corregida)
-- `pb_ecom_order_items` rows: esperado ≥ 7754
-- Histórico: `MAX(order_created_at) - MIN(order_created_at)` ≥ 140 días
-- `brand_integrations` row for Lure × tiendanube: esperado presente con `access_token IS NOT NULL`
+- `evaluations` count: esperado ≥ <baseline + N nuevas registradas durante migration>.
+- `eval_responses.consent_version` columna nueva con `NOT NULL DEFAULT 'v1'`.
+- RLS policy `evaluations_owner_only` activa (verificar `pg_policies`).
+- Audit log entry por cada migration aplicada en `audit_log` con `action = 'migration_applied'`.
 ```
 
-Sin esta sección, el sprint NO puede marcarse `closed-verified`.
+### D.3 Verificación empírica post-deploy
 
-### 4.5.3 — Verification empírica post-deploy (obligatorio)
-
-Ejecutar la misma query SQL del paso 4.5.1 **post-deploy**, comparar con expectativa 4.5.2:
+Re-ejecutar query D.1 + comparar con expectativa D.2:
 
 | Check | Pre | Post | Expected | Status |
 |-------|-----|------|----------|--------|
-| `pb_ecom_orders` count | 127 (legacy) | 2985 | ≥ 2985 | ✅ |
-| `pb_ecom_order_items` count | 341 (legacy) | 7754 | ≥ 7754 | ✅ |
-| `MAX - MIN dias` | 7 | 147 | ≥ 140 | ✅ |
-| `brand_integrations` stub | ∅ | present + token | present | ✅ |
+| `evaluations` count | <N> | <M> | ≥ <N + delta> | ✅ |
+| `eval_responses.consent_version` | NULL | 'v1' | NOT NULL | ✅ |
+| RLS `evaluations_owner_only` | ausente | presente | presente | ✅ |
 
-**Si cualquier check falla**: bloqueo automático del cierre — investigar root cause + agregar lesson learned + fix antes de re-deploy. No etiquetar `closed` sobre dataset parcial.
+**Si cualquier check falla:** bloqueo automático del cierre. NO etiquetar `closed-verified` sobre dataset parcial.
 
-### 4.5.4 — Triangulación 3 signals (Regla #12)
+### D.4 Triangulación 3 signals
 
-Adicional a 4.5.3, documentar en el sprint doc los 3 signals:
+- **Signal 1 (log literal):** output de la migration desde Supabase dashboard / CLI.
+- **Signal 2 (query DB):** SQL del D.3 con output literal vía MCP.
+- **Signal 3 (schema introspection):** `information_schema.columns` + `pg_indexes` + `pg_policies` para tabla target.
 
-- **Signal 1 (log literal)**: output del backfill / migration (`Progress X/total`, `Backfill complete`, `Migration applied`).
-- **Signal 2 (query DB)**: el SQL del 4.5.3 con output literal.
-- **Signal 3 (schema introspection)**: `information_schema.columns` + `pg_indexes` + `pg_policies` para la tabla target — o wikilink a `SCHEMA-EMPIRICAL-YYYY-MM-DD` si se mantiene doc separado.
+Los 3 signals DEBEN aparecer inline en el sprint doc bajo "Evidencia empírica final" antes de `closed-verified`.
 
-Los 3 signals DEBEN aparecer inline en el sprint doc bajo sección "Evidencia empírica final" antes de `closed-verified`.
+---
 
-### 4.5.5 — Ejemplos aplicados
+## §E — Hotfix lifecycle + closed-verified pattern (UNIVERSAL)
 
-- [[../sprints/sprint-tiendanube-granularity-fix/SPRINT-TIENDANUBE-GRANULARITY-FIX#Evidencia empírica final]] — primer sprint que aplicó el checkpoint retroactivamente (FASE A sprint-cierre).
-- [[../sprints/sprint-observability-pattern-1-complete/SPRINT-OBSERVABILITY-PATTERN-1-COMPLETE]] — checkpoint de agent_reports (13/13 crones).
-
-## Paso 5 — Rollback si algo falla
-
-```bash
-ssh root@82.29.61.151
-cd /root/Pampa-Labs-Core
-git log --oneline -10                   # identificar último commit bueno
-git reset --hard <HASH_ESTABLE>
-docker compose -f products/content-factory-web/docker-compose.yml build --no-cache
-docker compose -f products/content-factory-web/docker-compose.yml up -d --force-recreate
-```
-
-Después del rollback: documentar el bug en [[../sprints/]]`sprint-NN/BUGFIXES-NN.md` y arreglar antes de reintentar deploy.
-
-## Comando único (después del QA OK, para sprints rutinarios)
-
-```bash
-ssh root@82.29.61.151 "cd /root/Pampa-Labs-Core && git pull origin main && docker compose -f products/content-factory-web/docker-compose.yml up -d --build"
-```
-
-Usar solo cuando no hay cambios de deps (`package.json`, `Dockerfile`); si hay, forzar `--no-cache`.
-
-## Frecuencia recomendada
-
-- **Sprints tech:** deploy al terminar cada sprint con QA OK.
-- **Hotfixes:** deploy inmediato tras QA reducido (build + smoke test módulo afectado).
-- **Release de features grandes:** ventana de deploy definida (horario de bajo tráfico).
-
-## §C — Hotfix lifecycle + closed-verified pattern
-
-> Patrón establecido empíricamente durante los 5 sprints hotfix del 2026-04-18/19 (meta-rate-limiter-buc-aware, rls-brand-integrations-hotfix, meta-app-secret-rotation, sentry-dsn-prod-complete, observability-pattern-1-complete). Formaliza cuándo un DEBT realmente se cierra.
+> Patrón heredado del Pampa Labs Core, aplicable a cualquier deploy en cualquier stack. Preservado tal cual del proceso original. Define cuándo un DEBT realmente se cierra.
 
 Un DEBT no se marca como `closed-verified` hasta que haya **evidencia empírica post-deploy**. Status progression:
 
@@ -186,39 +288,62 @@ Un DEBT no se marca como `closed-verified` hasta que haya **evidencia empírica 
 2. **`fix-in-progress`** — código committed pero aún no deployado (o deploy en curso).
 3. **`ready-for-deploy`** — push OK + runbook escrito, esperando ventana de deploy.
 4. **`closed-verified`** — deploy aplicado + **mínimo 3 de estas evidencias** acumuladas:
-   - **Boot log** verifica las señales esperadas (ej. `[sentry] initialized`, `loadPersistedStates`, `crons scheduled`, container `running`).
-   - **Smoke test empírico** con output concreto del `curl` / response (status code + body relevante).
-   - **Query MCP** sobre tabla target confirma state esperado (ej. `SELECT count(*) FROM agent_reports WHERE agent_type = 'meta_ads_sync' AND created_at > now() - interval '5 min'`).
-   - **Dashboard externo** muestra el evento (ej. Sentry Issue nuevo con tags correctos, Meta Business Manager webhook log, Stripe event received).
+   - **Boot log / build log** verifica las señales esperadas (Vercel deploy `Ready`, GH Actions verde, Supabase migration applied).
+   - **Smoke test empírico** con output concreto del `curl` o response browser (status code + body relevante).
+   - **Query MCP** (`supabase-somnosalud` cuando exista) sobre tabla target confirma state esperado.
+   - **Dashboard externo** muestra el evento (ej: Sentry Issue nuevo con tags correctos, Vercel analytics, PostHog event received, Resend delivery confirmed).
 
 Si solo hay 1-2 evidencias, el DEBT **se mantiene en `ready-for-deploy`** hasta acumular la 3ra. Nunca saltar directo a `closed-verified` sin evidencia triangulada.
-
-### Los 4 CRITICAL cerrados 2026-04-18/19 siguieron este patrón
-
-| DEBT | Evidencia 1 (boot log) | Evidencia 2 (smoke) | Evidencia 3 (dashboard/MCP) |
-|------|------------------------|---------------------|-----------------------------|
-| `DEBT-metricsync-failing-100-percent` | `[cron-metrics-sync] register` + `loadPersistedStates BUC total:2, active_blocks:0` | Meta API response 200 + `pb_metrics_snapshot` updated | MCP: agent_reports runs post-deploy con status='ok' |
-| `DEBT-rls-brand-integrations-exposes-credentials` | Container `running` post-rebuild | Dual curl (anon + publishable) → 401/empty | MCP: `SELECT * FROM pg_policies WHERE tablename='brand_integrations'` confirma `service_role_all` |
-| `DEBT-meta-app-secret-hardcoded-in-git` | Boot sin `META_APP_ID required` errors | OAuth flow functional en UI (Meta callback 200) | Meta Developers dashboard: secret activo nuevo + viejo revoked |
-| `DEBT-sentry-no-dsn-prod` | `[sentry] initialized — env=production dsn=***@ingest.us.sentry.io` | Smoke test curl `/api/health` | Sentry dashboard issue visible en 28s con tags `{scope, operation}` |
 
 ### Regla importante: nunca cerrar en el mismo commit que deploya
 
 El commit que introduce el fix sube a `ready-for-deploy`. El commit que cierra el DEBT a `closed-verified` **ocurre después** con las evidencias recolectadas. Esto fuerza que el deploy real ocurra antes del cierre documental y evita "closed-on-paper" sin verificación.
 
-Los 4 sprints de hoy siguieron esta separación — ver hashes:
-- `1a0d410` fix metricsync + `0387c48` sprint doc update (post-verify)
-- `e2caee9` fix RLS + `b68584f` close DEBT (post dual curl)
-- `d1db6c8` fix secret + `78ea376` close DEBT (post Meta dashboard)
-- `0c5de90` fix Sentry + `323dde0` close DEBT (post dashboard issue visible)
+Ejemplos del patrón aplicado en otros proyectos (Pampa Labs Core, ver Vault correspondiente):
+- Hash `1a0d410` fix → hash `0387c48` close DEBT (post-verify, separación temporal).
+- Hash `e2caee9` fix RLS → hash `b68584f` close DEBT (post dual curl).
+
+Aplicar igual en SomnoSalud cuando empiecen los deploys reales (Sprint 3+).
+
+---
+
+## §F — Frecuencia y ventanas de deploy
+
+- **Sprint cleanup / docs (sin código de prod):** deploy continuo, cada commit a `main`.
+- **Sprints `clinical-engine`:** deploy con signoff Pablo + smoke test ampliado. Idealmente lunes-miércoles para tener bandwidth si rollback.
+- **Sprints `webapp-somnosalud`:** deploy continuo via Vercel preview en PR + production deploy al merge.
+- **Hotfixes:** deploy inmediato tras QA reducido (build + smoke test módulo afectado). Sin esperar ventana.
+- **Release de features grandes (multi-sprint):** ventana definida (horario bajo tráfico AR, ej: 23h-02h ART).
+
+---
+
+## §G — Cuándo NO deployar
+
+- ❌ CI GitHub Actions rojo en el último commit.
+- ❌ Test suite con tests skipped silenciosamente (verificar `pnpm test` reporta `0 skipped`).
+- ❌ Cambio en `clinical-engine/scoring/` o `safety/` o `engine/recommendations.ts` o `engine/risk-integrator.ts` o `references.ts` **sin signoff Pablo Ferrero documentado** (quote textual + screenshot WhatsApp + archivado en `docs/vault/clinical/scoring-validation/`).
+- ❌ Migration con `verification_query` que devuelve `bug-present` (ver [[VERIFICATION-QUERY-SCHEMA]]).
+- ❌ DEBT de prioridad CRITICAL abierto que afecta el área deployada.
+- ❌ Vacaciones / fin de semana sin on-call disponible (Pablo + Cowork + Fabio backup).
+
+---
 
 ## Cross-links
 
-- [[QA-CHECKLIST]] — §A para hotfix backend, §B para release frontend.
+- [[QA-CHECKLIST]] — checklist técnico pre-merge (§A clinical-engine, §B webapp, §C conversor-psg).
+- [[SPRINT-CLOSURE-CHECKLIST]] — FASE 4 obligatoria + Bloque K filesystem housekeeping post-merge.
+- [[TEMPLATE-DEBT]] — template para crear DEBTs cuando se detecta gap durante deploy.
 - [[AUDITORIA-METODOLOGIA]] — regla #11 sync pass post-auditoría + regla #12 empirical verification triangulada.
-- [[TEMPLATE-DEBT]] — checklist de cierre con 3 evidencias (mismo principio que Regla #12).
-- [[../sprints/sprint-tiendanube-granularity-fix/LESSONS-LEARNED-TIENDANUBE-GRANULARITY]] — origen empírico del schema checkpoint (L2, L4).
-- [[../MASTER-PLAN#Track D — Procesos|Master Plan Track D]]
-- [[../sprints/sprint-30/BUGFIXES#BUG 6 — Docker build falla por workspace local fuera del context|Sprint 30 BUG 6]] — build context del Docker.
-- [[../sprints/sprint-30/BUGFIXES#BUG 9 — Vite 8 / rolldown native bindings rompen Docker cross-platform|Sprint 30 BUG 9]] — Vite 5 LTS.
-- [[../PAMPALABS-CONTEXT-SKILL]] — comandos canónicos de deploy.
+- [[VERIFICATION-QUERY-SCHEMA]] — schema para queries de verificación de DEBTs.
+- [[../clinical/COMPLIANCE-ARGENTINA]] — checklist Pre-launch público + plan de respuesta a brechas.
+- [[../../../.claude/agents/compliance-anmat]] — invocar antes de deploy que toque flow consent/disclaimer/safety.
+
+## Referencia histórica
+
+El DEPLOY-WORKFLOW anterior (heredado commit `6f8f6c9`) asumía VPS Docker `82.29.61.151` con `docker compose -f products/content-factory-web/docker-compose.yml`. Los 4 sprints del 2026-04-18/19 referenciados (meta-rate-limiter-buc-aware, rls-brand-integrations, meta-app-secret-rotation, sentry-dsn-prod, observability-pattern-1) eran de Pampa Labs Core, no SomnoSalud. La reescritura completa fue trabajo de [[../sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]].
+
+El §E (Hotfix lifecycle + closed-verified pattern) se preservó tal cual porque es un patrón universal aplicable independiente del stack.
+
+---
+
+*Última actualización: 2026-05-08 — reescrito durante Sprint 2.A para SomnoSalud (Vercel + GH Pages, sin VPS).*
