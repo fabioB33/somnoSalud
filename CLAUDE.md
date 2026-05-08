@@ -27,39 +27,75 @@ Ver también: [[docs/vault/processes/QA-CHECKLIST]] · [[docs/vault/processes/DE
 
 ## Skills obligatorias — USAR SIEMPRE
 
-**LEER SIEMPRE PRIMERO: este `CLAUDE.md` completo + el del Vault Pampa Labs si hay drift conceptual entre proyectos.**
+**LEER SIEMPRE PRIMERO: este `CLAUDE.md` completo.**
 
-En CADA tarea, sin excepción, cargá las skills relevantes ANTES de escribir código.
+En CADA tarea, sin excepción, cargá las skills relevantes ANTES de escribir código. Lista curada durante [[docs/vault/sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]] (2026-05-08): de los 46 agents que importó el commit `6f8f6c9`, 21 fueron archivados por irrelevancia (regulación China, stack incorrecto, fuera de roadmap, drift conceptual NEXUS) y se creó 1 propio (`compliance-anmat`). Total activo: **25 agents + 1 propio = 26 archivos en `.claude/agents/`** + 22 archivos archivados en [[docs/vault/archive/agents-2026-05-08/]] (con README explicando por qué).
 
 ### Siempre (en toda tarea):
 
-- **obsidian-markdown** — Documentar CADA cambio en `docs/vault/`
-- **GSD** — `/gsd:plan-phase`, `/gsd:execute-phase` para planificación
-- **SuperClaude** — `/sc:` commands para análisis y planning
-- **Superpowers** — `/superpowers:*` para tareas grandes, multi-agente (hasta 60 agentes paralelos)
+- **obsidian-markdown** — Documentar CADA cambio en `docs/vault/` con frontmatter YAML + wikilinks bidireccionales.
+- **agents-orchestrator** (.claude/agents/) — workflow pipeline manager universal cuando hay >2 agents involucrados.
+- **engineering-minimal-change-engineer** (.claude/agents/) — disciplina anti-scope-creep. Aplicar especialmente cuando un sprint amenaza con expandirse más allá de sus FASES.
+- **engineering-git-workflow-master** (.claude/agents/) — branches/conventional commits/CI-friendly.
 
-### Clínico / médico (cuando toques scoring, safety, recommendations):
+Slash commands universales (cuando estén instalados como skills del IDE):
+- `/gsd:plan-phase`, `/gsd:execute-phase` — planificación (proceso [[docs/vault/processes/GSD-WORKFLOW]]).
+- `/superpowers:*` — paralelización multi-agent para tareas grandes (proceso [[docs/vault/processes/SUPERPOWERS-MULTI-AGENT-WORKFLOW]]).
 
-- **clinical-engine domain knowledge** — leer `packages/clinical-engine/src/references.ts` (DOI/PMID centralizados) ANTES de modificar lógica de scoring o safety. Cada algoritmo debe estar respaldado por publicación peer-reviewed.
-- **compliance-auditor** (.claude/agents/) — para validar cualquier cambio que afecte ANMAT / Ley 25.326 / Ley 26.529.
-- **healthcare-marketing-compliance** (.claude/agents/) — para Fase 3 B2B cuando arranque marketing a sleep specialists (regulación dispositivo médico digital).
+### Clínico / médico (cuando toques `packages/clinical-engine/`):
 
-### Frontend (cuando toques cualquier componente):
+- **clinical-engine domain knowledge** — leer `packages/clinical-engine/src/references.ts` (DOI/PMID centralizados) ANTES de modificar lógica de scoring/safety/recommendations. Cada algoritmo debe estar respaldado por publicación peer-reviewed verificable.
+- **compliance-anmat** (.claude/agents/) — agent **propio** para AR/ANMAT/Ley 25.326/Ley 26.529/Decreto 1089/2012. Invocar antes de cualquier feature que toque consent, disclaimer, datos sensibles, verificación de edad. Reemplazó al archivado `healthcare-marketing-compliance` (que era 100% regulación China NMPA).
+- **compliance-auditor** (.claude/agents/) — agent genérico SOC 2/ISO 27001/HIPAA. Invocar **solo Fase 3** cuando se escale a USA/UE. Para Fase 1-2 AR usar `compliance-anmat`.
 
-- **engineering-frontend-developer** (.claude/agents/) — patrón canónico Next.js 14 App Router + Tailwind + shadcn/ui
-- **design-ui-designer + design-ux-architect** — accesibilidad WCAG 2.1 AA target Fase 3
-- **testing-accessibility-auditor** — antes de cualquier merge frontend
+### Frontend (cuando toques `packages/webapp-somnosalud/` o `packages/webapp-conversor-psg/`):
 
-### Backend / DB:
+- **engineering-frontend-developer** (.claude/agents/) — patrón canónico React/Next.js/Tailwind/Vite.
+- **engineering-software-architect** — decisiones arquitecturales (DDD, layers, contracts entre packages).
+- **engineering-code-reviewer** — review correctness/maintainability/security pre-merge.
+- **testing-accessibility-auditor** — antes de cualquier merge frontend (WCAG 2.1 A mínimo Fase 1, AA target Fase 3).
+- **testing-evidence-collector** — screenshot QA disciplina. Default a "needs work" hasta evidencia visual.
+- **testing-reality-checker** — anti-fantasy approvals. Default a "NEEDS WORK" hasta proof overwhelming.
+- **testing-performance-benchmarker** — bundle size + render perf cuando importa.
 
-- **engineering-backend-architect** (.claude/agents/) — Next.js Server Actions + Supabase patterns
-- **engineering-database-optimizer** — RLS multi-tenant policies
-- **supabase-postgres-best-practices** (cuando esté instalado) — schema + queries + migrations
+### Backend / DB (cuando toques Supabase / API routes / migrations):
+
+- **engineering-backend-architect** (.claude/agents/) — Next.js Server Actions + Supabase patterns.
+- **engineering-database-optimizer** — schema design + queries + indexing + RLS multi-tenant policies para Postgres/Supabase.
+- **engineering-security-engineer** — threat modeling + secure code review (relevante para compliance + datos clínicos).
+- **testing-api-tester** — validation + integration testing de API routes.
+
+### Operación / observabilidad (Fase 1+):
+
+- **engineering-devops-automator** — CI/CD GitHub Actions + Vercel deploy automation.
+- **engineering-incident-response-commander** — postmortem + on-call cuando haya producción real.
+- **engineering-sre** — SLOs/observability/error budgets cuando volumen lo justifique.
+- **engineering-codebase-onboarding-engineer** — útil para incorporar Fabio o nuevos devs.
+
+### Documentación / writing:
+
+- **engineering-technical-writer** — README/docs/API references/sprint docs.
+
+### Producto / sprints:
+
+- **product-sprint-prioritizer** (.claude/agents/) — agile sprint planning + feature prioritization. Invocar al abrir cada sprint nuevo (regla #5 abajo).
+
+### Testing / análisis:
+
+- **testing-test-results-analyzer** — interpretar test metrics y derivar insights.
+
+### AI features (Fase 3 wearables / OCR labs):
+
+- **engineering-ai-engineer** — ML/AI features cuando aparezcan (parsing de PDFs lab con OCR, integración wearables data).
+
+### Customer service (Fase 3 B2C scale):
+
+- **healthcare-customer-service** — patient support con sensibilidad clínica.
 
 ### MCP Servers disponibles:
 
-- **github** — Repo management (PRs, issues, releases)
-- **supabase-somnosalud** — DB del proyecto (PENDIENTE crear project Org Pampa Labs Fase 0)
+- **github** — Repo management (PRs, issues, releases) sobre `itsomnosalud/Somnosalud`.
+- **supabase-somnosalud** — DB del proyecto (PENDIENTE crear project Org Pampa Labs — Sprint 2.B, ownership Fabio).
 
 ### REGLAS ABSOLUTAS:
 
@@ -517,6 +553,6 @@ Revisar al go-live B2B (posible cambio a algún esquema más permisivo según va
 
 ---
 
-*Última actualización: 7 Mayo 2026 (setup Pampa Labs OS)*
-*last_synced_with_vault_reality: 2026-05-07*
-*Próxima revisión: post-Sprint 1 (CI verde + project Supabase creado)*
+*Última actualización: 8 Mayo 2026 (Sprint 2.A — sección "Skills obligatorias" reescrita con lista curada de agents post-archivado)*
+*last_synced_with_vault_reality: 2026-05-08*
+*Próxima revisión: post-Sprint 2.B (project Supabase creado + MCP supabase-somnosalud activo)*
