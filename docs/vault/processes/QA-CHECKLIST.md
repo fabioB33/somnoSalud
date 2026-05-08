@@ -1,134 +1,256 @@
 ---
-title: "QA Checklist — pre-deploy"
-date: 2026-04-19
-last_synced_with_vault_reality: 2026-04-19
-tags: [process, qa, deploy, quality]
+title: "QA Checklist — pre-merge / pre-deploy SomnoSalud"
+date: 2026-05-08
+last_synced_with_vault_reality: 2026-05-08
+tags: [process, qa, deploy, quality, somnosalud]
 status: active
-run: "antes de cada deploy a producción"
+run: "antes de cada merge a main + antes de cada deploy a Vercel/GH Pages"
+related:
+  - "[[DEPLOY-WORKFLOW]]"
+  - "[[SPRINT-CLOSURE-CHECKLIST]]"
+  - "[[../sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]]"
 ---
 
-# QA Checklist — pre-deploy
+# QA Checklist — pre-merge / pre-deploy SomnoSalud
 
-Dos checklists según el tipo de deploy:
+> Reemplaza al QA-CHECKLIST heredado del Pampa Labs Core (que asumía Content Factory + VPS Docker). Este checklist está adaptado a SomnoSalud: clinical-engine + monorepo pnpm + Vercel/GH Pages, con énfasis en compliance clínica y signoff Pablo Ferrero.
+>
+> Origen: reescritura durante [[../sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]] (2026-05-08), cerrando [[../debt/DEBT-procesos-heredados-content-factory]].
 
-- **§A — Hotfix backend (7 items core):** deploys de `products/content-factory/` (API, crones, services, migrations). Reducido empíricamente a partir de los 5 sprints hotfix del 2026-04-18/19. Es el mínimo no-negociable.
-- **§B — Release frontend (checklist extendido):** deploys de `products/content-factory-web/` (Playbook UI, landing, brand library). Incluye smoke visual + responsive + auth flow.
+Dos checklists según el tipo de cambio:
 
-Si algún ítem falla → **NO deployar**, arreglar primero.
+- **§A — Cambio en `clinical-engine` (7 items core + signoff Pablo):** scoring, safety rules, recommendations, lab/genetics, references. Es el mínimo no-negociable.
+- **§B — Cambio en webapp (placeholder hasta Fase 1):** deploys de `webapp-somnosalud/` o `webapp-conversor-psg/`.
 
----
-
-## §A — Hotfix backend (7 items CORE)
-
-Preamble: este checklist reemplaza el anterior estilo "60 items" para deploys backend. Son los 7 items que **REALMENTE se ejecutaron en los 5 sprints hotfix del 2026-04-18/19** (meta-rate-limiter-buc-aware, rls-brand-integrations, meta-app-secret-rotation, sentry-dsn-prod, observability-pattern-1) y cuya ausencia causó incidents reales en el pasado. Criterio: si algún item falla, NO shippear.
-
-1. **TypeScript strict** — `npm run typecheck` → EXIT 0. Zero `any`, zero `@ts-ignore` introducidos.
-2. **Build limpio** — `npm run build` → EXIT 0. `dist/` regenerado.
-3. **Tests pasan** — `npm test` → EXIT 0 en todas las suites (0 skipped, 0 fails, 0 todos). Si la feature agrega lógica nueva crítica, **tests nuevos obligatorios** (mínimo 1 happy path + 1 error path).
-4. **Smoke test endpoint crítico** — al menos un `curl` (o request equivalente) al feature modificado con respuesta esperada. Para crones: query MCP sobre tabla target confirmando state esperado. Para RLS: dual curl (anon + publishable) verificando lockout.
-5. **Boot signals post-deploy** — `docker compose logs --tail=100` muestra los 3-5 logs clave del boot: `[sentry] initialized`, `loadPersistedStates`, `crons scheduled: N registered`, container `running` status, ausencia de `ERROR` en tail.
-6. **Git state clean** — `git status` solo cambios del sprint, sin basura. Ruido de `.obsidian/*` (graph.json / workspace.json) puede ignorarse — no commitear en commits de código.
-7. **Vault actualizado al momento** — DEBT status actualizado (open → fix-in-progress → closed-verified solo con evidencia empírica per §C del DEPLOY-WORKFLOW), sprint doc con fase marcada, MOC si aplica, commit atómico con mensaje descriptivo.
-
-Los 4 CRITICAL cerrados 2026-04-18/19 siguieron este checklist literal. Ver evidencia en:
-- [[../sprints/sprint-meta-rate-limiter-buc-aware/SPRINT-META-RATE-LIMITER-BUC-AWARE]]
-- [[../sprints/sprint-rls-brand-integrations-hotfix/SPRINT-RLS-BRAND-INTEGRATIONS-HOTFIX]]
-- [[../sprints/sprint-meta-app-secret-rotation/SPRINT-META-APP-SECRET-ROTATION]]
-- [[../sprints/sprint-sentry-dsn-prod-complete/SPRINT-SENTRY-DSN-PROD-COMPLETE]]
-- [[../sprints/sprint-observability-pattern-1-complete/SPRINT-OBSERVABILITY-PATTERN-1-COMPLETE]]
+Si algún ítem falla → **NO mergear / NO deployar**, arreglar primero.
 
 ---
 
-## §B — Release frontend (checklist extendido)
+## §A — Cambio en `clinical-engine` (7 items CORE + signoff Pablo)
 
-> Checklist original pre-2026-04-19. Aplica a releases de `products/content-factory-web/` (Playbook UI). Requiere más coverage visual + responsive + auth flow por la naturaleza del frontend. Los items marcados explícitamente son post-launch-opcional cuando la release es pequeña (ej. fix de copy).
+> Estos 7 items son el mínimo para mergear cualquier cambio en `packages/clinical-engine/src/`. Aplican a scoring/, safety/, engine/, lab/, references.ts. Si el cambio es en `tests/` o docs internas (`README.md`), bastan items 1-3 + 6-7.
 
-### 1. Build local
+### 1. TypeScript estricto
 
-- [ ] `cd products/content-factory-web && npm run build` → `✓ built` sin errores
-- [ ] 0 warnings de TypeScript (`tsc -b` embebido en build)
-- [ ] Tamaño del bundle `index-*.js` no creció > 10% vs último deploy
+```bash
+pnpm --filter somnosalud-clinical-engine typecheck
+```
 
-### 2. Módulos cargando
+→ EXIT 0. Zero `any`, zero `@ts-ignore` introducidos sin justificación inline. Zero `as unknown as` sin documentación del por qué.
 
-Levantar `npm run dev` y verificar que cada ruta principal renderiza sin errores en consola:
+### 2. Build limpio
 
-- [ ] `/landing-v2` — PublicLanding con cinematic scroll funcional (frames cargan)
-- [ ] `/login` — form de login
-- [ ] `/playbook` — PlaybookDashboard con métricas above-the-fold
-- [ ] `/playbook/creatives` — pipeline de creativos
-- [ ] `/playbook/campaigns` — lista de campañas
-- [ ] `/playbook/optimizer` — auto-optimizer
-- [ ] `/playbook/ab-tests` — A/B tests
-- [ ] `/playbook/settings` — settings
-- [ ] `/playbook/ai-marketer` — Luna
-- [ ] `/brand-library` — Brand Library
-- [ ] `/chat` — Chat
-- [ ] `/video-studio` — Video Studio
+```bash
+pnpm --filter somnosalud-clinical-engine build
+```
 
-### 3. Light mode
+→ EXIT 0. `dist/` regenerado. Si la lógica clínica nueva agrega exports, verificar que aparecen en `dist/index.d.ts`.
 
-- [ ] Si el `ThemeToggle` está activo: toggleear y verificar que **no hay texto ilegible** en ninguna ruta principal
-- [ ] Si light mode sigue roto: confirmar que `ThemeToggle` **no está importado** en ningún consumer
+### 3. Tests pasan + tests nuevos obligatorios
 
-### 4. Responsive
+```bash
+pnpm --filter somnosalud-clinical-engine test
+```
 
-Probar en DevTools resoluciones:
-- [ ] 375 × 667 (iPhone SE) — nav hamburger, sin scroll horizontal, CTAs accesibles
-- [ ] 768 × 1024 (iPad) — layouts de grilla 2-col, sidebar collapsible
-- [ ] 1440 × 900 (desktop) — layout completo, max-width respetado
+→ EXIT 0 con N tests passing donde N ≥ baseline anterior.
 
-### 5. Animaciones
+**Tests nuevos obligatorios** si el cambio agrega lógica clínica:
+- 1 test de happy path (entrada típica → resultado esperado).
+- 1 test de boundary (cutoffs exactos según DOI/PMID, ej: "ISI 14 → subthreshold, 15 → moderate").
+- 1 test de error path (entrada inválida → throws con mensaje específico).
 
-- [ ] Cinematic scroll en landing pública: frames avanzan al scrollear, sin jank
-- [ ] GSAP entrance animations: secciones aparecen con fade+slide
-- [ ] Hover states en botones / cards: transiciones suaves
-- [ ] Dropdowns de PlaybookNav: abren y cierran con animación
+Si el cambio toca un instrumento de scoring (ISI, ESS, STOP-BANG, PHQ-9, GAD-7, DASS-21, BMI), los tests deben cubrir TODOS los rangos de severidad declarados en `types.ts`.
 
-### 6. Rutas sin 404
+**Conteo correcto de tests:** usar el output del runner, NO grep de `describe(`. Ver [[../lessons-learned/LL-2026-05-08-conteo-describe-vs-test-blocks]].
 
-- [ ] Todos los links del sidebar → navegan sin error
-- [ ] Todos los links de PlaybookNav (incluyendo dropdowns children) → navegan sin error
-- [ ] Links del footer de PublicLanding → navegan a rutas existentes
-- [ ] Deep links directo (tipeando URL) → renderizan correctamente
+### 4. Referencias DOI/PMID centralizadas
 
-### 7. Auth flow
+Si el cambio agrega un nuevo algoritmo / cutoff / tratamiento:
 
-- [ ] Usuario no logueado → `/playbook` redirige a `/login`
-- [ ] Login exitoso → redirige a `/playbook`
-- [ ] Logout → redirige a `/login`
+```bash
+grep -n "doi\|pmid" packages/clinical-engine/src/<archivo-modificado>.ts
+```
 
-#### §B.7.4 — OAuth Google flow (Sprint 73.A — DEBT-supabase-auth-lock-deadlock-google-oauth)
+→ Cada algoritmo / cutoff / recomendación nueva debe estar respaldado por una referencia presente en `packages/clinical-engine/src/references.ts`. Si la referencia no existe ahí, agregarla en el mismo PR.
 
-- [ ] Click "Continuar con Google" en `/login` → redirige a `accounts.google.com/o/oauth2/v2/auth?...` en menos de 1 s, sin freeze del renderer.
-- [ ] Callback Google → redirige a `/auth/callback` → llega a `/setup` o `/playbook` según estado de onboarding.
-- [ ] Logout → `/login` → click "Continuar con Google" nuevamente → redirige sin warning de gotrue-js `Lock not released within 5000ms` en console.
-- [ ] DevTools Console en `/login` (hard reload) → 0 mensajes con pattern `gotrue-js: Lock` y 0 errors en console.
-- [ ] DevTools Network → entry a `accounts.google.com/o/oauth2/v2/auth` con status 302 capturada al click.
+```typescript
+// ✅ CORRECTO
+import { REFERENCES } from '../references';
+const ISI_CUTOFF_MODERATE = 15; // Bastien 2001, validado en Morin 2011
+// Reference: REFERENCES.ISI_BASTIEN_2001 (DOI: 10.1093/sleep/24.1.110)
+```
 
-### 8. Consola del browser
+### 5. Safety rules no debilitadas
 
-- [ ] 0 errores en DevTools Console en cada ruta principal
-- [ ] 0 warnings de React (keys, hooks, etc.)
-- [ ] 0 requests fallidos en Network tab (evitar 404/500 en assets o API)
+Si el cambio toca `packages/clinical-engine/src/safety/rules.ts`:
 
-### 9. Git hygiene
+```bash
+pnpm --filter somnosalud-clinical-engine test -- safety
+```
 
-- [ ] Commit message descriptivo (`fix:`, `feat:`, `sprint-NN:` prefix)
-- [ ] `git status` limpio antes del push
-- [ ] Nada de `.env` o secrets en el diff
+→ EXIT 0. **NUNCA** un cambio puede hacer que una safety rule `triggered: true` pase a `triggered: false` para los mismos inputs sin justificación clínica documentada.
 
-### 10. Docker build (si aplica a esta release)
+Verificar en el diff que SAFE-010 (edad <18), SAFE-020 (embarazo), SAFE-021 (lactancia), SAFE-040 (anticoagulantes + melatonina) siguen disparando para los inputs canónicos.
 
-- [ ] `docker compose -f products/content-factory-web/docker-compose.yml build --no-cache` completa sin errores
-- [ ] Imagen resultante arranca: `docker compose up -d` + health check OK
+### 6. Git state limpio
+
+```bash
+git status
+```
+
+→ Solo cambios del sprint. Sin basura de `.obsidian/workspace.json`, sin `.DS_Store`, sin lockfiles temporales (`~$*`), sin archivos de output `dist/`, sin secrets (`.env*` que no sea `.env.example`).
+
+### 7. Vault actualizado al momento del merge
+
+- DEBT padre del cambio: status actualizado siguiendo progression del [[DEPLOY-WORKFLOW]] §C (`open` → `fix-in-progress` → `ready-for-deploy` → `closed-verified` solo con triangulación 3 evidencias post-deploy).
+- Sprint doc con FASE marcada (1/2/3/4) según [[SPRINT-CLOSURE-CHECKLIST]].
+- Si el cambio falsifica empíricamente una hipótesis del DEBT padre o detecta patrón sistémico: lesson-learned en `docs/vault/lessons-learned/LL-YYYY-MM-DD-<slug>.md`.
+- Commit message descriptivo siguiendo conventional commits (`feat:`, `fix:`, `chore:`, `clinical:`, `docs:`).
+
+### 🩺 Signoff clínico de Pablo Ferrero
+
+**Adicional a items 1-7 cuando el cambio toca:**
+- `packages/clinical-engine/src/scoring/` (cualquier cutoff o severidad).
+- `packages/clinical-engine/src/safety/` (cualquier safety rule).
+- `packages/clinical-engine/src/engine/recommendations.ts` (lógica de recomendación).
+- `packages/clinical-engine/src/engine/risk-integrator.ts` (red flags + clasificación severe/intermediate/clear).
+- `packages/clinical-engine/src/references.ts` (cuando se agrega/modifica referencia).
+
+**Workflow de signoff:**
+1. Cowork prepara el cambio + documenta en sprint doc el rationale clínico (qué cambia, por qué, qué evidencia DOI/PMID lo respalda).
+2. Pablo recibe screenshot del diff + rationale via WhatsApp.
+3. Pablo confirma con quote textual ("OK", "approved", "preferiría que el cutoff sea X en lugar de Y", etc.).
+4. Cowork pega el quote textual + fecha + screenshot del WhatsApp en `docs/vault/clinical/scoring-validation/<algoritmo>.md` ANTES del merge.
+5. Sin signoff documentado: el cambio queda en branch local + sprint doc en `closure-pending-clinical-signoff`.
+
+**No es opcional ni se puede saltear.** La barrera regulatoria de SomnoSalud (clasificación ANMAT Clase I orientativo) depende de que cada algoritmo tenga signoff médico trazable. Ver [[../clinical/COMPLIANCE-ARGENTINA]] §1 + agent [[../../../.claude/agents/compliance-anmat]].
 
 ---
 
-Si algún punto falla: **NO deployar**. Arreglar + volver al punto 1.
+## §B — Cambio en webapp (placeholder Fase 1)
+
+> Este checklist se completa cuando exista código en `packages/webapp-somnosalud/` (Fase 1, Sprint 5+). Hoy los packages son skeleton con scripts noop.
+>
+> Estructura prevista:
+
+### B.1 Build local
+
+- [ ] `pnpm --filter @somnosalud/webapp-somnosalud build` → EXIT 0
+- [ ] Zero warnings TypeScript
+- [ ] Bundle size no creció >10% vs último deploy (Vercel reporta)
+
+### B.2 Rutas críticas renderizan
+
+Probar en `pnpm --filter @somnosalud/webapp-somnosalud dev` (Next.js dev server):
+
+- [ ] `/` — Welcome (P0.1)
+- [ ] `/disclaimer` — disclaimer médico (P0.2)
+- [ ] `/terms` — T&C con consent checkbox (P0.3)
+- [ ] `/eval/profile` — datos paciente
+- [ ] `/eval/safety` — pregnancy + medication + anticoagulant gates
+- [ ] `/eval/isi` — Insomnia Severity Index
+- [ ] `/eval/stopbang` — STOP-BANG riesgo apnea
+- [ ] `/eval/phq9` — depresión (incluyendo ítem 9 ideación suicida)
+- [ ] `/eval/gad7` — ansiedad
+- [ ] `/eval/dass21` — depresión + ansiedad + estrés
+- [ ] `/eval/sleep` — sleep diary
+- [ ] `/eval/lab` — opcional
+- [ ] `/eval/genetics` — opcional
+- [ ] `/eval/results` — disclaimer obligatorio + recomendaciones + derivación
+- [ ] `/dashboard` — historial de evaluaciones del usuario
+
+### B.3 Compliance gates en código (no solo docs)
+
+- [ ] **Disclaimer médico visible** en TODA pantalla de `/eval/results` y en `/dashboard`.
+- [ ] **M.N. Pablo Ferrero (119.783)** visible en footer + en disclaimer.
+- [ ] **Consentimiento informado** con checkbox NO pre-marcado en `/terms` antes de habilitar `/eval/`.
+- [ ] **Verificación edad <18** hard gate en `/eval/profile` (calcular edad desde fecha de nacimiento).
+- [ ] **Test E2E (Playwright)** que verifica: usuario sin consent no puede acceder a `/eval/`; usuario <18 redirige a contacto especialista.
+
+### B.4 Responsive mobile-first
+
+DevTools resoluciones:
+- [ ] 375 × 667 (iPhone SE) — sin scroll horizontal, CTAs accesibles, formularios usables con teclado mobile.
+- [ ] 768 × 1024 (iPad) — layouts de grilla legibles.
+- [ ] 1440 × 900 (desktop) — max-width respetado.
+
+### B.5 Accesibilidad básica (WCAG 2.1 A mínimo)
+
+- [ ] Contraste suficiente (testear con DevTools Lighthouse).
+- [ ] Inputs con `<label>` asociado (no solo placeholder).
+- [ ] Botones con texto descriptivo (no solo iconos sin `aria-label`).
+- [ ] Navegación con teclado (Tab + Enter funciona en flow completo).
+
+> Target full WCAG 2.1 AA → Fase 3, ver agent `testing-accessibility-auditor`.
+
+### B.6 Auth flow Supabase
+
+- [ ] Usuario no logueado → `/eval/` redirige a `/login`.
+- [ ] Login exitoso → redirige a `/dashboard` o continuación de evaluación parcial.
+- [ ] Logout → redirige a `/`.
+- [ ] DevTools Network → callback Supabase Auth status 200.
+- [ ] DevTools Console → 0 errores ni warnings de gotrue-js.
+
+### B.7 Consola del browser limpia
+
+- [ ] 0 errores en DevTools Console en cada ruta principal.
+- [ ] 0 warnings de React (keys, hooks, hydration mismatch).
+- [ ] 0 requests fallidos en Network tab.
+
+### B.8 Git hygiene
+
+- [ ] Commit message descriptivo (`feat:`, `fix:`, `clinical:`, `docs:`).
+- [ ] `git status` limpio antes del push.
+- [ ] Nada de `.env` ni secrets en el diff.
+
+---
+
+## §C — Cambio en webapp-conversor-psg (placeholder Fase 2)
+
+> Se completa cuando exista código TS modular en `packages/webapp-conversor-psg/` (post-refactor del legacy HTML monolítico). Hoy el conversor sigue funcionando 100% en `legacy-v0/index.html`.
+
+### Pre-requisito Fase 2
+
+- [ ] Refactor HTML monolítico → TS modular en `packages/psg-parser/` con tests fixture (PSGs reales anonimizados de los 7 equipos).
+- [ ] Engine Hipóxico extraído a `clinical-engine/engine/hypoxic-score.ts`.
+
+### C.1-C.7 (cuando exista)
+
+- C.1 Build (`vite build`) limpio.
+- C.2 Parser regression: cada parser pasa contra fixtures conocidos → CSV idéntico a baseline.
+- C.3 Engine Hipóxico: para fixture canónico de Pablo, score post-refactor == score legacy.
+- C.4 Drag-drop UX OK.
+- C.5 ZIP batch download funcional.
+- C.6 Git hygiene.
+- C.7 Vault actualizado.
+
+---
+
+## Smoke test post-deploy (universal)
+
+Ver [[DEPLOY-WORKFLOW]] §C — Hotfix lifecycle + closed-verified pattern. Aplica para cualquier deploy:
+
+1. **Boot signals** verificados (Vercel deploy log + GH Pages build log).
+2. **Smoke endpoint** crítico (curl o request browser con response esperado).
+3. **Query MCP `supabase-somnosalud`** sobre tabla target confirmando state esperado (cuando exista).
+4. **Dashboard externo** (Sentry issue, Vercel analytics) confirmando evento.
+
+Sin las 3 evidencias → DEBT permanece en `ready-for-deploy`, NO `closed-verified`.
+
+---
 
 ## Cross-links
 
-- [[DEPLOY-WORKFLOW]] — pasos de deploy después del QA OK.
-- [[../MASTER-PLAN#Track D — Procesos|Master Plan Track D]]
-- [[../PAMPALABS-CONTEXT-SKILL]] — fuente única de contexto.
+- [[DEPLOY-WORKFLOW]] — proceso de deploy + triangulación 3 evidencias.
+- [[SPRINT-CLOSURE-CHECKLIST]] — FASE 4 obligatoria + Bloque K filesystem housekeeping.
+- [[TEMPLATE-DEBT]] — template para crear DEBTs cuando se detecta gap durante QA.
+- [[../clinical/COMPLIANCE-ARGENTINA]] — checklist regulatorio Pre-launch público.
+- [[../../../.claude/agents/compliance-anmat]] — invocar antes de cualquier cambio que toque consent / disclaimer / safety / scoring.
+
+## Referencia histórica
+
+El QA-CHECKLIST anterior (heredado del commit `6f8f6c9`) asumía Content Factory + VPS Docker + sprints viejos (`sprint-meta-rate-limiter-buc-aware`, etc.). Está preservado en git history. La reescritura completa fue trabajo de [[../sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]].
+
+---
+
+*Última actualización: 2026-05-08 — reescrito durante Sprint 2.A para SomnoSalud.*
