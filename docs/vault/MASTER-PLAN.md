@@ -43,7 +43,8 @@ created: 2026-05-07
 | 0.2 | Migración remote a itsomnosalud/Somnosalud | ✅ closed-verified | 0.5h |
 | 0.3 | Setup Pampa Labs OS en este repo | ✅ closed-verified | 2h |
 | 1 | Cleanup OS heredado + CI verde local triangulado | ✅ closed-verified | 1.5h ejecutadas (2026-05-08) |
-| 2 | Curar agents + reescribir procesos heredados + crear Supabase Org Pampa Labs + MCP setup | ⏳ pending | 4-5h |
+| 2.A | Curar agents heredados + reescribir procesos heredados + adaptar SCC/TEMPLATE-DEBT | ⏳ in-progress (2026-05-08) | 4-5h |
+| 2.B | Crear project Supabase Org Pampa Labs + setear MCP `supabase-somnosalud` (ownership Fabio, requiere credenciales) | ⏳ pending Fabio | 1h |
 | 3 | Deploy webapp-somnosalud preview a Vercel + dominio | ⏳ pending | 2h |
 | 4 | Deploy webapp-conversor-psg a GitHub Pages | ⏳ pending | 1h |
 
