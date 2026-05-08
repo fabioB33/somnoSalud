@@ -57,6 +57,7 @@ Los procesos viven en `processes/` y son **reutilizables cross-product**. Cualqu
 - [[lessons-learned/LL-2026-05-06-oauth-flows-tienen-4-capas-de-gotchas]] — refinamiento regla #8 EMPIRICAL-FIRST: OAuth flows requieren 5 evidencias E1-E5 (callback param naming + frontend rendering SSOT + customer_id auto-discovery + developer token / API access + smoke E2E)
 - [[lessons-learned/LL-2026-05-06-rpc-validar-name-no-solo-slug]] — al validar uniqueness en RPC, validar `name` no solo `slug` (caso Lure brand fantasma)
 - [[lessons-learned/LL-2026-05-07-filesystem-housekeeping-drift]] — 5 patrones que rompen la regla del Vault como fuente única (worktrees, deliverables, repos externos, naming, branches stale) + mitigaciones formalizadas
+- [[lessons-learned/LL-2026-05-08-conteo-describe-vs-test-blocks]] — contar tests con grep de `describe(` da número falso; siempre correr el test runner para conteo real (vitest/jest reportan línea `Tests N passed`)
 
 ---
 
@@ -71,7 +72,7 @@ Los procesos viven en `processes/` y son **reutilizables cross-product**. Cualqu
 
 ## 🚀 Sprints
 
-> **Sprint 1 a empezar:** commit pnpm-lock.yaml + CI verde + crear project Supabase Org Pampa Labs.
+- [[sprints/sprint-1-cleanup-os-heredado/SPRINT-1-CLEANUP-OS-HEREDADO]] — cleanup del OS heredado tras commit `6f8f6c9`: package-lock huérfano, SETUP.sh foot-gun, análisis exhaustivo duplicado, packages skeleton sin package.json. Cierra Fase 0.4 del MASTER-PLAN.
 
 Cada sprint vive en `sprints/sprint-NN-<slug>/SPRINT-NN-<SLUG>.md`. Convención de naming: ASCII-safe lowercase con guiones-medios (regla #12 CLAUDE.md).
 
