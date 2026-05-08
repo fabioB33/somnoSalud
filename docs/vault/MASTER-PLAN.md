@@ -29,8 +29,9 @@ created: 2026-05-07
 - ✅ **Fase 0.4 — Sprint 1 closed-verified (2026-05-08):** commit `pnpm-lock.yaml` ya estaba (`6f8f6c9`) + CI verde local triangulado + cleanup OS heredado (package-lock huérfano borrado, SETUP.sh archivado, análisis exhaustivo SSOT resuelto, 4 packages skeleton habilitados con turbo). Detalle: [[sprints/sprint-1-cleanup-os-heredado/SPRINT-1-CLEANUP-OS-HEREDADO]].
 - ✅ **Fase 0.5 — Sprint 2.A closed-verified (2026-05-08):** curado de 46 agents heredados → 26 activos (25 mantenidos + 1 propio `compliance-anmat` AR/ANMAT) + 22 archivados con README. QA-CHECKLIST y DEPLOY-WORKFLOW reescritos para SomnoSalud (Vercel + GH Pages, sin VPS Docker). SCC Bloque F adaptado, TEMPLATE-DEBT con ejemplos reales SomnoSalud, 5 LLs con disclaimer cross-product. CLAUDE.md "Skills obligatorias" reescrita con lista curada en 10 categorías. Detalle: [[sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]]. Cierra DEBT-curar-agents-pampalabs-os y DEBT-procesos-heredados-content-factory.
 - ⏳ **Fase 0.6 — Sprint 2.B pending Fabio:** crear project Supabase `somnosalud-platform` en Org Pampa Labs (plan FREE, region São Paulo) + setear MCP `supabase-somnosalud` con project ref real. Runbook listo en [[sprints/sprint-2-curar-os-heredado/SPRINT-2B-RUNBOOK-SUPABASE]]. Ownership: Fabio (requiere credenciales Org Pampa Labs).
+- 🚀 **Fase 1 arrancada (2026-05-08): Sprint 5 in-progress.** Decisión equipo Fabio: saltar Sprints 2.B (Supabase) y 3 (Vercel deploy) ya que webapp-somnosalud puede correr 100% client-side hasta Sprint 9+ (auth + persistencia). Sprint 5 inicia scaffold Next.js 14 + Tailwind + shadcn/ui + workspace dep clinical-engine + welcome page. Detalle: [[sprints/sprint-5-scaffold-webapp-somnosalud/SPRINT-5-SCAFFOLD-WEBAPP-SOMNOSALUD]].
 
-**Próxima sesión sugerida:** Sprint 2.B (Supabase setup) — ejecución por Fabio cuando agende ventana.
+**Próxima sesión sugerida:** continuar Sprint 5 → S6 (compliance gates: disclaimer + T&C + verificación edad).
 
 ---
 
@@ -59,15 +60,17 @@ created: 2026-05-07
 
 | Sprint | Entregable | Estado | Horas est. |
 |---|---|---|---|
-| 5 | Schema inicial Supabase: users + evaluations + answers + RLS multi-tenant | ⏳ | 4h |
-| 6 | Auth Supabase (email + magic link) + protected routes | ⏳ | 3h |
-| 7 | Persistencia evaluación (save partial progress + resume) | ⏳ | 4h |
-| 8 | T&C + consentimiento informado escrito + verificación edad gate | ⏳ | 3h |
-| 9 | Disclaimer médico obligatorio en TODA pantalla resultados + matrícula MN visible | ⏳ | 2h |
-| 10 | Responsive mobile-first audit + fixes | ⏳ | 4h |
-| 11 | Tests unitarios cobertura 100% `clinical-engine/scoring/` (50+ tests adicionales) | ⏳ | 5h |
-| 12 | Sentry + Resend setup (error tracking + welcome email) | ⏳ | 2h |
-| 13 | E2E Playwright cobertura básica (happy path 12 steps + safety triggers) | ⏳ | 4h |
+| **5** | **Scaffold Next.js 14 webapp-somnosalud + Tailwind + shadcn/ui + workspace dep clinical-engine + welcome page** | ⏳ in-progress (2026-05-08) | 3-4h |
+| 6 | Pantallas P0 compliance gates: disclaimer + T&C + verificación edad <18 + profile (sin persistencia, sessionStorage) | ⏳ | 3-4h |
+| 7 | Pantallas cuestionarios: ISI + STOP-BANG + PHQ-9 (con detección ítem 9) + GAD-7 + DASS-21 + sleep + lab + genetics, scoring real con clinical-engine | ⏳ | 5-6h |
+| 8 | Pantalla resultados + recomendaciones + disclaimer obligatorio + MN visible + export PDF | ⏳ | 3-4h |
+| 9 | (post Sprint 2.B) Schema inicial Supabase: users + evaluations + answers + RLS multi-tenant | ⏳ | 4h |
+| 10 | Auth Supabase (email + magic link) + protected routes | ⏳ | 3h |
+| 11 | Persistencia evaluación migrada de sessionStorage → Supabase (save partial progress + resume) | ⏳ | 4h |
+| 12 | Responsive mobile-first audit + fixes | ⏳ | 4h |
+| 13 | Tests unitarios cobertura 100% `clinical-engine/scoring/` (50+ tests adicionales) | ⏳ | 5h |
+| 14 | Sentry + Resend setup (error tracking + welcome email) | ⏳ | 2h |
+| 15 | E2E Playwright cobertura básica (happy path 12 steps + safety triggers) | ⏳ | 4h |
 
 **Criterio de cierre Fase 1:** un paciente AR puede crear cuenta + completar evaluación + recibir resultados con compliance legal full + retomar evaluación si abandonó.
 
