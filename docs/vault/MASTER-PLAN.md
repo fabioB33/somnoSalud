@@ -29,9 +29,9 @@ created: 2026-05-07
 - ✅ **Fase 0.4 — Sprint 1 closed-verified (2026-05-08):** commit `pnpm-lock.yaml` ya estaba (`6f8f6c9`) + CI verde local triangulado + cleanup OS heredado (package-lock huérfano borrado, SETUP.sh archivado, análisis exhaustivo SSOT resuelto, 4 packages skeleton habilitados con turbo). Detalle: [[sprints/sprint-1-cleanup-os-heredado/SPRINT-1-CLEANUP-OS-HEREDADO]].
 - ✅ **Fase 0.5 — Sprint 2.A closed-verified (2026-05-08):** curado de 46 agents heredados → 26 activos (25 mantenidos + 1 propio `compliance-anmat` AR/ANMAT) + 22 archivados con README. QA-CHECKLIST y DEPLOY-WORKFLOW reescritos para SomnoSalud (Vercel + GH Pages, sin VPS Docker). SCC Bloque F adaptado, TEMPLATE-DEBT con ejemplos reales SomnoSalud, 5 LLs con disclaimer cross-product. CLAUDE.md "Skills obligatorias" reescrita con lista curada en 10 categorías. Detalle: [[sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]]. Cierra DEBT-curar-agents-pampalabs-os y DEBT-procesos-heredados-content-factory.
 - ⏳ **Fase 0.6 — Sprint 2.B pending Fabio:** crear project Supabase `somnosalud-platform` en Org Pampa Labs (plan FREE, region São Paulo) + setear MCP `supabase-somnosalud` con project ref real. Runbook listo en [[sprints/sprint-2-curar-os-heredado/SPRINT-2B-RUNBOOK-SUPABASE]]. Ownership: Fabio (requiere credenciales Org Pampa Labs).
-- 🚀 **Fase 1 arrancada (2026-05-08): Sprint 5 in-progress.** Decisión equipo Fabio: saltar Sprints 2.B (Supabase) y 3 (Vercel deploy) ya que webapp-somnosalud puede correr 100% client-side hasta Sprint 9+ (auth + persistencia). Sprint 5 inicia scaffold Next.js 14 + Tailwind + shadcn/ui + workspace dep clinical-engine + welcome page. Detalle: [[sprints/sprint-5-scaffold-webapp-somnosalud/SPRINT-5-SCAFFOLD-WEBAPP-SOMNOSALUD]].
+- ✅ **Fase 1 arrancada — Sprint 5 closed-verified (2026-05-08):** scaffold completo de `webapp-somnosalud` con Next.js 14 + Tailwind 3.4 + shadcn/ui (Button + Card) + tsconfig extend + workspace dep `somnosalud-clinical-engine` validado empíricamente (`scoreISI` ejecutándose en build-time) + welcome page con paleta SomnoSalud + footer compliance (M.N. Pablo Ferrero 119.783). `pnpm dev` arranca en 2s, `pnpm build` genera prerendered estático. CI cross-monorepo verde (5-6/N tasks successful, clinical-engine 55/55). Decisión equipo Fabio: saltar Sprints 2.B + 3 ya que webapp puede correr 100% client-side hasta S9+. Detalle: [[sprints/sprint-5-scaffold-webapp-somnosalud/SPRINT-5-SCAFFOLD-WEBAPP-SOMNOSALUD]].
 
-**Próxima sesión sugerida:** continuar Sprint 5 → S6 (compliance gates: disclaimer + T&C + verificación edad).
+**Próxima sesión sugerida:** Sprint 6 — Pantallas P0 compliance gates (disclaimer + T&C consent + verificación edad <18 hard gate + profile inicial). Estimado 3-4h.
 
 ---
 
@@ -60,7 +60,7 @@ created: 2026-05-07
 
 | Sprint | Entregable | Estado | Horas est. |
 |---|---|---|---|
-| **5** | **Scaffold Next.js 14 webapp-somnosalud + Tailwind + shadcn/ui + workspace dep clinical-engine + welcome page** | ⏳ in-progress (2026-05-08) | 3-4h |
+| **5** | **Scaffold Next.js 14 webapp-somnosalud + Tailwind + shadcn/ui + workspace dep clinical-engine + welcome page** | ✅ closed-verified | ~2h ejecutadas (2026-05-08) |
 | 6 | Pantallas P0 compliance gates: disclaimer + T&C + verificación edad <18 + profile (sin persistencia, sessionStorage) | ⏳ | 3-4h |
 | 7 | Pantallas cuestionarios: ISI + STOP-BANG + PHQ-9 (con detección ítem 9) + GAD-7 + DASS-21 + sleep + lab + genetics, scoring real con clinical-engine | ⏳ | 5-6h |
 | 8 | Pantalla resultados + recomendaciones + disclaimer obligatorio + MN visible + export PDF | ⏳ | 3-4h |

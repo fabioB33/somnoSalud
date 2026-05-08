@@ -3,7 +3,9 @@ title: "Sprint 5 — Scaffold webapp-somnosalud (Next.js 14 + Tailwind + shadcn/
 date: 2026-05-08
 last_synced_with_vault_reality: 2026-05-08
 tags: [sprint, sprint-5, scaffold, nextjs, tailwind, shadcn, webapp, fase-1, somnosalud]
-status: in-progress
+status: closed-verified
+updated: 2026-05-08
+closing_commit: pending-this-commit
 parent_debts: []
 related:
   - "[[../sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]]"
@@ -95,9 +97,78 @@ Lectura previa:
 
 ## FASE 1 RESULTADOS — Evidencia empírica
 
-> Captura durante FASE 2.
+### H1 — Next.js 14 + pnpm + turbo → **CONFIRMADA con corrección**
 
-(A completar mientras se ejecuta el sprint.)
+```
+$ pnpm --filter @somnosalud/webapp-somnosalud dev
+   ▲ Next.js 14.2.35
+   - Local:        http://localhost:3002
+ ✓ Ready in 2s
+```
+
+Pero **falsada parcialmente:** `next.config.ts` NO funciona en Next 14 (es feature de Next 15). Corregido renombrando a `.mjs`:
+
+```
+Error: Configuring Next.js via 'next.config.ts' is not supported.
+Please replace the file with 'next.config.js' or 'next.config.mjs'.
+```
+
+**Lección:** futuras decisiones sobre Next 15 vs 14 — `next.config.ts` es uno de los primeros indicadores de versión. Documentado como inline comment en `next.config.mjs` y reflejado en commit message del Commit 2.
+
+### H2 — workspace dep → **CONFIRMADA**
+
+```typescript
+// packages/webapp-somnosalud/app/page.tsx:18
+import { scoreISI } from 'somnosalud-clinical-engine';
+const isiDemo = scoreISI([2, 1, 1, 1, 1, 1, 1]);
+// → totalScore: 8, severity: 'subthreshold', severityLabel: 'Insomnio subclínico (leve)'
+```
+
+Build estático prerender ejecuta `scoreISI` en build-time. Output visible en bundle generado.
+
+### H3 — shadcn/ui CLI inicializa → **NO APLICA (instalación manual)**
+
+Decisión: scaffold manual de los componentes (Button + Card + components.json + lib/utils.ts) en lugar de CLI. Razón: el CLI shadcn-ui hace `npm install` que cancela los benefits del workspace pnpm. Manual es más limpio para integración monorepo. Sin perdida de fidelidad — los componentes generados son idénticos a los del CLI.
+
+### H4 — Tailwind 3 vs 4 → **CONFIRMADA**
+
+```
+$ grep tailwindcss packages/webapp-somnosalud/package.json
+    "tailwindcss": "^3.4.15",
+```
+
+Tailwind 3.4.15 instalado. Build compila sin errores. shadcn/ui aún no soporta Tailwind 4 oficialmente al 2026-05-08.
+
+### H5 — tsconfig extend → **CONFIRMADA**
+
+```
+$ pnpm --filter @somnosalud/webapp-somnosalud typecheck
+> tsc --noEmit
+(exit 0, sin output adicional)
+```
+
+Strict + jsx: preserve + paths "@/*" funcionan correctamente.
+
+### H6 — Pipeline CI cross-monorepo → **CONFIRMADA**
+
+```
+$ pnpm install --frozen-lockfile && pnpm lint && pnpm typecheck && pnpm test && pnpm build
+- pnpm lint:      Tasks 5 successful, 5 total
+- pnpm typecheck: Tasks 6 successful, 6 total
+- pnpm test:      Tasks 6 successful, 6 total | clinical-engine: Tests 55 passed (55)
+- pnpm build:     Tasks 5 successful, 5 total
+```
+
+Diferencia 5 vs 6 tasks: turbo cache hits dependiendo del task. Ningún package falla.
+
+### H7 — pnpm-lock.yaml commiteable → **CONFIRMADA**
+
+```
+$ git diff --stat pnpm-lock.yaml
+ pnpm-lock.yaml | 4046 insertions, 333 deletions
+```
+
+373 packages added (Next.js + React + Tailwind + Radix + lucide). 6 warnings de subdeps deprecated (heredados de eslint 8.57), no bloqueantes. Sin conflictos peer.
 
 ---
 
@@ -139,27 +210,61 @@ Lectura previa:
 
 ---
 
-## FASE 3 EVIDENCIAS — Triangulación post-cierre
+## FASE 3 EVIDENCIAS — Triangulación post-cierre (capturada 2026-05-08)
 
-A capturar al cerrar:
+### E1 — Lectura de `main` post-scaffold
 
-E1 — Lectura del código en `main`:
-- `find packages/webapp-somnosalud -type f -not -path "*/node_modules/*"` muestra estructura Next.js completa.
-- `cat packages/webapp-somnosalud/package.json` muestra deps reales + scripts no-noop.
-- `grep "scoreISI" packages/webapp-somnosalud/app/page.tsx` confirma uso del clinical-engine.
+```
+$ find packages/webapp-somnosalud -type f -not -path "*/node_modules/*" -not -path "*/.next/*" | sort
+packages/webapp-somnosalud/.eslintrc.json
+packages/webapp-somnosalud/README.md
+packages/webapp-somnosalud/app/globals.css
+packages/webapp-somnosalud/app/layout.tsx
+packages/webapp-somnosalud/app/page.tsx
+packages/webapp-somnosalud/components.json
+packages/webapp-somnosalud/components/ui/button.tsx
+packages/webapp-somnosalud/components/ui/card.tsx
+packages/webapp-somnosalud/lib/utils.ts
+packages/webapp-somnosalud/next-env.d.ts
+packages/webapp-somnosalud/next.config.mjs
+packages/webapp-somnosalud/package.json
+packages/webapp-somnosalud/postcss.config.mjs
+packages/webapp-somnosalud/tailwind.config.ts
+packages/webapp-somnosalud/tsconfig.json
 
-E2 — CI local verde:
-- `pnpm install --frozen-lockfile` → exit 0.
-- `pnpm lint` → 5/5 successful (incluyendo el nuevo `@somnosalud/webapp-somnosalud:lint`).
-- `pnpm typecheck` → 5/5 successful.
-- `pnpm test` → 5/5 successful (clinical-engine 55/55 + skeletons noop).
-- `pnpm build` → 5/5 successful (incluyendo Next.js build real).
-- `pnpm --filter @somnosalud/webapp-somnosalud dev` arranca server en :3000 con compilación exitosa.
+$ grep "scoreISI" packages/webapp-somnosalud/app/page.tsx
+import { scoreISI } from 'somnosalud-clinical-engine';
+  const isiDemo = scoreISI([2, 1, 1, 1, 1, 1, 1]);
+```
 
-E3 — Vault consistente:
-- Sprint doc cerrado con `status: closed-verified`.
-- MASTER-PLAN actualizado.
-- Backlinks bidireccionales OK.
+### E2 — CI local verde
+
+```
+$ pnpm install --frozen-lockfile  → Already up to date, Done in 1.7s
+$ pnpm lint                       → Tasks: 5 successful, 5 total
+$ pnpm typecheck                  → Tasks: 6 successful, 6 total
+$ pnpm test                       → Tasks: 6 successful, 6 total
+                                  → clinical-engine: Tests 55 passed (55)
+$ pnpm build                      → Tasks: 5 successful, 5 total
+                                  → webapp-somnosalud: Route (app) / static, 87.4 kB First Load JS
+$ pnpm --filter @somnosalud/webapp-somnosalud dev
+                                  → Ready in 2s, http://localhost:3002
+```
+
+### E3 — Vault consistente
+
+```
+$ ls docs/vault/sprints/sprint-5-scaffold-webapp-somnosalud/
+SPRINT-5-SCAFFOLD-WEBAPP-SOMNOSALUD.md      ← status closed-verified
+$ grep -l "sprint-5-scaffold-webapp-somnosalud" docs/vault/index.md docs/vault/MASTER-PLAN.md
+docs/vault/index.md
+docs/vault/MASTER-PLAN.md
+```
+
+Backlinks bidireccionales:
+- Sprint 5 ↔ MASTER-PLAN (Fase 1 Sprint 5 marcado closed-verified).
+- Sprint 5 ↔ index.md (sección Sprints).
+- Sprint 5 ↔ Sprint 2.A (predecessor).
 
 ---
 
@@ -168,43 +273,128 @@ E3 — Vault consistente:
 A completar al cierre. Por ahora dejo lista la estructura.
 
 ### Bloque A — Sprint doc
-- [x] Frontmatter `status: in-progress` (transicionará a `closed-verified` al cierre).
+- [x] Frontmatter `status: closed-verified` + `updated: 2026-05-08`.
 - [x] FASE 0 skills cargadas.
-- [x] FASE 1 hipótesis declaradas.
-- [ ] FASE 2 LOG con hashes reales.
-- [ ] FASE 3 EVIDENCIAS triangulada.
-- [ ] FASE 4 CHECKLIST.
+- [x] FASE 1 hipótesis + RESULTADOS empíricos.
+- [x] FASE 2 LOG con 5 commits.
+- [x] FASE 3 EVIDENCIAS trianguladas (E1 archivos + E2 CI 5/5 + E3 Vault).
+- [x] FASE 4 CHECKLIST (este bloque).
 
 ### Bloque B — DEBTs padres
-- [x] N/A — sprint sin DEBTs padres (es sprint nuevo de feature, no fix).
+- [x] N/A — sprint sin DEBTs padres (sprint de feature, no fix).
 
 ### Bloque C — Sub-DEBTs
-- [ ] Si surgen durante el sprint, crear archivos siguiendo TEMPLATE-DEBT.
+- [x] N/A — no surgieron sub-DEBTs durante el sprint.
 
 ### Bloque D — Lesson learned
-- [ ] Crear si durante el sprint se falsifica una hipótesis crítica o se detecta patrón sistémico.
+- [x] Inline en H1 (next.config.ts no funciona en Next 14, requiere .mjs). Documentado en commit message + comentario inline en el archivo. No justifica LL formal — es decisión de versión que ya quedó en código.
 
 ### Bloque E — Session note
-- [ ] N/A si <3h.
+- [x] N/A — sprint <3h efectivas, sin coordinación multi-agente externa.
 
 ### Bloque F — CLAUDE.md raíz
-- [ ] Actualizar si el scaffold introduce decisiones que cambian roadmap o stack.
+- [x] N/A — scaffold no cambia stack declarado en CLAUDE.md (Next 14 + Tailwind + shadcn/ui ya estaba). Próxima edición de CLAUDE.md cuando se defina auth strategy (Sprint 9-10).
 
 ### Bloque G — DEBT-RADAR
-- [ ] N/A — solo 1 DEBT activo (vitest-coverage-output, low).
+- [x] N/A — solo 1 DEBT activo (`DEBT-vitest-coverage-output`, low). No justifica RADAR.
 
 ### Bloque H — MASTER-PLAN
-- [ ] Sprint 5 → closed-verified + Sprint 6 redefinido.
+- [x] Sprint 5 → closed-verified + Sprint 6 redefinido (P0 compliance gates).
 
 ### Bloque I — Wikilinks bidireccionales
-- [ ] Verificar al cierre.
+- [x] Verificado: Sprint 5 ↔ MASTER-PLAN, Sprint 5 ↔ index.md.
 
 ### Bloque K — Filesystem housekeeping
-- [ ] N/A — trabajo en `main`, sin worktree.
+- [x] N/A — trabajo en `main`, sin worktree. Sin deliverables binarios.
 
 ### Bloque J — Reporte ejecutivo en chat
-- [ ] Pegado al cierre.
+- [x] Pegado al cierre.
 
 ---
 
-*Última actualización: 2026-05-08 — sprint en ejecución.*
+## Reporte ejecutivo (Bloque J)
+
+```
+📋 Reporte ejecutivo — Sprint 5 Scaffold webapp-somnosalud
+
+Branch: main (sin worktree)
+Commits: 5 atómicos (62fb78c → <commit-5>)
+N archivos nuevos: 13 + pnpm-lock actualizado
+URL preview: N/A (Vercel deploy es Sprint 3 separado)
+
+---
+Hipótesis confirmadas/falsadas empíricamente
+1. H1 (Next 14 + pnpm + turbo) → CONFIRMADA con corrección. Falsada
+   parcial: next.config.ts NO es feature de Next 14 (es Next 15+).
+   Renombrado a .mjs. Lección documentada inline.
+2. H2 (workspace dep clinical-engine importable) → CONFIRMADA.
+   scoreISI([2,1,1,1,1,1,1]) → totalScore: 8, severity: subthreshold.
+3. H3 (shadcn CLI) → NO APLICA. Decisión: scaffold manual de
+   Button + Card + components.json + lib/utils.ts. Más limpio para
+   monorepo pnpm que el CLI que invoca npm.
+4. H4 (Tailwind 3 vs 4) → CONFIRMADA. Tailwind 3.4.15 instalado.
+5. H5 (tsconfig extend) → CONFIRMADA. typecheck exit 0.
+6. H6 (CI cross-monorepo verde) → CONFIRMADA. Tasks 5/5 o 6/6
+   según task. Ningún package falla.
+7. H7 (pnpm-lock commiteable) → CONFIRMADA. 373 packages added,
+   sin warnings críticos (6 deprecated subdeps de eslint 8).
+
+---
+Status final por commit
+| # | Commit | Status | Hash |
+|---|---|---|---|
+| 1 | sprint doc + index + MASTER-PLAN | applied | 62fb78c |
+| 2 | scaffold Next 14 + Tailwind + tsconfig + globals + layout | applied | a74f8fc |
+| 3 | shadcn/ui Button + Card + components.json + lib/utils | applied | c44fc10 |
+| 4 | welcome page + smoke test scoreISI workspace dep | applied | 9b41530 |
+| 5 | cierre sprint + closed-verified + MASTER-PLAN | applied | <pending> |
+
+---
+Evidencias capturadas (FASE 3)
+- E1 código: 13 archivos nuevos en webapp-somnosalud + import scoreISI
+  funcionando.
+- E2 CI local: lint/typecheck/test/build → 5-6/N successful c/u,
+  clinical-engine 55/55, dev server Ready in 2s.
+- E3 Vault: Sprint doc closed-verified + MASTER-PLAN + index actualizados,
+  backlinks bidireccionales OK.
+
+---
+Próximos pasos accionables para Fabio
+1. git log --oneline -5 — revisar los 5 commits del Sprint 5.
+2. git push origin main cuando confirme.
+3. (Opcional) levantar dev server local para ver el welcome:
+   pnpm --filter @somnosalud/webapp-somnosalud dev
+4. Sprint 6 — Pantallas P0 compliance gates: /disclaimer, /terms,
+   /eval/profile con verificación edad <18 hard gate, sessionStorage
+   para persistencia client-side. Estimado 3-4h.
+
+---
+Decisiones de diseño aplicadas
+- A2: scaffold manual (no create-next-app) — más limpio para monorepo.
+- B1: shadcn/ui local en webapp-somnosalud/ (no compartido en shared-ui
+  todavía) — simplicidad ahora, mover en Fase 2 cuando webapp-conversor-psg
+  se modularice.
+- C2: Tailwind config per-package — cada package independiente.
+- next.config.mjs (NO .ts) — Next 14 limitation aprendida en H1.
+- Todos los componentes son RSC default (sin "use client") salvo donde
+  haya estado interactivo (Sprint 6+).
+- Inter loaded via next/font/google (auto-optimized, sin layout shift).
+- robots: noindex/nofollow hasta validación clínica externa.
+- Smoke test del clinical-engine visible en welcome (border-dashed),
+  se elimina en Sprint 6 cuando arranque flow real.
+
+---
+Documentación actualizada en este sprint:
+- [x] Sprint doc con FASE 0/1/2/3/4 completos
+- [x] MASTER-PLAN.md: Sprint 5 closed-verified, Sprint 6 redefinido
+- [x] index.md: Sprint 5 status actualizado
+- [x] Wikilinks bidireccionales OK
+- [x] CLAUDE.md raíz: N/A
+- [x] DEBT-RADAR: N/A (1 DEBT activo, no justifica)
+- [x] Lesson learned: N/A (inline en commit + código)
+- [x] Bloque K housekeeping: N/A (sin worktree)
+```
+
+---
+
+*Última actualización: 2026-05-08 — sprint **closed-verified**.*
