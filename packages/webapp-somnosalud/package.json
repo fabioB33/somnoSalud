@@ -2,14 +2,38 @@
   "name": "@somnosalud/webapp-somnosalud",
   "version": "0.1.0",
   "private": true,
-  "description": "Frontend Next.js 14 (App Router) + Tailwind + shadcn/ui — webapp principal SomnoSalud (12 pasos de evaluacion). Skeleton — implementacion pendiente Fase 1 segun docs/vault/MASTER-PLAN.md",
+  "description": "Frontend Next.js 14 (App Router) + Tailwind + shadcn/ui — webapp principal SomnoSalud (12 pasos de evaluacion). Scaffold inicial Sprint 5 (2026-05-08) — implementacion completa pendiente Fase 1 segun docs/vault/MASTER-PLAN.md",
   "scripts": {
-    "build": "echo 'skeleton — implementacion pendiente Fase 1 (Next.js 14 + Supabase auth + persistence + RLS)' && exit 0",
-    "dev": "echo 'skeleton — pnpm dev disponible cuando exista app/ directory' && exit 0",
-    "test": "echo 'skeleton — tests E2E Playwright pendientes Fase 1' && exit 0",
-    "typecheck": "echo 'skeleton — sin .ts todavia' && exit 0",
-    "lint": "echo 'skeleton — sin .ts todavia' && exit 0",
-    "clean": "rm -rf .next out dist"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint --max-warnings=0",
+    "typecheck": "tsc --noEmit",
+    "test": "echo 'tests E2E Playwright pendientes Sprint 15' && exit 0",
+    "clean": "rm -rf .next out"
+  },
+  "dependencies": {
+    "somnosalud-clinical-engine": "workspace:*",
+    "@radix-ui/react-slot": "^1.1.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.460.0",
+    "next": "^14.2.18",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwind-merge": "^2.5.4",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.18",
+    "postcss": "^8.5.0",
+    "tailwindcss": "^3.4.15",
+    "typescript": "^5.4.0"
   },
   "keywords": [
     "nextjs",

@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* shadcn/ui tokens — paleta dark base */
+    --background: 232 39% 14%;          /* #1a1a2e */
+    --foreground: 210 40% 98%;
+    --card: 220 47% 17%;                /* #16213e */
+    --card-foreground: 210 40% 98%;
+    --popover: 220 47% 17%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 232 89% 74%;             /* #818cf8 SomnoSalud purple */
+    --primary-foreground: 232 39% 14%;
+    --secondary: 220 30% 25%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 220 30% 25%;
+    --muted-foreground: 215 20% 70%;
+    --accent: 232 89% 74%;
+    --accent-foreground: 232 39% 14%;
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 30% 25%;
+    --input: 220 30% 25%;
+    --ring: 232 89% 74%;
+    --radius: 0.625rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    @apply h-full;
+  }
+  body {
+    @apply min-h-full bg-somno-gradient text-foreground antialiased;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+}
