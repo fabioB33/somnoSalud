@@ -22,6 +22,11 @@ related_rules:
 
 # LL-2026-05-06 — OAuth flows tienen 4 capas de gotchas (no 1)
 
+> [!info] Lección heredada Pampa Labs Core
+> Esta lesson learned se originó en el proyecto **Pampa Labs Core** (Sprints 77-78 Google Ads OAuth). Aplicable a SomnoSalud cuando se agreguen integraciones OAuth (Fase 3 wearables Oura/Fitbit/Apple Health, o Stripe Connect B2B sleep specialists). Las 4 capas (callback param naming + frontend rendering SSOT + customer_id auto-discovery + developer token / API access + smoke E2E) aplican universalmente a cualquier OAuth provider — validar las 4 ANTES de prometer time-to-value al cliente.
+>
+> Disclaimer agregado durante [[../sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]] (2026-05-08).
+
 ## Resumen
 
 OAuth flows aparentemente simples ("conectá tu cuenta Google Ads") tienen **4 capas independientes** de potenciales bugs/blockers. Validar las 4 ANTES de prometer time-to-value al cliente.

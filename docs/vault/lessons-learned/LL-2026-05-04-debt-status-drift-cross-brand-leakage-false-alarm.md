@@ -13,6 +13,11 @@ detected_by: jorge (instinto humano post-Cowork plan)
 
 # Lesson Learned — DEBT status drift causó falso alarma de 4 horas
 
+> [!info] Lección heredada Pampa Labs Core
+> Esta lesson learned se originó en el proyecto **Pampa Labs Core** (Sprint 73.R cross-brand-leakage). Aplicable a SomnoSalud por analogía: el patrón "DEBT con status incorrecto consume horas en investigar bugs ya resueltos" se repite en cualquier proyecto multi-tenant con management de DEBTs en Vault. Aplicar la regla #8 EMPIRICAL-FIRST-BEFORE-PLAN del [[../../../CLAUDE]] antes de cualquier plan de fix sobre un DEBT viejo.
+>
+> Disclaimer agregado durante [[../sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]] (2026-05-08) para clarificar origen cross-product.
+
 ## Contexto inmediato
 
 Domingo 2026-05-03 noche / lunes 2026-05-04 madrugada. Reunión Lure programada para lunes 12-17hs ART (Gabriel + Sol + Federico Traficante). Las 3 demos previas con Lure habían fallado. Jorge me pidió revisar el vault para ver qué DEBTs podían bloquear el demo.

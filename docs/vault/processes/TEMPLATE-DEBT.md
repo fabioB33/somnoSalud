@@ -99,15 +99,18 @@ Agregado 2026-04-19 basado en los 4 CRITICAL cerrados 2026-04-18/19. Un DEBT sol
 - [ ] Si el DEBT resuelve parcialmente, usar status `partial-closed` + documentar qué quedó open + estimación del trabajo restante.
 - [ ] Si el diagnóstico requiere observación adicional, usar status `investigation-in-progress` + plan de verificación con queries concretas (ej. DEBT-crones-silent-anomalies).
 
-## Ejemplos reales (buscar inspiración)
+## Ejemplos reales en SomnoSalud (buscar inspiración)
 
-- [[DEBT-tiendanube-granularity-gap]] — priority high, scope sprint dedicado
-- [[DEBT-deploy-workflow-env-sanity]] — priority medium, scope post-sprint-1
-- [[DEBT-quartz-slugify-case]] — priority low, scope sprint polish
-- [[DEBT-luna-escalation-antipattern]] — priority high, resuelto en Sprint 1 Fase 3
-- [[DEBT-luna-semantic-memory-pinecone]] — priority high, scheduled para Fase 2
+DEBTs creados durante [[../sprints/sprint-1-cleanup-os-heredado/SPRINT-1-CLEANUP-OS-HEREDADO]]:
+
+- [[../debt/DEBT-vitest-coverage-output]] — priority low, scope sprint-2 (warning de turbo `outputs` declarados pero no generados).
+- [[../debt/DEBT-curar-agents-pampalabs-os]] — priority medium, scope sprint-2 (46 agents heredados, ~21 irrelevantes).
+- [[../debt/DEBT-procesos-heredados-content-factory]] — priority medium, scope sprint-2 (QA-CHECKLIST + DEPLOY-WORKFLOW asumían Content Factory + VPS Docker).
+
+A medida que se acumulen DEBTs en SomnoSalud, esta lista se mantiene actualizada como referencia de patrones aplicados al proyecto.
 
 ## Changelog
 
-- **v1.0 — 2026-04-18** — Template inicial extraído de la convención aplicada en los 8 DEBTs existentes pre-auditoría.
-- **v1.1 — 2026-04-19** — Agregados status `fix-in-progress`, `ready-for-deploy`, `closed-verified`, `partial-closed`, `investigation-in-progress` + campos opcionales `updated` y `closed_by` en frontmatter + checklist de cierre con triangulación de 3 evidencias. Origen: los 4 CRITICAL cerrados 2026-04-18/19 definieron el patrón empírico. Ver [[DEPLOY-WORKFLOW#§C — Hotfix lifecycle + closed-verified pattern]] + [[../sprints/sprint-doc-integrity-pattern-3-complete/SPRINT-DOC-INTEGRITY-PATTERN-3-COMPLETE]] FASE C.
+- **v1.0 — 2026-04-18** (heredado Pampa Labs Core) — Template inicial extraído de la convención aplicada en los 8 DEBTs existentes pre-auditoría.
+- **v1.1 — 2026-04-19** (heredado Pampa Labs Core) — Agregados status `fix-in-progress`, `ready-for-deploy`, `closed-verified`, `partial-closed`, `investigation-in-progress` + campos opcionales `updated` y `closed_by` en frontmatter + checklist de cierre con triangulación de 3 evidencias. Origen: 4 CRITICAL cerrados 2026-04-18/19 en Pampa Labs Core que definieron el patrón empírico. Ver [[DEPLOY-WORKFLOW#§E — Hotfix lifecycle + closed-verified pattern (UNIVERSAL)]].
+- **v1.2 — 2026-05-08** (SomnoSalud) — Reemplazados ejemplos hardcoded de DEBTs cross-product (Tiendanube/Luna/Quartz, vivían en otro Vault) por ejemplos reales de SomnoSalud creados durante Sprint 1. Cleanup parte de [[../sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]].

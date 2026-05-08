@@ -26,6 +26,11 @@ related_rules:
 
 # LL-2026-05-06 — Pattern listAccessibleCustomers para auto-discovery account_id post-OAuth
 
+> [!info] Lección heredada Pampa Labs Core
+> Esta lesson learned se originó en el proyecto **Pampa Labs Core** (Sprint 78 Google Ads OAuth + customer_id auto-discovery). Aplicable a SomnoSalud cuando se agreguen integraciones OAuth con scope multi-account: posibles candidatos en Fase 3 son wearables (Oura, Fitbit, Apple Health, Garmin), Google Calendar (para agendamiento de consultas con IFN), o Stripe Connect (para sleep specialists pagantes). Cada provider tiene un endpoint canónico tipo `listAccessible*` para descubrir las cuentas/profiles bajo el OAuth grant — usar el pattern documentado acá para evitar dejar `*_account_id = NULL` post-callback.
+>
+> Disclaimer agregado durante [[../sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]] (2026-05-08).
+
 ## Resumen
 
 Cuando integramos un nuevo provider OAuth (Meta, Google, TikTok, LinkedIn, Stripe Connect, Twitter/X Ads, Pinterest, Snapchat), el callback que persiste el `refresh_token` debe AUTOMÁTICAMENTE descubrir y persistir el `account_id` correspondiente. NO dejar `ad_account_id = NULL` y "que el cron lo resuelva después" — eso introduce un paso silencioso que rompe el flow self-service.

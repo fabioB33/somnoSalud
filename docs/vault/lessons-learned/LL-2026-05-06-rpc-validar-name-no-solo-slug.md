@@ -25,6 +25,11 @@ related_rules:
 
 # LL-2026-05-06 — RPC validar name unique, no solo slug
 
+> [!info] Lección heredada Pampa Labs Core
+> Esta lesson learned se originó en el proyecto **Pampa Labs Core** (Sprint 79.A Lure brand fantasma). Aplicable a SomnoSalud cuando se diseñen RPCs Postgres que creen recursos user-facing con `name + slug`. En SomnoSalud aplica desde Fase 3 multi-tenant white-label (cada sleep specialist con su clínica → tabla `clinics` con `name + slug`). El bug del slug auto-incremental que silenciosamente permite `name` duplicado se reproduciría exactamente igual.
+>
+> Disclaimer agregado durante [[../sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]] (2026-05-08).
+
 ## Resumen
 
 Cuando una RPC crea un resource user-facing con `name` (visible al usuario) + `slug` (identifier técnico), validar **únicamente unicidad de slug** genera **brand fantasma**: el slug es siempre único (loop incremental autogenera `-1`, `-2`, ...) pero el `name` puede colisionar silenciosamente.

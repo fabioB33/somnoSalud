@@ -19,6 +19,11 @@ related_rules:
 
 # LL-2026-05-05 — VPS logs revelaron schema drift entre RPC y tabla
 
+> [!info] Lección heredada Pampa Labs Core
+> Esta lesson learned se originó en el proyecto **Pampa Labs Core** (Sprint 76.Y `pb_brand_config.business_type` schema drift). Aplicable a SomnoSalud por analogía: cualquier RPC Postgres que escriba en una tabla puede tener drift entre el código (RPC `INSERT INTO ...`) y el schema real (`information_schema.columns`). En SomnoSalud aplica desde Sprint 5 cuando exista schema Supabase (tablas `evaluations`, `eval_responses`, etc.). La técnica empírica es la misma: triangular logs prod (Vercel/Supabase logs) + query schema introspection + smoke E2E. Aplicar regla #8 EMPIRICAL-FIRST-BEFORE-PLAN del [[../../../CLAUDE]].
+>
+> Disclaimer agregado durante [[../sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]] (2026-05-08).
+
 ## Resumen
 
 El bug de Sprint 76.Y (POST `/api/onboarding/brand` → 500) NO fue detectable por:

@@ -106,16 +106,19 @@ Cuerpo: cronología por hito + qué se shippó + decisiones tomadas (numeradas) 
 
 ### Bloque F — CLAUDE.md raíz (cuando aplique)
 
-**Editar `/Users/elizabethuribe/Pampa-Labs-Core/CLAUDE.md` SI el sprint cambia:**
+**Editar el `CLAUDE.md` raíz del repo** (`./CLAUDE.md`, ruta relativa al root del proyecto) **SI el sprint cambia:**
 
-- Status de un servicio externo (ej: Resend `PENDIENTE` → `code-pending-merge`).
-- Stack del producto principal (ej: nueva dependencia crítica).
-- Roadmap inmediato (sección "Próximas 4 semanas").
+- Status de un servicio externo (ej: Supabase `PENDIENTE crear` → `created` con project ref).
+- Stack del producto principal (ej: nueva dependencia crítica, cambio de framework).
+- Roadmap inmediato (sección "🎯 Roadmap (3 fases)").
 - DEBTs CRITICAL abiertos/cerrados.
 - Productos en producción (estado, tracción, modelos comerciales).
-- Procesos obligatorios (sección "Instrucciones para Claude Code").
+- Procesos obligatorios (sección "🧠 Instrucciones para Claude Code").
+- Skills obligatorias (sección "Skills obligatorias — USAR SIEMPRE") cuando se agregan/quitan agents en `.claude/agents/`.
 
-Buscar líneas relevantes con `grep -n "<keyword>" CLAUDE.md` antes de editar. Actualizar `Última actualización: <fecha>` al final si fue cambio significativo.
+Buscar líneas relevantes con `grep -n "<keyword>" CLAUDE.md` antes de editar. Actualizar `*Última actualización: <fecha>*` al final si fue cambio significativo.
+
+> **Nota histórica:** versiones anteriores de este checklist (heredadas del Pampa Labs Core / commit `6f8f6c9`) referenciaban un path absoluto `/Users/elizabethuribe/Pampa-Labs-Core/CLAUDE.md`. SomnoSalud usa siempre la referencia relativa al repo (`./CLAUDE.md`) — el CLAUDE.md de SomnoSalud es self-contained, no hay un CLAUDE.md cross-product que actualizar simultáneamente. Adaptado durante [[../sprints/sprint-2-curar-os-heredado/SPRINT-2-CURAR-OS-HEREDADO]].
 
 ### Bloque G — DEBT-RADAR (siempre)
 
