@@ -36,7 +36,14 @@
     @apply h-full;
   }
   body {
-    @apply min-h-full bg-somno-gradient text-foreground antialiased;
+    @apply min-h-full text-foreground antialiased;
+    /* Paleta SomnoSalud: gradient diagonal del bg-from al bg-to.
+       Usamos CSS directo en lugar de @apply bg-somno-gradient porque
+       la utility custom de Tailwind solo se genera si aparece en JSX
+       (con JIT), y este body es el unico consumer. */
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background-attachment: fixed;
+    min-height: 100dvh;
     font-feature-settings: 'rlig' 1, 'calt' 1;
   }
 }
