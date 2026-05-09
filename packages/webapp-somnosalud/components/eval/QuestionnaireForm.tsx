@@ -58,16 +58,28 @@ export function QuestionnaireForm({
   scale,
   initialResponses,
   onSubmit,
+  onResponseChange,
   submitLabel = 'Continuar',
   cancelHref,
+  itemSeparators,
 }: {
   instrumentName: string;
   items: readonly QuestionItem[];
   scale: readonly ScaleOption[];
   initialResponses?: number[];
   onSubmit: (responses: number[]) => void | Promise<void>;
+  /**
+   * Callback opcional que se dispara en cada cambio de respuesta.
+   * Uso: detección live (ej: PHQ-9 item 9 ideación suicida → recurso emergencia).
+   */
+  onResponseChange?: (itemIdx: number, value: number) => void;
   submitLabel?: string;
   cancelHref?: string;
+  /**
+   * Mapa opcional de itemIdx → headerText. Si presente, se renderiza
+   * un separator <h2> ANTES de ese item. Uso: DASS-21 con 3 subscales.
+   */
+  itemSeparators?: ReadonlyMap<number, string>;
 }) {
   const [responses, setResponses] = useState<(number | null)[]>(() =>
     initialResponses && initialResponses.length === items.length
@@ -91,6 +103,8 @@ export function QuestionnaireForm({
       return next;
     });
     setShowError(false);
+    // Notificar al consumer (ej: PHQ9Form para detección live ítem 9).
+    onResponseChange?.(itemIdx, value);
   };
 
   const allAnswered = responses.every((r) => r !== null);
@@ -136,8 +150,14 @@ export function QuestionnaireForm({
           const itemScale: readonly ScaleOption[] = item.options
             ? item.options.map((label, idx) => ({ value: idx, label }))
             : scale;
+          const separator = itemSeparators?.get(itemIdx);
           return (
             <li key={item.number} id={itemId}>
+              {separator && (
+                <h2 className="mb-3 mt-2 text-sm font-semibold uppercase tracking-wider text-somno-accent">
+                  {separator}
+                </h2>
+              )}
               <fieldset
                 className={`rounded-lg border p-5 transition-colors ${
                   isAnswered
