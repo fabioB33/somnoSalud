@@ -31,20 +31,43 @@ export interface EvalState {
     weightKg: number;
     heightCm: number;
   };
-  /** Safety screening (Sprint 7) */
-  safety?: unknown; // Tipado completo se agrega Sprint 7.
-  /** Cuestionarios (Sprint 7) */
+  /** Safety screening (Sprint 7.A) — match con clinical-engine SafetyScreening. */
+  safety?: {
+    pregnancyStatus: 'yes' | 'no' | 'not_applicable';
+    isPregnant: boolean;
+    pregnancyWeeks?: number;
+    currentMedications: string[];
+    anticoagulantFlag: boolean;
+    medicalConditions: string[];
+    allergies: string[];
+    shiftWork: boolean;
+    shiftType?: 'night_fixed' | 'rotating' | 'on_call';
+    /** Si paciente acepto warning de severity 'restrict' para continuar. */
+    acknowledgedRestrict?: boolean;
+  };
+  /** ISI 7 items, cada uno 0-4 (Sprint 7.A) */
   isi?: number[];
+  /** ESS 8 items, cada uno 0-3 (Sprint 7.A) */
   ess?: number[];
-  stopBang?: unknown;
+  /** STOP-BANG 5 manual respuestas boolean (Sprint 7.A) */
+  stopBang?: {
+    snoring: boolean;
+    tired: boolean;
+    observed: boolean;
+    pressure: boolean;
+    neckOver40cm: boolean;
+  };
+  /** PHQ-9 9 items, cada uno 0-3 (Sprint 7.B) */
   phq9?: number[];
+  /** GAD-7 7 items, cada uno 0-3 (Sprint 7.B) */
   gad7?: number[];
+  /** DASS-21 21 items, cada uno 0-3 (Sprint 7.B) */
   dass21?: number[];
-  /** Sleep diary (Sprint 7) */
+  /** Sleep diary (Sprint 7.B) */
   sleep?: unknown;
-  /** Lab opcional (Sprint 7) */
+  /** Lab opcional (Sprint 7.B) */
   lab?: unknown;
-  /** Genetics opcional (Sprint 7) */
+  /** Genetics opcional (Sprint 7.B) */
   genetics?: unknown;
 }
 
