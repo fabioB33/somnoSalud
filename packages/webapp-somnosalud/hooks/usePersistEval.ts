@@ -63,12 +63,20 @@ export interface EvalState {
   gad7?: number[];
   /** DASS-21 21 items, cada uno 0-3 (Sprint 7.B) */
   dass21?: number[];
-  /** Sleep diary (Sprint 7.B) */
-  sleep?: unknown;
-  /** Lab opcional (Sprint 7.B) */
-  lab?: unknown;
-  /** Genetics opcional (Sprint 7.B) */
-  genetics?: unknown;
+  /** Sleep diary (Sprint 7.B) — campos heterogeneos del paciente. */
+  sleep?: {
+    sleepLatencyMin: number;        // tiempo en min para dormirse
+    totalHoursAsleep: number;       // horas dormidas tipicas
+    timeInBedHours: number;         // horas en cama tipicas
+    awakeningsPerNight: number;     // numero de despertares
+    qualitySubjective: number;      // 1-10 (10 = mejor)
+    bedtimeTypical: string;         // HH:MM 24h
+    wakeTimeTypical: string;        // HH:MM 24h
+  };
+  /** Lab opcional (Sprint 7.B) — keys son codes del clinical-engine. Skip = lab no presente. */
+  lab?: Record<string, number>;
+  /** Genetics opcional (Sprint 7.B) — keys son gene names, value es genotype string. Skip = genetics no presente. */
+  genetics?: Record<string, string>;
 }
 
 export function usePersistEval() {
