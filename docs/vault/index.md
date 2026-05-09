@@ -58,6 +58,7 @@ Los procesos viven en `processes/` y son **reutilizables cross-product**. Cualqu
 - [[lessons-learned/LL-2026-05-06-rpc-validar-name-no-solo-slug]] — al validar uniqueness en RPC, validar `name` no solo `slug` (caso Lure brand fantasma)
 - [[lessons-learned/LL-2026-05-07-filesystem-housekeeping-drift]] — 5 patrones que rompen la regla del Vault como fuente única (worktrees, deliverables, repos externos, naming, branches stale) + mitigaciones formalizadas
 - [[lessons-learned/LL-2026-05-08-conteo-describe-vs-test-blocks]] — contar tests con grep de `describe(` da número falso; siempre correr el test runner para conteo real (vitest/jest reportan línea `Tests N passed`)
+- [[lessons-learned/LL-2026-05-09-tailwind-apply-no-genera-utilities-no-usadas]] — Tailwind JIT NO genera utility custom referenciada solo via `@apply` en CSS; usar CSS directo o `safelist`. Detectado en HOTFIX-2026-05-09 (gradient SomnoSalud ausente del body)
 
 ---
 
@@ -111,6 +112,14 @@ Stack inventories, snapshots de versiones, glosarios. Versionados con fecha en s
 ## 💰 DEBTs (technical debt)
 
 > Vacío al inicio del proyecto. Cada DEBT detectado durante un sprint se agrega siguiendo [[processes/TEMPLATE-DEBT]]. NO usar GitHub Issues — el Vault es SSOT.
+
+---
+
+## 🚨 Hotfixes
+
+Hotfixes urgentes detectados post-cierre de sprint que requieren fix inmediato. Cada hotfix documenta detección + diagnóstico triangulado + fix + verificación empírica.
+
+- [[hotfixes/HOTFIX-2026-05-09-tailwind-apply-utility-no-generado]] — gradient SomnoSalud ausente del body por Tailwind JIT no generando utility custom referenciada solo desde `@apply` en CSS. Fix: CSS directo en lugar de `@apply` para reglas globales. Lección: [[lessons-learned/LL-2026-05-09-tailwind-apply-no-genera-utilities-no-usadas]].
 
 ---
 
