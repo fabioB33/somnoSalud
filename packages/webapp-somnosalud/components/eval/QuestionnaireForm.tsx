@@ -7,12 +7,18 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 /**
- * Item de un cuestionario escalar. Acepta el shape del clinical-engine
- * (ej: ISI_ITEMS = [{number, text, options}]) o ESS (sin options inline).
+ * Item de un cuestionario escalar. Acepta dos shapes del clinical-engine:
+ * - ESS-like: solo {number, text}; la escala se pasa global como `scale` prop.
+ * - ISI-like: {number, text, options: string[]} donde cada item tiene su
+ *   propia lista de labels (5 niveles con wording distinto por item).
+ *
+ * Si el item tiene `options`, esos labels sobreescriben la `scale` global
+ * (los `value` siguen siendo 0..options.length-1).
  */
 export interface QuestionItem {
   number: number;
   text: string;
+  options?: readonly string[];
 }
 
 /**
@@ -125,6 +131,11 @@ export function QuestionnaireForm({
         {items.map((item, itemIdx) => {
           const itemId = `${instrumentName}-item-${itemIdx}`;
           const isAnswered = responses[itemIdx] !== null;
+          // Si el item trae options propias (ISI-like), las usamos. Si no,
+          // usamos la scale global (ESS-like, PHQ-9, GAD-7, DASS-21).
+          const itemScale: readonly ScaleOption[] = item.options
+            ? item.options.map((label, idx) => ({ value: idx, label }))
+            : scale;
           return (
             <li key={item.number} id={itemId}>
               <fieldset
@@ -141,7 +152,7 @@ export function QuestionnaireForm({
                   {item.text}
                 </legend>
                 <div className="space-y-2">
-                  {scale.map((option) => {
+                  {itemScale.map((option) => {
                     const inputId = `${itemId}-opt-${option.value}`;
                     const checked = responses[itemIdx] === option.value;
                     return (
