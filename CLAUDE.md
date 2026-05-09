@@ -6,7 +6,7 @@
 > cómo trabajamos y hacia dónde vamos.
 >
 > **Heredado del Pampa Labs OS (`pampalabs/core` `CLAUDE.md`) — formalizado 2026-05-07 noche.**
-> Las 13 reglas absolutas de Pampa Labs son universales y se aplican tal cual a este repo.
+> Las 15 reglas absolutas de Pampa Labs son universales y se aplican tal cual a este repo (actualizado 2026-05-09 con #13 NO-HARDCODED + #14 VAULT-LOOKUP-BEFORE-INSTRUCT).
 > El contenido específico de productos, stack, MCPs y roadmap es propio de SomnoSalud.
 
 ---
@@ -122,7 +122,35 @@ Slash commands universales (cuando estén instalados como skills del IDE):
 10. **REGLA DELIVERABLES-CLIENTE-EN-CLIENTS (heredada de Pampa Labs OS, formalizada 2026-05-07):** todo output entregable a stakeholders / Pablo Ferrero / equipo IFN (.docx, .pdf, decks, reportes clínicos) va a `clients/ifn/deliverables-YYYY-MM/`. Esta carpeta está gitignored. NUNCA dejar deliverables en raíz del repo. Si el sprint generó assets binarios pesados (>10 MB cumulado), ir a `clients/ifn/source-<origen>/` (también gitignored) o setear Git LFS — NO commitear ZIPs/.mov/.png crudos al repo.
 11. **REGLA REPOS-EXTERNOS-EN-PROJECTS (heredada de Pampa Labs OS, formalizada 2026-05-07):** repos git externos (no SomnoSalud) viven en `~/Projects/<nombre>/`, NO anidados dentro de este repo. Si por urgencia se bootstrappea uno desde `cwd=somnosalud-platform`, **moverlo inmediatamente post-push** a `~/Projects/`. Riesgo grave: si alguien hace `git add` accidental sobre el repo anidado, se duplica el código del repo cliente dentro de SomnoSalud, creando drift permanente entre los dos repos.
 12. **REGLA VAULT-NAMING-ASCII-LOWERCASE (heredada de Pampa Labs OS, formalizada 2026-05-07):** todas las carpetas dentro de `docs/vault/` deben ser ASCII-safe lowercase con guiones-medios. **NO** espacios, **NO** acentos, **NO** uppercase a menos que sea acrónimo establecido (ANMAT, RLS, OAuth, ISI, ESS, STOP-BANG, PHQ, GAD, DASS, BMI, PSG, AHI, etc.). Cuando se importan assets desde Drive con naming nativo, renombrar al copiar.
-13. NO HAY EXCEPCIONES.
+13. **REGLA NO-HARDCODED (heredada de Pampa Labs OS, formalizada 2026-05-09):** PROHIBIDO hardcodear valores específicos en código de producto o configuración deployada. **HARDCODED es mala palabra en Pampa Labs / SomnoSalud.** Cero excepciones. Aplica a:
+    - **Mailboxes / emails** (e.g. `pabloferrero@ifn.com.ar`, `legal@somnosalud.com.ar`, `info@pampalabs.com`) → usar config/env vars + helper canónico con routing diferenciado
+    - **DOI / PMID** referenciados en algoritmos clínicos → SIEMPRE en `packages/clinical-engine/src/references.ts` centralizado, NUNCA inline en código de scoring
+    - **Matrícula médica** (M.N. 119.783 Pablo Ferrero) → env var o config schema-driven, no string literal en footer/disclaimer
+    - **Brand IDs / clinic IDs / business_type / industry** → siempre dinámico desde DB con auth context
+    - **Paths / URLs producción** (Vercel preview URLs, dominio prod) → usar env vars
+    - **SHA commits, branch names, sprint numbers** → leer dinámicamente desde git/Vault, no hardcodear
+    - **Tokens / API keys / secrets** (Supabase, Sentry, Resend, Stripe) → variables de entorno, NUNCA en código
+    - **Account IDs / DB IDs** → query dinámica con auth/permission check
+    - **Rangos clínicos / cutoffs** (ISI ≥15 severo, AHI ≥15 moderado, etc.) → constantes en `clinical-engine/src/constants.ts` o derivado de `references.ts`, NUNCA `if (score >= 15)` literal repetido
+    - **Disclaimers / textos legales / consent strings** → schema-driven o i18n bundle, NUNCA copy hardcodeado en componentes
+    Si Cowork detecta hardcoded existente durante una tarea → abrir DEBT inmediatamente + proponer schema-driven fix. NO replicar el patrón. Esta ley existe porque cada hardcoded crea drift permanente, deuda técnica latente, fragilidad multi-tenant (white-label B2B Fase 3), y bloquea escalabilidad. SomnoSalud aspira a ser plataforma multi-clínica white-label — cada hardcoded es deuda contra esa tesis. Ver [[~/Pampa-Labs-Core/docs/vault/lessons-learned/LL-2026-05-09-no-hardcoded-law-pampa-labs]].
+14. **REGLA VAULT-LOOKUP-BEFORE-INSTRUCT (heredada de Pampa Labs OS, formalizada 2026-05-09 post 6 violaciones en una sesión):** ANTES de cada respuesta a Jorge / Pablo donde Cowork mencione un VALOR ESPECÍFICO (mailbox, path, comando, SHA, archivo, sprint number, DEBT name, branch name, URL, account, tabla DB, env var, sprint status, archivo del Vault, DOI/PMID, matrícula médica, scoring cutoff, etc), Cowork DEBE:
+    (a) Identificar los sustantivos críticos de la respuesta planeada
+    (b) Ejecutar grep recursivo Vault: `grep -rn "<sustantivo>" docs/vault/ CLAUDE.md packages/*/README.md packages/clinical-engine/src/references.ts`
+    (c) Leer top 3-5 matches completos (no asumir desde memoria)
+    (d) Pegar ANTES de la instrucción un bloque visible:
+    ```
+    [VAULT-CHECK pre-respuesta]
+    Sustantivos críticos: <lista>
+    Grep ejecutado: <comando exacto>
+    Hallazgos top: <citado textual + path:línea>
+    Coherencia: ✅ OK / ❌ DRIFT detectado → corrijo
+    ```
+    (e) Si hay DRIFT entre Vault y respuesta planeada → corregir la respuesta basada en el Vault, no al revés. Si el Vault está obsoleto, abrir DEBT/LL para sync, no proponer instrucción contradictoria.
+    **SIN bloque [VAULT-CHECK] visible ANTES de la instrucción, la respuesta es INVÁLIDA.** Jorge / Pablo tienen autoridad para parar Cowork y exigir que vuelva a responder con el bloque ejecutado.
+    Excepciones únicas: conversación social/casual sin valores específicos, acknowledgment puro, pregunta clarificadora donde Cowork pide info.
+    En SomnoSalud esta regla es DOBLEMENTE crítica porque mencionar incorrectamente un DOI/PMID o un cutoff clínico tiene riesgo regulatorio + clínico real (no solo drift documental). Cualquier afirmación sobre evidencia científica, scoring threshold, safety rule, o referencia a publicación peer-reviewed requiere VAULT-CHECK obligatorio. Ver [[~/Pampa-Labs-Core/docs/vault/lessons-learned/LL-2026-05-09-vault-lookup-before-instruct]].
+15. NO HAY EXCEPCIONES.
 
 ---
 
