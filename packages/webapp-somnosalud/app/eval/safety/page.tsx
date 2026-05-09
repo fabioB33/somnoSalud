@@ -1,49 +1,33 @@
-import Link from 'next/link';
+import { ProgressBar } from '@/components/eval/ProgressBar';
 
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { SafetyForm } from './SafetyForm';
 
 /**
- * Pantalla /eval/safety — PLACEHOLDER Sprint 6.
+ * Pantalla /eval/safety — Capa 4 de compliance gates (ADR-003).
  *
- * Se implementa completo en Sprint 7 con:
- * - Capa 4 de ADR-003: enforcement de safety rules SAFE-010..040 del
- *   clinical-engine (pregnancy + medication + anticoagulant + suicide
- *   ideation).
- * - Form: pregnancy status, current medications, anticoagulant flag,
- *   medical conditions, allergies, shift work.
- * - Si rule.action === 'block' -> derivar a especialista.
- * - Si rule.action === 'restrict' -> warning pero permitir continuar.
+ * Server Component renderiza header + ProgressBar. El form es Client
+ * Component porque ejecuta evaluateAllSafetyRules con estado y redirige
+ * segun severity.
  *
- * Por ahora muestra placeholder con boton "Volver" para que el flow
- * de Sprint 6 (welcome -> disclaimer -> terms -> profile) tenga un
- * destino sin 404.
+ * @see docs/vault/architecture/adr/ADR-003-compliance-gates-en-codigo.md (Capa 4)
+ * @see packages/clinical-engine/src/safety/rules.ts
  */
 export default function SafetyPage() {
   return (
     <main className="min-h-dvh">
       <div className="container max-w-2xl py-8 md:py-12">
-        <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          Paso 2 de 12
-        </p>
-        <h1 className="mb-3 text-3xl font-bold tracking-tight md:text-4xl">
+        <ProgressBar current={2} total={12} />
+        <h1 className="mb-3 mt-4 text-3xl font-bold tracking-tight md:text-4xl">
           Seguridad clínica
         </h1>
+        <p className="mb-8 text-base text-muted-foreground">
+          Algunas condiciones especiales (embarazo, medicación actual,
+          anticoagulantes) modifican qué recomendaciones son seguras para vos.
+          Esta sección revisa esas condiciones siguiendo nuestras reglas de
+          seguridad SAFE-010 a SAFE-040.
+        </p>
 
-        <Alert variant="info" className="my-8">
-          <AlertTitle>Próximamente — Sprint 7</AlertTitle>
-          <AlertDescription>
-            Esta pantalla se implementará en el próximo sprint. Va a evaluar
-            condiciones especiales (embarazo, medicación actual,
-            anticoagulantes) que pueden modificar las recomendaciones de
-            sueño. Por ahora, tus datos personales del paso 1 ya están
-            guardados localmente.
-          </AlertDescription>
-        </Alert>
-
-        <Button variant="outline" size="lg" asChild>
-          <Link href="/">Volver al inicio</Link>
-        </Button>
+        <SafetyForm />
       </div>
     </main>
   );
