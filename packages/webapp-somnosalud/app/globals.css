@@ -47,3 +47,79 @@
     font-feature-settings: 'rlig' 1, 'calt' 1;
   }
 }
+
+/* ─── Print styles (Capa 5 ADR-003: export PDF de /eval/results) ───
+   El paciente puede imprimir/exportar como PDF la pantalla de
+   resultados para llevarla a la consulta con el especialista. Estos
+   estilos:
+   - Quitan el gradient oscuro (fondo blanco para tinta).
+   - Texto en negro para contraste.
+   - Ocultan elementos UI (botones, banners default no reforzados).
+   - Evitan saltos de página en cards / score boxes / recommendations.
+   Los className `print:*` en JSX complementan estos estilos.
+*/
+@media print {
+  body {
+    background: white !important;
+    background-image: none !important;
+    color: black !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  main,
+  section,
+  article,
+  div {
+    background: transparent !important;
+  }
+
+  /* Forzar texto legible en modo print sobre fondo blanco. */
+  .text-foreground,
+  .text-foreground\/90,
+  h1, h2, h3, h4, h5, h6, p, li, strong, em {
+    color: black !important;
+  }
+
+  .text-muted-foreground,
+  .text-foreground\/80 {
+    color: #444 !important;
+  }
+
+  /* Mantener accent purpura para titulos clave + scoring. */
+  .text-somno-accent,
+  .text-primary {
+    color: #4f46e5 !important;
+  }
+
+  /* Bordes visibles en print. */
+  .border, .border-y, .border-b, .border-t,
+  .border-border\/40, .border-border\/60 {
+    border-color: #999 !important;
+  }
+
+  /* Footer + headers: no break-after. */
+  header, footer {
+    break-inside: avoid;
+  }
+
+  /* Evitar que cards/recs se partan entre paginas. */
+  .print\:break-inside-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Asegurar URLs visibles cerca de los links. */
+  a[href^='https://']::after,
+  a[href^='http://']::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.85em;
+    color: #666;
+  }
+
+  /* Quitar shadows en print. */
+  *, *::before, *::after {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+}
