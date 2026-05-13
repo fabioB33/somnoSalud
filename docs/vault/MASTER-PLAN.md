@@ -42,7 +42,9 @@ created: 2026-05-07
 
 - ✅ **Sprint 8.7 closed-verified (2026-05-09):** Polish UX + a11y baseline. shadcn Skeleton + FormSkeleton compuesto → reemplazo de 13 `<p>Cargando datos...</p>` repetidos en /eval/* forms. shadcn Dialog + Sonner Toaster instalados; `window.confirm` ugly de "Empezar de nuevo" reemplazado por Dialog elegante con destructive variant. `<Toaster />` montado en root layout disponible para feedback futuro (Sprint 9+ acciones). Bloque `@media (prefers-reduced-motion: reduce)` en globals.css respeta WCAG 2.1 SC 2.3.3 + 2.2.2 — desactiva animaciones/transiciones/smooth-scroll. role="status" + aria-label en placeholders. Lighthouse audit deferred para smoke humano. CI verde + smoke E2E 7/7 rutas correctas. Detalle: [[sprints/sprint-8-7-polish-a11y/SPRINT-8-7-POLISH-A11Y]].
 
-**Próxima sesión sugerida:** Sprint 13 — Tests E2E Playwright (~4-5h, no requiere Supabase). Cubre happy path 12 steps, safety triggers, PHQ-9 ítem 9 detection, redirect si flow incompleto, reset Dialog, edge cases.
+- 🚀 **Sprint 13 in-progress (2026-05-09):** Tests E2E Playwright robustos del flow client-side. Setup `@playwright/test` + Chromium headless. `playwright.config.ts` con webServer auto-launch. `tests/e2e/helpers.ts` con `skipToEvalWithProfile`, `acceptConsent`, `fillProfile`. 9 tests críticos: T1 happy path, T2 middleware Capa 1, T3 edad <18, T4 safety SAFE-040 restrict, T5 PHQ-9 ítem 9 detection, T6 lab/genetics skip, T7 results redirect si incompleto, T8 Reset Dialog, T9 404 custom. Detalle: [[sprints/sprint-13-e2e-playwright/SPRINT-13-E2E-PLAYWRIGHT]].
+
+**Próxima sesión sugerida:** continuar Sprint 13 → Sprint 14 (Sentry + Resend + CI integration de E2E) o saltar a Sprint 2.B/9 (Supabase).
 
 ---
 
