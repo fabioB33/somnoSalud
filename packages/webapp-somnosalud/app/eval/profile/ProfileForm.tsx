@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { calcularEdad, EDAD_MINIMA_EVALUACION } from '@/lib/calc-edad';
+import { FormSkeleton } from '@/components/eval/FormSkeleton';
 import { usePersistEval } from '@/hooks/usePersistEval';
 
 type BiologicalSex = 'male' | 'female' | 'prefer_not_to_say';
@@ -117,9 +118,7 @@ export function ProfileForm() {
   // Mientras hidrata sessionStorage, mostrar form sin errores (placeholder UX).
   if (!hydrated) {
     return (
-      <div className="rounded-lg border border-border/60 bg-card/40 p-6">
-        <p className="text-sm text-muted-foreground">Cargando datos...</p>
-      </div>
+      <FormSkeleton />
     );
   }
 

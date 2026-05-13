@@ -2,12 +2,18 @@ import { Suspense } from 'react';
 
 import { DisclaimerBanner } from '@/components/compliance/DisclaimerBanner';
 
+import { Skeleton } from '@/components/ui/skeleton';
+
 import { ResultsContent } from './ResultsContent';
 
 function ResultsLoading() {
   return (
-    <div className="rounded-lg border border-border/60 bg-card/40 p-6">
-      <p className="text-sm text-muted-foreground">Cargando resultados...</p>
+    <div className="space-y-4">
+      <Skeleton className="h-8 w-1/2" />
+      <Skeleton className="h-4 w-3/4" />
+      <Skeleton className="h-40 w-full" />
+      <Skeleton className="h-60 w-full" />
+      <span className="sr-only">Cargando resultados...</span>
     </div>
   );
 }

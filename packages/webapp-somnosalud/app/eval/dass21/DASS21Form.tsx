@@ -8,6 +8,7 @@ import {
   DASS21_STEM,
 } from 'somnosalud-clinical-engine';
 
+import { FormSkeleton } from '@/components/eval/FormSkeleton';
 import { QuestionnaireForm } from '@/components/eval/QuestionnaireForm';
 import { usePersistEval } from '@/hooks/usePersistEval';
 
@@ -48,9 +49,7 @@ export function DASS21Form() {
 
   if (!hydrated) {
     return (
-      <div className="rounded-lg border border-border/60 bg-card/40 p-6">
-        <p className="text-sm text-muted-foreground">Cargando datos...</p>
-      </div>
+      <FormSkeleton />
     );
   }
 

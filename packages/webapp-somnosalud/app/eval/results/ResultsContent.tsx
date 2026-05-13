@@ -19,6 +19,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
 import { CrisisHotlineCard } from '@/components/compliance/CrisisHotlineCard';
 import { usePersistEval } from '@/hooks/usePersistEval';
 import { clearAllStorage } from '@/lib/persist';
@@ -65,8 +66,12 @@ export function ResultsContent() {
 
   if (!hydrated || !results) {
     return (
-      <div className="rounded-lg border border-border/60 bg-card/40 p-6">
-        <p className="text-sm text-muted-foreground">Cargando resultados...</p>
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-1/2" />
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-60 w-full" />
+        <span className="sr-only">Cargando resultados...</span>
       </div>
     );
   }

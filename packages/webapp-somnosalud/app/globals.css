@@ -123,3 +123,24 @@
     text-shadow: none !important;
   }
 }
+
+/* ─── Accesibilidad: prefers-reduced-motion (WCAG 2.1 A) ────────
+   Usuarios con sensibilidad a movimiento (vestibular disorders,
+   migrañas, atención sensible) pueden configurar su OS para reducir
+   animaciones. Respetamos esa preferencia globalmente.
+
+   Tailwind animate-* + transition-* + animation custom (accordion-up/
+   down de tailwindcss-animate) se desactivan. Se mantienen los
+   colores/estilos finales — sólo desaparece el efecto motion.
+*/
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, SkipForward } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { FormSkeleton } from '@/components/eval/FormSkeleton';
 import { usePersistEval } from '@/hooks/usePersistEval';
 
 /**
@@ -88,9 +89,7 @@ export function GeneticsForm() {
 
   if (!hydrated) {
     return (
-      <div className="rounded-lg border border-border/60 bg-card/40 p-6">
-        <p className="text-sm text-muted-foreground">Cargando datos...</p>
-      </div>
+      <FormSkeleton />
     );
   }
 

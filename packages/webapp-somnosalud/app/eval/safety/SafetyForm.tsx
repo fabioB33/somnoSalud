@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { FormSkeleton } from '@/components/eval/FormSkeleton';
 import { usePersistEval } from '@/hooks/usePersistEval';
 
 type PregnancyStatus = 'yes' | 'no' | 'not_applicable';
@@ -87,9 +88,7 @@ export function SafetyForm() {
 
   if (!hydrated) {
     return (
-      <div className="rounded-lg border border-border/60 bg-card/40 p-6">
-        <p className="text-sm text-muted-foreground">Cargando datos...</p>
-      </div>
+      <FormSkeleton />
     );
   }
 
