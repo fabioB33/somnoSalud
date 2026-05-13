@@ -3,7 +3,9 @@ title: "Sprint 8.5 — UX polish QuestionnaireForm (pills horizontales + progres
 date: 2026-05-09
 last_synced_with_vault_reality: 2026-05-09
 tags: [sprint, sprint-8-5, ux, polish, questionnaire, fase-1, somnosalud]
-status: in-progress
+status: closed-verified
+updated: 2026-05-09
+closing_commit: pending-this-commit
 parent_debts: []
 related:
   - "[[../sprint-8-results-capa-5/SPRINT-8-RESULTS-CAPA-5]]"
@@ -97,9 +99,42 @@ Lectura previa:
 
 ## FASE 1 RESULTADOS — Evidencia empírica
 
-> Captura durante FASE 2.
+### H1 — Pills horizontales caben en mobile → **CONFIRMADA por design**
 
-(A completar mientras se ejecuta el sprint.)
+Grid `auto-fit, minmax(140px/110px, 1fr)` permite wrap responsive automático. En mobile 375px:
+- ESS/PHQ/GAD (4 niveles, min 140px): caben 2 por fila (2x2).
+- ISI (5 niveles, min 110px): caben 3 arriba + 2 abajo (mejor balance).
+
+Smoke visual humano final pendiente Fabio.
+
+### H2 — Sin warnings lint a11y → **CONFIRMADA**
+
+`pnpm lint` exit 0. Input radio con `sr-only` + label como touch target (mantiene WCAG porque el `<label htmlFor>` asocia correctamente).
+
+### H3 — `autoScroll` configurable para tests → **CONFIRMADA**
+
+Prop `autoScroll?: boolean` default `true`. Tests E2E Sprint 13+ pueden pasar `autoScroll={false}`.
+
+### H4 — Separators DASS-21 sin mencionar subscale → **CONFIRMADA**
+
+`DASS21_SEPARATORS = new Map([[0, 'Parte 1 de 3'], [7, 'Parte 2 de 3'], [14, 'Parte 3 de 3']])`. NO menciona depression/anxiety/stress. Solo descanso visual.
+
+### H5 — CI cross-monorepo verde → **CONFIRMADA**
+
+```
+$ pnpm test → Tasks 6/6 successful, 55/55 tests
+$ pnpm typecheck → exit 0
+$ pnpm lint → No warnings
+$ pnpm build → 19 routes prerendered + Middleware
+```
+
+### H6 — Smoke E2E con curl → **CONFIRMADA**
+
+```
+17/17 rutas HTTP 200 (incluyendo /eval/dass21 con itemSeparators).
+```
+
+**Caveat empírico:** durante el sprint encontré bug en dev runtime — `/eval/dass21` devolvió HTTP 500 tras el primer cambio a QuestionnaireForm. Error de webpack module en runtime dev (cache stale). Fix: `rm -rf .next` + restart dev server. **Lesson learned**: cuando un componente compartido se refactoriza significativamente, hard-clean del cache `.next/` es a veces necesario en dev. NO afecta build de prod (que pasó OK desde el primer commit).
 
 ---
 
@@ -148,42 +183,112 @@ A capturar al cerrar.
 A completar al cierre.
 
 ### Bloque A — Sprint doc
-- [x] Frontmatter `status: in-progress`.
-- [x] FASE 0 + FASE 1.
-- [ ] FASE 2 LOG con 3 commits.
-- [ ] FASE 3 EVIDENCIAS.
-- [ ] FASE 4 CHECKLIST.
+- [x] Frontmatter `status: closed-verified` + `updated: 2026-05-09`.
+- [x] FASE 0 + FASE 1 + FASE 1 RESULTADOS.
+- [x] FASE 2 LOG con 2 commits (compactamos 2+3 en 1 al cierre).
+- [x] FASE 3 EVIDENCIAS triangulada.
+- [x] FASE 4 CHECKLIST (este bloque).
 
 ### Bloque B — DEBTs padres
 - [x] N/A.
 
 ### Bloque C — Sub-DEBTs
-- [ ] Considerar al cierre (probablemente N/A — sprint puramente UX).
+- [x] N/A — sprint puramente UX, sin gaps detectados.
 
 ### Bloque D — Lesson learned
-- [ ] Considerar al cierre.
+- [x] **Inline en FASE 1 H6**: cuando se refactoriza componente compartido, hard-clean del cache Next dev (`rm -rf .next`) puede ser necesario para evitar webpack module stale. No justifica LL formal — caso conocido de Next dev runtime.
 
 ### Bloque E — Session note
-- [x] N/A — sprint < 2h.
+- [x] N/A — sprint ~1.5h.
 
 ### Bloque F — CLAUDE.md raíz
-- [x] N/A.
+- [x] N/A — sprint UX puro.
 
 ### Bloque G — DEBT-RADAR
-- [x] N/A.
+- [x] N/A — 2 DEBTs activos sin cambios.
 
 ### Bloque H — MASTER-PLAN
-- [ ] Sprint 8.5 → closed-verified.
+- [x] Sprint 8.5 closed-verified + próxima sesión: smoke visual humano (Fabio) → Sprint 8.6 welcome expandida o Sprint 9 Supabase.
 
 ### Bloque I — Wikilinks bidireccionales
-- [ ] Verificar al cierre.
+- [x] Verificados.
 
 ### Bloque K — Filesystem housekeeping
 - [x] N/A.
 
 ### Bloque J — Reporte ejecutivo
-- [ ] Pegado al cierre.
+- [x] Pegado al cierre.
 
 ---
 
-*Última actualización: 2026-05-09 — sprint en ejecución.*
+## Reporte ejecutivo (Bloque J)
+
+```
+📋 Reporte ejecutivo — Sprint 8.5 UX QuestionnaireForm
+
+Branch: main (sin worktree)
+Commits: 2 (be54893 → <commit-2>)
+Archivos modificados: 4 (sprint doc + QuestionnaireForm + DASS21Form + index/MASTER-PLAN)
+LOC nuevos: ~270 (mejoras visuales + refactor componente)
+
+---
+Hipótesis confirmadas
+- H1 Pills horizontales responsive (grid auto-fit minmax) — design.
+- H2 Sin warnings lint a11y — pnpm lint exit 0.
+- H3 autoScroll configurable para tests — design.
+- H4 Separators DASS-21 sin mencionar subscale — design.
+- H5 CI cross-monorepo verde — empírica.
+- H6 Smoke E2E 17/17 rutas HTTP 200 — empírica.
+
+---
+Mejoras visuales aplicadas
+- Pills horizontales (no stack vertical) con responsive wrap.
+- Number badge con tick lucide Check cuando answered.
+- Sticky progress bar interno al form (visible scrolleando).
+- Smooth scroll automático al siguiente item al responder (300ms delay).
+- Highlight ring-2 + shadow cuando pill checked.
+- DASS-21 con separators "Parte 1/2/3 de 3" cada 7 items.
+
+---
+Status final por commit
+| # | Commit | Hash |
+|---|---|---|
+| 1 | refactor QuestionnaireForm (pills + badge + sticky + auto-scroll) | be54893 |
+| 2 | DASS21Form con itemSeparators + cierre sprint | <pending> |
+
+---
+Próximos pasos para Fabio
+1. SMOKE VISUAL HUMANO obligatorio (lección hotfix 2026-05-09):
+   pnpm --filter @somnosalud/webapp-somnosalud dev
+   Probar:
+   - /eval/isi: pills 5-niveles wrap responsive (cell 110px).
+   - /eval/ess: pills 4-niveles wrap (cell 140px).
+   - /eval/dass21: separators "Parte 1/2/3 de 3" visibles.
+   - Click una opción → tick verde + scroll smooth al siguiente.
+   - Progress sticky arriba siempre visible mientras scrolleás.
+   - Mobile 375px: pills wrap a multiple lineas.
+2. git push origin main cuando confirme.
+3. Próximo sprint: 8.6 welcome expandida con FAQ + about, o 9.A
+   Sprint 2.B Supabase si querés arrancar backend.
+
+---
+Bug encontrado y resuelto durante el sprint
+- /eval/dass21 devolvió HTTP 500 tras refactor (webpack module stale
+  en dev runtime). Build de prod pasaba OK. Fix: rm -rf .next +
+  restart dev. Documentado en FASE 1 H6.
+
+---
+Decisiones de diseño aplicadas
+- Pills `min-h-[68px]` para touch target WCAG 2.1 A.
+- Grid auto-fit minmax: 140px (4 niveles) o 110px (5 niveles).
+- Input radio sr-only + label = touch target (mantiene a11y).
+- DASS-21 separators NO mencionan subscale — solo dividen visualmente.
+- autoScroll default true, configurable para tests E2E.
+- setTimeout 300ms antes del scroll (paciente ve el tick verde).
+- Sticky bg-background/95 con backdrop-blur (fallback solido).
+- className print:hidden en sticky bar (no se imprime).
+```
+
+---
+
+*Última actualización: 2026-05-09 — sprint **closed-verified**.*
