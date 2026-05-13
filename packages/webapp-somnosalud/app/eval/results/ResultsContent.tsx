@@ -19,6 +19,14 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CrisisHotlineCard } from '@/components/compliance/CrisisHotlineCard';
 import { usePersistEval } from '@/hooks/usePersistEval';
@@ -44,6 +52,7 @@ export function ResultsContent() {
   const { state, hydrated } = usePersistEval();
   const debugMode = searchParams.get('debug') === '1';
   const [resetting, setResetting] = useState(false);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
 
   // Build solo cuando hidrato. useMemo evita re-cómputo en re-render.
   const results: BuildResultsOutput | null = useMemo(() => {
@@ -92,14 +101,7 @@ export function ResultsContent() {
     window.print();
   };
 
-  const handleReset = () => {
-    if (
-      !window.confirm(
-        '¿Estás seguro? Esto borra tus respuestas y empieza una evaluación nueva.',
-      )
-    ) {
-      return;
-    }
+  const handleResetConfirmed = () => {
     setResetting(true);
     clearAllStorage();
     router.push('/');
@@ -462,13 +464,43 @@ export function ResultsContent() {
         <Button
           variant="outline"
           size="lg"
-          onClick={handleReset}
+          onClick={() => setResetDialogOpen(true)}
           disabled={resetting}
         >
           <RotateCcw aria-hidden="true" />
           Empezar de nuevo
         </Button>
       </div>
+
+      {/* Dialog de confirmación reset (reemplaza window.confirm ugly). */}
+      <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>¿Empezar una evaluación nueva?</DialogTitle>
+            <DialogDescription>
+              Esto va a borrar todas tus respuestas actuales. No se puede
+              deshacer. Si querés guardar estos resultados, exportalos
+              como PDF antes de continuar.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setResetDialogOpen(false)}
+              disabled={resetting}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleResetConfirmed}
+              disabled={resetting}
+            >
+              {resetting ? 'Borrando...' : 'Sí, empezar de nuevo'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Panel debug (solo con ?debug=1). */}
       {debugMode && (
