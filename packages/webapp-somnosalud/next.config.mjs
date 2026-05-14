@@ -1,3 +1,5 @@
+import { withSentryConfig } from '@sentry/nextjs';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -14,4 +16,18 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+// Sprint 14: withSentryConfig se aplica siempre, pero el SDK queda idle
+// cuando NEXT_PUBLIC_SENTRY_DSN no esta seteado. silent: !CI evita logs
+// ruidosos en dev. widenClientFileUpload mejora source maps cuando exista
+// SENTRY_AUTH_TOKEN.
+const sentryWebpackPluginOptions = {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: !process.env.CI,
+  widenClientFileUpload: true,
+  disableLogger: true,
+  tunnelRoute: '/monitoring',
+};
+
+export default withSentryConfig(nextConfig, sentryWebpackPluginOptions);
