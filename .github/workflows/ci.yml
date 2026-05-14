@@ -77,3 +77,45 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
+
+  e2e:
+    name: E2E Playwright (webapp-somnosalud)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - name: Install Chromium (con deps de sistema)
+        run: pnpm --filter @somnosalud/webapp-somnosalud exec playwright install chromium --with-deps
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+      - name: Install Chromium system deps (cache hit)
+        run: pnpm --filter @somnosalud/webapp-somnosalud exec playwright install-deps chromium
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+      - name: Build webapp
+        run: pnpm --filter @somnosalud/webapp-somnosalud build
+      - name: Run Playwright tests
+        run: pnpm --filter @somnosalud/webapp-somnosalud test:e2e
+        env:
+          CI: 'true'
+      - name: Upload Playwright report on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            packages/webapp-somnosalud/playwright-report/
+            packages/webapp-somnosalud/test-results/
+          retention-days: 14

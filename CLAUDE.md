@@ -243,9 +243,9 @@ Design system compartido entre webapp-somnosalud y webapp-conversor-psg. Compone
 | Backend / DB / Auth | Supabase (PostgreSQL + RLS multi-tenant + Auth + Storage) | Project a crear Fase 0 |
 | Deploy | Vercel (somnosalud webapp) + GitHub Pages (conversor PSG) | A configurar Fase 0 |
 | Tests unitarios | Vitest | 55+ tests del clinical-engine ya pasando |
-| Tests E2E | Playwright | Pendiente Fase 1 |
-| Error tracking | Sentry | Pendiente Fase 1 |
-| Email transaccional | Resend | Pendiente Fase 1 (cuando arranque persistencia + cuentas) |
+| Tests E2E | Playwright | ✅ Sprint 13 — 19/19 tests passing en local. Sprint 14 agregó job `e2e` al CI con cache Chromium |
+| Error tracking | Sentry | ✅ Sprint 14 — `@sentry/nextjs@10.53.1` instalado **idle** (DSN vacío = no envía). Activable con `NEXT_PUBLIC_SENTRY_DSN` post deploy Vercel |
+| Email transaccional | Resend | ✅ Sprint 14 — `resend@6.12.3` wrapper instalado **idle** (sin API key = `getResendClient()` retorna null). Invocación real Sprint 9+ con persistencia |
 | Pagos | Stripe | Pendiente Fase 3 (B2B freemium para sleep specialists) |
 | Analytics | PostHog | Pendiente Fase 1 (consentimiento explícito + zero PII tracking) |
 | CI/CD | GitHub Actions | Workflow básico ya en `.github/workflows/ci.yml` (lint + test + typecheck + build) — falla actualmente por falta de pnpm-lock.yaml en main, fix pendiente Sprint 1 |

@@ -1,14 +1,21 @@
 ---
 title: "Deuda Técnica — tests E2E Playwright NO se corren en GitHub Actions CI"
 date: 2026-05-09
-tags: [deuda-tecnica, e2e, playwright, ci, github-actions, fase-1, open]
-status: open
+tags: [deuda-tecnica, e2e, playwright, ci, github-actions, fase-1, closed-verified]
+status: closed-verified
+closed_date: 2026-05-14
+closed_by: sprint-14-observabilidad-ci
 priority: low
 scope: sprint-14
 detected_during: sprint-13-e2e-playwright
 related:
   - "[[../sprints/sprint-13-e2e-playwright/SPRINT-13-E2E-PLAYWRIGHT]]"
+  - "[[../sprints/sprint-14-observabilidad-ci/SPRINT-14-OBSERVABILIDAD-CI]]"
 ---
+
+> [!success] Cerrado 2026-05-14 (Sprint 14)
+> Job `e2e` agregado a `.github/workflows/ci.yml` con cache Chromium (~113 MB), `playwright install-deps` separado en cache-hit branch, build webapp + `pnpm test:e2e` con `CI=true`, artifact upload on failure (playwright-report/ + test-results/, retention 14d), timeout 15 min. Smoke local pre-push: 19/19 tests passing post-cambios Sentry+Resend. Verificación CI verde queda pendiente al primer push de Fabio.
+
 
 # DEBT-e2e-ci-integration
 
