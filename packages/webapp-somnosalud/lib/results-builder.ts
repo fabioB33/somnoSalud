@@ -137,25 +137,29 @@ function detectMissingSteps(state: EvalState): RequiredStep[] {
 }
 
 /**
- * Mappea state.sleep (Sprint 7.B SleepForm shape) al SleepData del
- * clinical-engine. Algunos campos no se capturan en Sprint 7.B
- * (earlyAwakening, earlyMorningAwakeningMinutes, caffeine, screen,
- * exercise) — usamos defaults razonables.
+ * Mappea state.sleep al SleepData del clinical-engine.
  *
- * Sub-DEBT: si Pablo valida y pide capturarlos, agregar al SleepForm
- * en Sprint 9.
+ * Sprint 9: SleepForm ahora captura 5 campos extras opcionales (EMA freq+min,
+ * caffeine cups+lastHour, screenBeforeBed, treatmentPreference). Si el
+ * paciente no expandio la seccion "Mas detalles", se propagan defaults
+ * coherentes con "no info". Exercise sigue postergado a sprint sleep-hygiene
+ * dedicado.
  */
 function buildSleepData(sleep: NonNullable<EvalState['sleep']>): SleepData {
   return {
     sleepLatencyMinutes: sleep.sleepLatencyMin,
     nightAwakenings: sleep.awakeningsPerNight,
-    earlyAwakening: 'never',
-    earlyMorningAwakeningMinutes: 0,
+    earlyAwakening: sleep.earlyAwakeningFreq ?? 'never',
+    earlyMorningAwakeningMinutes: sleep.earlyAwakeningMin ?? 0,
     totalSleepHours: sleep.totalHoursAsleep,
     timeInBedHours: sleep.timeInBedHours,
     subjectiveQuality: sleep.qualitySubjective,
     bedtimeWeekday: sleep.bedtimeTypical,
     waketimeWeekday: sleep.wakeTimeTypical,
+    caffeineLastHour: sleep.caffeineLastHour,
+    caffeineCupsDay: sleep.caffeineCupsDay,
+    screenBeforeBed: sleep.screenBeforeBed,
+    treatmentPreference: sleep.treatmentPreference,
   };
 }
 

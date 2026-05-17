@@ -63,7 +63,7 @@ export interface EvalState {
   gad7?: number[];
   /** DASS-21 21 items, cada uno 0-3 (Sprint 7.B) */
   dass21?: number[];
-  /** Sleep diary (Sprint 7.B) — campos heterogeneos del paciente. */
+  /** Sleep diary (Sprint 7.B base + Sprint 9 extension). */
   sleep?: {
     sleepLatencyMin: number;        // tiempo en min para dormirse
     totalHoursAsleep: number;       // horas dormidas tipicas
@@ -72,6 +72,13 @@ export interface EvalState {
     qualitySubjective: number;      // 1-10 (10 = mejor)
     bedtimeTypical: string;         // HH:MM 24h
     wakeTimeTypical: string;        // HH:MM 24h
+    // Sprint 9 — campos "Mas detalles" opcionales para clinical-engine completo
+    earlyAwakeningFreq?: 'never' | 'sometimes' | 'frequently' | 'always';
+    earlyAwakeningMin?: number;     // 0-180 min antes de la hora deseada
+    caffeineCupsDay?: number;       // 0-20 tazas/dia
+    caffeineLastHour?: number;      // 0-23 hora ultima taza (24h)
+    screenBeforeBed?: 'never' | 'sometimes' | 'frequently' | 'always';
+    treatmentPreference?: 'natural_only' | 'open_to_supplements' | 'open_to_all';
   };
   /** Lab opcional (Sprint 7.B) — keys son codes del clinical-engine. Skip = lab no presente. */
   lab?: Record<string, number>;

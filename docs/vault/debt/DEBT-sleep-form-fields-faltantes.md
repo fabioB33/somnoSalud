@@ -1,15 +1,22 @@
 ---
 title: "Deuda Técnica — SleepForm captura solo 7 de 12 campos del SleepData clinical-engine"
 date: 2026-05-09
-tags: [deuda-tecnica, webapp, sleep-form, clinical-engine, pendiente-pablo, open]
-status: open
+tags: [deuda-tecnica, webapp, sleep-form, clinical-engine, closed-verified]
+status: closed-verified
+closed_date: 2026-05-14
+closed_by: sprint-9-sleep-form-fields-extension
 priority: medium
 scope: sprint-9
 detected_during: sprint-8-results-capa-5
 related:
   - "[[../sprints/sprint-8-results-capa-5/SPRINT-8-RESULTS-CAPA-5]]"
   - "[[../sprints/sprint-7-b-mental-health-sleep-lab-genetics/SPRINT-7-B-MENTAL-HEALTH-SLEEP-LAB-GENETICS]]"
+  - "[[../sprints/sprint-9-sleep-form-fields-extension/SPRINT-9-SLEEP-FORM-FIELDS-EXTENSION]]"
 ---
+
+> [!success] Cerrado 2026-05-14 (Sprint 9)
+> SleepForm extendido de 7 a 13 campos. 6 nuevos opcionales en sección Accordion "Más detalles": `earlyAwakeningFreq`, `earlyAwakeningMin` (cierra el gap crítico de detección EMA en `classifyInsomniaPhenotype`), `caffeineCupsDay`, `caffeineLastHour`, `screenBeforeBed`, `treatmentPreference`. `buildSleepData()` ya no hardcodea defaults — propaga valores reales del state. Ejercicio postergado a sprint futuro sleep-hygiene dedicado (no parte de este cierre). Decisión clínica asumida sin signoff Pablo explícito (validación visual queda pendiente próxima reunión IFN — sin riesgo porque NO se modificó lógica del clinical-engine, solo se enriqueció su input). 19/19 E2E passing post-cambios.
+
 
 # DEBT-sleep-form-fields-faltantes
 
