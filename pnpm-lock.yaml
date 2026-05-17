@@ -33,7 +33,17 @@ importers:
         specifier: ^2.0.0
         version: 2.1.9(@types/node@20.19.39)(terser@5.47.1)
 
-  packages/psg-parser: {}
+  packages/psg-parser:
+    devDependencies:
+      esbuild:
+        specifier: ^0.27.3
+        version: 0.27.7
+      typescript:
+        specifier: ^5.4.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.39)(terser@5.47.1)
 
   packages/shared-ui: {}
 

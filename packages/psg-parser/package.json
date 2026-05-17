@@ -2,14 +2,19 @@
   "name": "@somnosalud/psg-parser",
   "version": "0.1.0",
   "private": true,
-  "description": "Parser modular de PDFs polisomnograficos (7 equipos: Philips Sleepware G3, Alice NightOne, BrainWave, ResMed Diagnostico/Tratamiento, BMC Tratamiento/Poligrafo). Skeleton — implementacion pendiente Fase 2 segun docs/vault/MASTER-PLAN.md",
+  "description": "Parser modular TypeScript de PDFs polisomnograficos (7 equipos: Philips Sleepware G3, Alice NightOne, BrainWave, ResMed Diagnostico/Tratamiento, BMC Tratamiento/Poligrafo). Sprint 15 (2026-05-14) arranca migracion desde packages/webapp-conversor-psg/legacy-v0/index.html con Philips Sleepware G3 como parser piloto + fixtures sinteticos.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
-    "build": "echo 'skeleton — implementacion pendiente Fase 2 (refactor desde packages/webapp-conversor-psg/legacy-v0/index.html)' && exit 0",
-    "test": "echo 'skeleton — tests con fixtures PSGs reales pendientes Fase 2' && exit 0",
-    "typecheck": "echo 'skeleton — sin .ts todavia' && exit 0",
-    "lint": "echo 'skeleton — sin .ts todavia' && exit 0",
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit && echo 'Types OK'",
     "clean": "rm -rf dist"
   },
   "keywords": [
@@ -20,8 +25,14 @@
     "philips",
     "resmed",
     "bmc",
+    "brainwave",
     "sleep"
   ],
   "author": "SomnoSalud Team",
-  "license": "PROPRIETARY"
+  "license": "PROPRIETARY",
+  "devDependencies": {
+    "esbuild": "^0.27.3",
+    "typescript": "^5.4.0",
+    "vitest": "^2.0.0"
+  }
 }
