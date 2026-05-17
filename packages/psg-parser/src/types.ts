@@ -181,6 +181,37 @@ export interface PSGRecord {
   // --- ARRITMIAS / INDICES GLOBALES ---
   rdi_indice_trastornos_respiratorios?: number;
 
+  // --- INDICES RESPIRATORIOS POR TIPO (Sprint 16 — ResMed Diag) ---
+  apneas_total_indice_por_hora?: number;
+  apneas_centrales_indice_por_hora?: number;
+  apneas_obstructivas_indice_por_hora?: number;
+  apneas_mixtas_indice_por_hora?: number;
+  hipopneas_indice_por_hora?: number;
+  cheyne_stokes_porc?: number;
+
+  // --- FRECUENCIA CARDIACA (Sprint 16 — Philips NightOne + ResMed Diag) ---
+  fc_media_sueno_lpm?: number;
+  fc_minima_lpm?: number;
+  fc_maxima_lpm?: number;
+
+  // --- SpO2 umbrales adicionales (Sprint 16 — BrainWave usa <88% y <92%) ---
+  spo2_menor_88_despertar_min?: number;
+  spo2_menor_88_despertar_porc?: number;
+  spo2_menor_88_nrem_min?: number;
+  spo2_menor_88_nrem_porc?: number;
+  spo2_menor_88_rem_min?: number;
+  spo2_menor_88_rem_porc?: number;
+  spo2_menor_88_tc_min?: number;
+  spo2_menor_88_tc_porc?: number;
+  spo2_menor_92_despertar_min?: number;
+  spo2_menor_92_despertar_porc?: number;
+  spo2_menor_92_nrem_min?: number;
+  spo2_menor_92_nrem_porc?: number;
+  spo2_menor_92_rem_min?: number;
+  spo2_menor_92_rem_porc?: number;
+  spo2_menor_92_tc_min?: number;
+  spo2_menor_92_tc_porc?: number;
+
   /**
    * Campos dinamicos que los parsers generan con naming derivado
    * (ej. apneas_centrales_numero, hipopneas_indice_por_hora, etc).

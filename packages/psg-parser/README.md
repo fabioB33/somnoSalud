@@ -4,14 +4,15 @@ Parser modular TypeScript de PDFs polisomnográficos. Reusable desde cualquier a
 
 ## Status
 
-**Sprint 15 (2026-05-14):** bootstrap + parser piloto Philips Sleepware G3 + tests vitest con fixtures sintéticos. 15/15 tests passing.
+**Sprint 16 (2026-05-14):** 4/7 parsers migrados + auto-detect + router. **65/65 tests passing en 563 ms.**
 
 | Equipo | Parser | Tests | Sprint |
 |--------|--------|-------|--------|
 | Philips Sleepware G3 | ✅ | ✅ 15 | 15 |
-| BrainWave (PSG) | ⏳ | ⏳ | 16 |
-| Philips Alice NightOne | ⏳ | ⏳ | 16 |
-| ResMed Diagnóstico | ⏳ | ⏳ | 16 |
+| BrainWave (PSG) | ✅ | ✅ 14 | 16 |
+| Philips Alice NightOne | ✅ | ✅ 9 | 16 |
+| ResMed Diagnóstico | ✅ | ✅ 13 | 16 |
+| **Auto-detect + router** | ✅ | ✅ 14 | 16 |
 | ResMed Tratamiento | ⏳ | ⏳ | 17 |
 | BMC Tratamiento | ⏳ | ⏳ | 17 |
 | BMC Poligrafía | ⏳ | ⏳ | 17 |
@@ -31,12 +32,29 @@ El legacy `packages/webapp-conversor-psg/legacy-v0/index.html` (1.887 LOC) sigue
 
 ## Uso
 
+### Auto-detect + router (recomendado, Sprint 16+)
+
+```ts
+import { detectFormat, parseByFormat, UnknownFormatError } from '@somnosalud/psg-parser';
+
+const rawText = await extractTextFromPdf(file); // pdf.js
+const formatInfo = detectFormat(rawText);
+
+if (formatInfo.format === 'unknown') {
+  console.error('Formato no reconocido');
+} else {
+  const { data, missing } = parseByFormat(rawText, formatInfo);
+  console.log(data.paciente_apellido);
+  console.log(data.iah_global_por_hora);
+}
+```
+
+### Parser específico (cuando ya sabés el equipo)
+
 ```ts
 import { parsePhilipsSleepwareG3 } from '@somnosalud/psg-parser';
 
-const rawText = await extractTextFromPdf(file); // pdf.js
 const { data, missing } = parsePhilipsSleepwareG3(rawText);
-
 console.log(data.paciente_apellido);                   // "PEREZ"
 console.log(data.iah_global_por_hora);                 // 5.2
 console.log(data.rdi_indice_trastornos_respiratorios); // 6.0

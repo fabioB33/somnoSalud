@@ -23,13 +23,14 @@ El legacy `legacy-v0/index.html` sigue 100% funcional standalone (`python3 -m ht
 
 ## Roadmap
 
-### Sprint 16 — 3 parsers diagnósticos (~3-4 h)
+### Sprint 16 — ✅ closed-verified (2026-05-14)
 
-- **BrainWave (PSG):** parser legacy líneas 645-897. Formato muy similar a Sleepware G3 con variantes (fecha DD-MM-YYYY, hora "23/03/2026 10:08 PM", SpO2 umbrales desde <88%, arousal sin columna Dl+D).
-- **Philips Alice NightOne:** parser legacy líneas 898-1000. Poligrafía sin EEG (subset reducido).
-- **ResMed AirView Diagnóstico:** parser legacy líneas 1001-1108. Poligrafía con OData.
-- Cada parser: src/parsers/<equipo>.ts + tests/fixtures/<equipo>.ts + tests/parsers/<equipo>.test.ts.
-- Patrón establecido en Sprint 15 (regex idénticas al legacy, shape PSGRecord compartido).
+- **BrainWave (PSG):** ✅ migrado (`src/parsers/brainwave-psg.ts`, 330 LOC, 14 tests).
+- **Philips Alice NightOne:** ✅ migrado (115 LOC, 9 tests).
+- **ResMed AirView Diagnóstico:** ✅ migrado (135 LOC, 13 tests).
+- **Auto-detect + router:** ✅ `src/detect.ts` + `src/router.ts` con `UnknownFormatError` y `UnsupportedFormatError`. 14 tests integración.
+- **Total:** 50 tests nuevos (Sprint 15: 15 → Sprint 16: 65). 3 bugs latentes legacy detectados y resueltos.
+- Detalle: [[../sprints/sprint-16-3-parsers-diagnosticos/SPRINT-16-3-PARSERS-DIAGNOSTICOS]].
 
 ### Sprint 17 — 3 parsers tratamiento + BMC (~3 h)
 
@@ -66,7 +67,7 @@ El legacy `legacy-v0/index.html` sigue 100% funcional standalone (`python3 -m ht
 
 ## Scope total estimado
 
-~14-22 h restantes en 4 sprints (16-19). El Sprint 15 ya invirtió ~3 h.
+~10-16 h restantes en 3 sprints (17-19). Sprint 15 invirtió ~3 h, Sprint 16 invirtió ~4 h. Progreso migración: 4/7 parsers (57%) + detect + router.
 
 ## Prioridad
 
