@@ -18,12 +18,13 @@
       "command": "npx",
       "args": [
         "-y",
-        "@supabase/mcp-server-supabase@latest"
+        "@supabase/mcp-server-supabase@latest",
+        "--project-ref=goxdopciwvahrxdeirft"
       ],
       "env": {
         "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}"
       },
-      "_comment": "PENDIENTE Fase 0 setup: crear project Supabase 'somnosalud-platform' Org Pampa Labs (plan FREE inicial, scale a Pro Fase 1). Una vez creado, agregar el ref del project aqui. Token: usar el mismo SUPABASE_ACCESS_TOKEN del Org Pampa Labs."
+      "_comment": "Sprint 2.B (2026-05-14): project somnosalud-platform creado Org Pampa Labs, region sa-east-1 (Sao Paulo), plan Free. Ref: goxdopciwvahrxdeirft. URL: https://goxdopciwvahrxdeirft.supabase.co. Access Token vive en packages/webapp-somnosalud/.env.local (gitignored)."
     }
   },
   "_pending_mcps": {

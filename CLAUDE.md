@@ -95,7 +95,7 @@ Slash commands universales (cuando estén instalados como skills del IDE):
 ### MCP Servers disponibles:
 
 - **github** — Repo management (PRs, issues, releases) sobre `itsomnosalud/Somnosalud`.
-- **supabase-somnosalud** — DB del proyecto (PENDIENTE crear project Org Pampa Labs — Sprint 2.B, ownership Fabio).
+- **supabase-somnosalud** — DB del proyecto. ✅ Activo desde Sprint 2.B (2026-05-18). Project ref `goxdopciwvahrxdeirft`, region `sa-east-1`, plan Free. 5 migraciones aplicadas (profiles + evaluations + audit_log + RLS policies + hardening). 0 security lints.
 
 ### REGLAS ABSOLUTAS:
 
@@ -269,9 +269,10 @@ Design system compartido entre webapp-somnosalud y webapp-conversor-psg. Compone
 #### `supabase-somnosalud` — Project DB
 - **Tipo:** stdio (npx)
 - **Paquete:** `@supabase/mcp-server-supabase@latest`
-- **Proyecto:** **PENDIENTE crear** — `somnosalud-platform` Org Pampa Labs (plan FREE Fase 0, scale a Pro Fase 1)
-- **Auth:** `SUPABASE_ACCESS_TOKEN` del Org Pampa Labs
-- **Uso futuro:** queries sobre tablas clínicas, RLS policies, migrations
+- **Proyecto:** ✅ `somnosalud-platform` Org Pampa Labs creado 2026-05-14, MCP operativo desde 2026-05-18. Ref `goxdopciwvahrxdeirft`, region `sa-east-1` (Sao Paulo), plan FREE (escalar a Pro en Fase 2 con storage PSGs)
+- **URL:** `https://goxdopciwvahrxdeirft.supabase.co`
+- **Auth:** `SUPABASE_ACCESS_TOKEN` en `packages/webapp-somnosalud/.env.local` (gitignored)
+- **Uso actual:** apply_migration, execute_sql, get_advisors, list_tables/migrations, get_logs. NO usar service_role/secret key desde el cliente.
 
 ### MCPs pendientes de setup
 
@@ -378,9 +379,11 @@ Repo limpio con CI verde + ambos productos deployados con dominio profesional.
 - ✅ Repo monorepo bootstrapeado (2026-05-07)
 - ✅ Pampa Labs OS instalado (2026-05-07 noche)
 - ⏳ Sprint 1: pnpm-lock commiteado + CI verde
-- ⏳ Sprint 2: Crear project Supabase + setear MCP `supabase-somnosalud`
+- ✅ Sprint 2.A: OS curado (2026-05-08) — 21 agents archivados, lista relevante 25+1
+- ✅ Sprint 2.B: Project Supabase + schema inicial + MCP activo (2026-05-18) — 5 migraciones, 6 RLS policies, 0 security lints
 - ⏳ Sprint 3: Deploy webapp-somnosalud a Vercel + dominio (preview)
 - ⏳ Sprint 4: Deploy webapp-conversor-psg a GitHub Pages
+- ⏳ Sprint 9-supabase: Cliente Supabase + magic link + `sessionStorage → DB`
 
 ### Fase 1 — Robustez clínica + persistencia (Semanas 2-5, 25-35 horas)
 
@@ -581,6 +584,6 @@ Revisar al go-live B2B (posible cambio a algún esquema más permisivo según va
 
 ---
 
-*Última actualización: 8 Mayo 2026 (Sprint 2.A — sección "Skills obligatorias" reescrita con lista curada de agents post-archivado)*
-*last_synced_with_vault_reality: 2026-05-08*
-*Próxima revisión: post-Sprint 2.B (project Supabase creado + MCP supabase-somnosalud activo)*
+*Última actualización: 18 Mayo 2026 (Sprint 2.B cerrado — MCP supabase-somnosalud activo, 5 migraciones aplicadas, 0 security lints)*
+*last_synced_with_vault_reality: 2026-05-18*
+*Próxima revisión: post-Sprint 9-supabase (cliente + magic link + sessionStorage → DB)*
