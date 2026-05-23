@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   AlertTriangle,
@@ -32,6 +32,7 @@ import { CrisisHotlineCard } from '@/components/compliance/CrisisHotlineCard';
 import { usePersistEval } from '@/hooks/usePersistEval';
 import { clearAllStorage } from '@/lib/persist';
 import { buildResults, type BuildResultsOutput } from '@/lib/results-builder';
+import { markEvaluationCompleted } from '@/app/eval/actions';
 
 /**
  * ResultsContent — Client Component que invoca buildResults sobre el
@@ -49,10 +50,11 @@ import { buildResults, type BuildResultsOutput } from '@/lib/results-builder';
 export function ResultsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { state, hydrated } = usePersistEval();
+  const { state, hydrated, persistedToDb, evaluationId } = usePersistEval();
   const debugMode = searchParams.get('debug') === '1';
   const [resetting, setResetting] = useState(false);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const markedCompletedRef = useRef(false);
 
   // Build solo cuando hidrato. useMemo evita re-cómputo en re-render.
   const results: BuildResultsOutput | null = useMemo(() => {
@@ -72,6 +74,28 @@ export function ResultsContent() {
       router.replace(results.nextRoute);
     }
   }, [hydrated, results, router]);
+
+  // Sprint 9.C: si hay sesion + results complete + tenemos evaluationId,
+  // persistir el snapshot a DB. Idempotente (markedCompletedRef + check
+  // server-side de status='completed').
+  useEffect(() => {
+    if (
+      !persistedToDb ||
+      !evaluationId ||
+      !results ||
+      !results.complete ||
+      markedCompletedRef.current
+    ) {
+      return;
+    }
+    markedCompletedRef.current = true;
+    void markEvaluationCompleted(evaluationId, results).then((res) => {
+      if (!res.ok) {
+        // No bloqueamos UX. Sprint futuro: toast Sonner con retry.
+        console.warn('[results] markEvaluationCompleted failed:', res);
+      }
+    });
+  }, [persistedToDb, evaluationId, results]);
 
   if (!hydrated || !results) {
     return (

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   STORAGE_KEYS,
@@ -8,18 +8,21 @@ import {
   saveToStorage,
   removeFromStorage,
 } from '@/lib/persist';
+import { createClient } from '@/lib/supabase/client';
+import { upsertEvaluationFromState } from '@/app/eval/actions';
 
 /**
- * usePersistEval — hook para leer/escribir la evaluacion parcial en sessionStorage.
+ * usePersistEval — hook para leer/escribir la evaluacion parcial.
  *
- * Patron: useState local + sync a sessionStorage en cada cambio. Carga inicial
- * desde sessionStorage en useEffect (SSR-safe).
+ * Sprint 9.C: dual-mode. Si hay sesion Supabase activa, write-through a DB
+ * con debounce 800ms. Si no hay sesion, comportamiento legacy (sessionStorage
+ * only) — los usuarios anonimos siguen funcionando exactamente igual y los
+ * 19 E2E Playwright no se rompen.
  *
- * Hasta Sprint 11 (Supabase persistence), este es el unico storage. Despues
- * migra a tabla `evaluations` con RLS multi-tenant + el hook se reemplaza
- * por queries Supabase.
+ * SessionStorage sigue como cache local en ambos casos (incluso logueado)
+ * para que el navigation entre pasos sea instantaneo sin esperar al server.
  *
- * @see docs/vault/concepts/CONVENCIONES-FRONTEND-WEBAPP.md §1 (RSC vs client)
+ * @see docs/vault/sprints/sprint-9-c-persist-eval/SPRINT-9-C-PERSIST-EVAL.md
  */
 
 /** Datos de la evaluacion que persisten entre pantallas. Crece cada sprint. */
@@ -74,9 +77,9 @@ export interface EvalState {
     wakeTimeTypical: string;        // HH:MM 24h
     // Sprint 9 — campos "Mas detalles" opcionales para clinical-engine completo
     earlyAwakeningFreq?: 'never' | 'sometimes' | 'frequently' | 'always';
-    earlyAwakeningMin?: number;     // 0-180 min antes de la hora deseada
-    caffeineCupsDay?: number;       // 0-20 tazas/dia
-    caffeineLastHour?: number;      // 0-23 hora ultima taza (24h)
+    earlyAwakeningMin?: number;
+    caffeineCupsDay?: number;
+    caffeineLastHour?: number;
     screenBeforeBed?: 'never' | 'sometimes' | 'frequently' | 'always';
     treatmentPreference?: 'natural_only' | 'open_to_supplements' | 'open_to_all';
   };
@@ -86,36 +89,120 @@ export interface EvalState {
   genetics?: Record<string, string>;
 }
 
-export function usePersistEval() {
+const DB_DEBOUNCE_MS = 800;
+
+interface PersistResult {
+  state: EvalState;
+  /** True una vez que el hook leyo sessionStorage + chequeo sesion (post-mount). */
+  hydrated: boolean;
+  /** True si write-through DB esta activo (hay sesion). */
+  persistedToDb: boolean;
+  /** UUID de la evaluacion DB activa, si aplica. Null si anonimo. */
+  evaluationId: string | null;
+  update: (partial: Partial<EvalState>) => void;
+  clear: () => void;
+}
+
+export function usePersistEval(): PersistResult {
   const [state, setState] = useState<EvalState>({});
   const [hydrated, setHydrated] = useState(false);
+  const [persistedToDb, setPersistedToDb] = useState(false);
+  const [evaluationId, setEvaluationId] = useState<string | null>(null);
 
-  // Carga inicial post-mount (SSR-safe).
+  // Refs para debounce y tracking del state mas reciente.
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latestStateRef = useRef<EvalState>({});
+
+  // Carga inicial post-mount: sessionStorage + chequeo sesion Supabase.
   useEffect(() => {
-    const loaded = loadFromStorage<EvalState>(STORAGE_KEYS.evaluation);
-    if (loaded) setState(loaded);
-    setHydrated(true);
+    const init = async () => {
+      const loaded = loadFromStorage<EvalState>(STORAGE_KEYS.evaluation);
+      if (loaded) {
+        setState(loaded);
+        latestStateRef.current = loaded;
+      }
+
+      // Chequeo sesion: si esta logueado, activamos write-through.
+      try {
+        const supabase = createClient();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (session) {
+          setPersistedToDb(true);
+          // Primer sync: si tenia state local, lo upsertea. Sino, crea row vacia
+          // cuando llegue el primer update.
+          if (loaded && Object.keys(loaded).length > 0) {
+            const result = await upsertEvaluationFromState(loaded);
+            if (result.ok) {
+              setEvaluationId(result.evaluationId);
+            }
+          }
+        }
+      } catch {
+        // Si falla el chequeo de sesion, seguimos en modo anonimo (sessionStorage only).
+        // No bloqueamos al usuario.
+      }
+
+      setHydrated(true);
+    };
+    void init();
   }, []);
 
   /** Update parcial: merge de fields nuevos sobre el state existente. */
-  const update = useCallback((partial: Partial<EvalState>) => {
-    setState((prev) => {
-      const next = { ...prev, ...partial };
-      saveToStorage(STORAGE_KEYS.evaluation, next);
-      return next;
-    });
-  }, []);
+  const update = useCallback(
+    (partial: Partial<EvalState>) => {
+      setState((prev) => {
+        const next = { ...prev, ...partial };
+        latestStateRef.current = next;
+        saveToStorage(STORAGE_KEYS.evaluation, next);
+
+        // Debounce write-through DB si hay sesion.
+        if (persistedToDb) {
+          if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+          }
+          debounceTimerRef.current = setTimeout(() => {
+            void (async () => {
+              const result = await upsertEvaluationFromState(
+                latestStateRef.current,
+              );
+              if (result.ok) {
+                setEvaluationId(result.evaluationId);
+              }
+              // Si falla (db-error / no-session), no rompemos UX — el usuario sigue
+              // viendo el state local. Sprint futuro: retry con toast Sonner.
+            })();
+          }, DB_DEBOUNCE_MS);
+        }
+
+        return next;
+      });
+    },
+    [persistedToDb],
+  );
 
   /** Limpia toda la evaluacion (uso: "Empezar de nuevo" o post-submit final). */
   const clear = useCallback(() => {
     setState({});
+    latestStateRef.current = {};
     removeFromStorage(STORAGE_KEYS.evaluation);
+    setEvaluationId(null);
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    // Nota: NO borramos la row DB. Si el usuario logueado clickea "empezar de
+    // nuevo", su evaluacion previa queda con status='in_progress' o 'completed'
+    // en su historial. Sprint futuro: opcion "borrar permanentemente" con
+    // service_role.
   }, []);
 
   return {
     state,
-    /** True una vez que el hook leyo sessionStorage (post-mount). */
     hydrated,
+    persistedToDb,
+    evaluationId,
     update,
     clear,
   };
