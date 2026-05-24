@@ -25,6 +25,7 @@ created: 2026-05-07
 - [[../../CLAUDE]] — el CLAUDE.md raíz del repo, define quiénes somos + reglas + stack + roadmap
 - [[MASTER-PLAN]] — roadmap de las 3 fases con entregables por sprint
 - [[vision/PRODUCT-VISION-SOMNOSALUD]] — visión del producto + tesis + targets B2C/B2B
+- [[vision/PRODUCT-ROADMAP-2026-05-18-jorge]] — brief Jorge SaaS B2C suscripción + B2B White Label API keys + E-commerce satelital. Status: pending-pablo-input
 - [[clinical/COMPLIANCE-ARGENTINA]] — compliance regulatorio Ley 25.326 + 26.529 + ANMAT
 - [[clinical/somnosalud/ANALISIS-EXHAUSTIVO-SOMNOSALUD-2026-05-07]] — análisis pre-bootstrap (Drive Pablo + plan de migración del bundle compilado al source TypeScript + decisiones técnicas + 3 fases roadmap detallado)
 

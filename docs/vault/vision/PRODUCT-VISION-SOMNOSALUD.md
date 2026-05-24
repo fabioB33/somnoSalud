@@ -9,6 +9,7 @@ related:
   - "[[../MASTER-PLAN]]"
   - "[[../../../CLAUDE]]"
   - "[[../clinical/somnosalud/ANALISIS-EXHAUSTIVO-SOMNOSALUD-2026-05-07]]"
+  - "[[PRODUCT-ROADMAP-2026-05-18-jorge]]"
 owner: jorge + pablo-ferrero
 created: 2026-05-07
 ---
