@@ -4,7 +4,7 @@ Parser modular TypeScript de PDFs polisomnográficos. Reusable desde cualquier a
 
 ## Status
 
-**Sprint 16 (2026-05-14):** 4/7 parsers migrados + auto-detect + router. **65/65 tests passing en 563 ms.**
+**Sprint 17 (2026-05-24):** **7/7 parsers migrados (100%)** + auto-detect + router. **89/89 tests passing en 615 ms.**
 
 | Equipo | Parser | Tests | Sprint |
 |--------|--------|-------|--------|
@@ -12,10 +12,10 @@ Parser modular TypeScript de PDFs polisomnográficos. Reusable desde cualquier a
 | BrainWave (PSG) | ✅ | ✅ 14 | 16 |
 | Philips Alice NightOne | ✅ | ✅ 9 | 16 |
 | ResMed Diagnóstico | ✅ | ✅ 13 | 16 |
-| **Auto-detect + router** | ✅ | ✅ 14 | 16 |
-| ResMed Tratamiento | ⏳ | ⏳ | 17 |
-| BMC Tratamiento | ⏳ | ⏳ | 17 |
-| BMC Poligrafía | ⏳ | ⏳ | 17 |
+| ResMed Tratamiento | ✅ | ✅ 9 | 17 |
+| BMC Tratamiento | ✅ | ✅ 10 | 17 |
+| BMC Poligrafía | ✅ | ✅ 4 | 17 |
+| **Auto-detect + router** | ✅ | ✅ 15 | 16+17 |
 | Engine Hipóxico | ⏳ | ⏳ | 18 |
 | Frontend Vite+React | ⏳ | ⏳ | 19 |
 

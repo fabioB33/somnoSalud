@@ -1,20 +1,23 @@
 /**
  * Router de parsers: dado un FormatInfo, invoca el parser correcto.
  *
- * Sprint 16: cobertura para 4 parsers disponibles (Philips Sleepware G3,
- * BrainWave PSG, Philips NightOne, ResMed Diagnostico). Sprint 17 agrega
- * ResMed Trat + BMC Trat + BMC Poli.
+ * Sprint 17: cobertura completa 7/7 parsers (Sleepware G3, BrainWave, NightOne,
+ * ResMed Diag, ResMed Trat, BMC Trat, BMC Poligrafo). UnsupportedFormatError
+ * solo aplica si se agregan nuevos formatos en el detector sin parser asociado.
  */
 
+import { parseBMCPoligrafo } from './parsers/bmc-poligrafo';
+import { parseBMCTratamiento } from './parsers/bmc-tratamiento';
 import { parseBrainWavePSG } from './parsers/brainwave-psg';
 import { parsePhilipsNightOne } from './parsers/philips-nightone';
 import { parsePhilipsSleepwareG3 } from './parsers/philips-sleepware-g3';
 import { parseResMedDiagnostico } from './parsers/resmed-diagnostico';
+import { parseResMedTratamiento } from './parsers/resmed-tratamiento';
 import type { FormatInfo, ParserResult, PSGRecord } from './types';
 
 export class UnsupportedFormatError extends Error {
   constructor(public readonly format: string) {
-    super(`Formato "${format}" no soportado todavia (pendiente Sprint 17+).`);
+    super(`Formato "${format}" no soportado todavia.`);
     this.name = 'UnsupportedFormatError';
   }
 }
@@ -41,9 +44,11 @@ export function parseByFormat(
     case 'resmed_diagnostico':
       return parseResMedDiagnostico(rawText);
     case 'resmed_tratamiento':
+      return parseResMedTratamiento(rawText);
     case 'bmc_tratamiento':
+      return parseBMCTratamiento(rawText);
     case 'bmc_poligrafo':
-      throw new UnsupportedFormatError(formatInfo.format);
+      return parseBMCPoligrafo(rawText);
     case 'unknown':
     default:
       throw new UnknownFormatError();

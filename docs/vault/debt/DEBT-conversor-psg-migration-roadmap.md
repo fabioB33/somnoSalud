@@ -32,12 +32,16 @@ El legacy `legacy-v0/index.html` sigue 100% funcional standalone (`python3 -m ht
 - **Total:** 50 tests nuevos (Sprint 15: 15 → Sprint 16: 65). 3 bugs latentes legacy detectados y resueltos.
 - Detalle: [[../sprints/sprint-16-3-parsers-diagnosticos/SPRINT-16-3-PARSERS-DIAGNOSTICOS]].
 
-### Sprint 17 — 3 parsers tratamiento + BMC (~3 h)
+### Sprint 17 — ✅ closed-verified (2026-05-24)
 
-- **ResMed AirView Tratamiento:** parser legacy líneas 1109-1192. Reporte CPAP/cumplimiento.
-- **BMC Tratamiento:** parser legacy líneas 1193-1259.
-- **BMC Poligrafía:** parser legacy líneas 1260-1421. Mayormente imágenes en el PDF original, texto extraíble limitado.
-- Idem patrón Sprint 15-16.
+- **ResMed AirView Tratamiento:** ✅ migrado (~130 LOC, 9 tests). Uso CPAP + presión + fugas + Cheyne-Stokes.
+- **BMC Tratamiento:** ✅ migrado (~100 LOC, 10 tests). AHI/AI/HI/OAI/CAI desglosado + fecha YYYY/MM/DD invertida.
+- **BMC Poligrafía:** ✅ migrado (~45 LOC, 4 tests). Caso especial: data en imágenes, solo extrae paciente + warning explícito.
+- **Router activado:** los 3 formatos ya no tiran `UnsupportedFormatError`.
+- **Types extendido:** +8 campos CPAP (`cpap_*` + `estudio_fecha_fin`).
+- **Total:** 24 tests nuevos (Sprint 16: 65 → Sprint 17: 89). 3 bugs greedy regex detectados y resueltos.
+- **Progreso migración:** **7/7 parsers (100%)** ✅. Quedan Sprint 18 (engine) + Sprint 19 (frontend).
+- Detalle: [[../sprints/sprint-17-parsers-tratamiento/SPRINT-17-PARSERS-TRATAMIENTO]].
 
 ### Sprint 18 — Engine Hipóxico modular + tests con DOI (~5-7 h)
 
@@ -67,7 +71,7 @@ El legacy `legacy-v0/index.html` sigue 100% funcional standalone (`python3 -m ht
 
 ## Scope total estimado
 
-~10-16 h restantes en 3 sprints (17-19). Sprint 15 invirtió ~3 h, Sprint 16 invirtió ~4 h. Progreso migración: 4/7 parsers (57%) + detect + router.
+~10-15 h restantes en 2 sprints (18 + 19). Sprint 15: ~3 h, Sprint 16: ~4 h, Sprint 17: ~3 h. **Progreso migración: 7/7 parsers (100%) + detect + router + 89/89 tests.**
 
 ## Prioridad
 

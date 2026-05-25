@@ -1,23 +1,23 @@
 /**
  * Tests integracion detectFormat + parseByFormat router.
  *
- * Sprint 16: cubre los 4 formatos disponibles + error paths para los 3
- * formatos pendientes (ResMed Trat, BMC Trat, BMC Poli) + unknown.
+ * Sprint 17: cubre 7/7 parsers completos. UnsupportedFormatError ya no se
+ * dispara por formatos conocidos (todos tienen parser asociado). Sigue
+ * disponible la clase para futuros formatos detectados sin parser.
  */
 
 import { describe, expect, test } from 'vitest';
 import { detectFormat } from '../src/detect';
-import {
-  parseByFormat,
-  UnknownFormatError,
-  UnsupportedFormatError,
-} from '../src/router';
+import { parseByFormat, UnknownFormatError } from '../src/router';
+import { BMC_POLIGRAFO_TIPICO } from './fixtures/bmc-poligrafo';
+import { BMC_TRATAMIENTO_COMPLETO } from './fixtures/bmc-tratamiento';
 import { BRAINWAVE_COMPLETO } from './fixtures/brainwave-psg';
 import { NIGHTONE_COMPLETO } from './fixtures/philips-nightone';
 import { PHILIPS_SLEEPWARE_G3_COMPLETO } from './fixtures/philips-sleepware-g3';
 import { RESMED_DIAGNOSTICO_COMPLETO } from './fixtures/resmed-diagnostico';
+import { RESMED_TRATAMIENTO_COMPLETO } from './fixtures/resmed-tratamiento';
 
-describe('detectFormat — los 4 formatos disponibles', () => {
+describe('detectFormat — los 4 formatos diagnosticos disponibles', () => {
   test('Philips Sleepware G3 detectado por tag explicito', () => {
     const info = detectFormat(PHILIPS_SLEEPWARE_G3_COMPLETO);
     expect(info.format).toBe('philips_sleepware_g3');
@@ -54,7 +54,7 @@ describe('detectFormat — los 4 formatos disponibles', () => {
   });
 });
 
-describe('parseByFormat — router invoca el parser correcto', () => {
+describe('parseByFormat — router invoca el parser correcto (4 formatos Sprint 15-16)', () => {
   test('ruta a Philips Sleepware G3 y extrae paciente', () => {
     const info = detectFormat(PHILIPS_SLEEPWARE_G3_COMPLETO);
     const { data } = parseByFormat(PHILIPS_SLEEPWARE_G3_COMPLETO, info);
@@ -83,6 +83,42 @@ describe('parseByFormat — router invoca el parser correcto', () => {
   });
 });
 
+describe('parseByFormat — Sprint 17: 3 nuevos parsers tratamiento', () => {
+  test('ResMed Tratamiento con datos CPAP completos', () => {
+    const { data } = parseByFormat(RESMED_TRATAMIENTO_COMPLETO, {
+      format: 'resmed_tratamiento',
+      label: 'ResMed AirView (Tratamiento/CPAP)',
+      type: 'tratamiento',
+    });
+    expect(data.estudio_tipo).toBe('Titulacion CPAP');
+    expect(data.cpap_uso_promedio_min).toBe(405);
+    expect(data.iah_global_por_hora).toBe(3.2);
+  });
+
+  test('BMC Tratamiento con AHI desglosado + fecha YYYY/MM/DD invertida', () => {
+    const { data } = parseByFormat(BMC_TRATAMIENTO_COMPLETO, {
+      format: 'bmc_tratamiento',
+      label: 'BMC (Tratamiento/CPAP)',
+      type: 'tratamiento',
+    });
+    expect(data.estudio_software).toBe('BMC G2S 3DT');
+    expect(data.iah_global_por_hora).toBe(4.5);
+    expect(data.cpap_presion_p95_cmh2o).toBe(11.5);
+    expect(data.paciente_fecha_nacimiento).toBe('1960-08-15');
+  });
+
+  test('BMC Poligrafo con warning explicito de imagenes', () => {
+    const { data, missing } = parseByFormat(BMC_POLIGRAFO_TIPICO, {
+      format: 'bmc_poligrafo',
+      label: 'BMC (Poligrafia diagnostica)',
+      type: 'diagnostico',
+    });
+    expect(data.estudio_tipo).toBe('Poligrafia respiratoria');
+    expect(data.paciente_apellido).toBe('LOPEZ');
+    expect(missing[0]).toContain('ADVERTENCIA');
+  });
+});
+
 describe('parseByFormat — errores', () => {
   test('formato unknown tira UnknownFormatError', () => {
     expect(() =>
@@ -94,44 +130,12 @@ describe('parseByFormat — errores', () => {
     ).toThrow(UnknownFormatError);
   });
 
-  test('formato pendiente Sprint 17 tira UnsupportedFormatError con nombre', () => {
-    try {
-      parseByFormat('', {
-        format: 'resmed_tratamiento',
-        label: 'ResMed AirView (Tratamiento)',
-        type: 'tratamiento',
-      });
-      throw new Error('should have thrown');
-    } catch (err) {
-      expect(err).toBeInstanceOf(UnsupportedFormatError);
-      expect((err as UnsupportedFormatError).format).toBe('resmed_tratamiento');
-    }
-  });
-
-  test('bmc_tratamiento y bmc_poligrafo tambien tiran UnsupportedFormatError', () => {
-    expect(() =>
-      parseByFormat('', {
-        format: 'bmc_tratamiento',
-        label: 'BMC',
-        type: 'tratamiento',
-      }),
-    ).toThrow(UnsupportedFormatError);
-    expect(() =>
-      parseByFormat('', {
-        format: 'bmc_poligrafo',
-        label: 'BMC',
-        type: 'diagnostico',
-      }),
-    ).toThrow(UnsupportedFormatError);
-  });
-
   test('sleepware_like se rutea al parser de Sleepware G3 (fallback)', () => {
     const info = {
       format: 'sleepware_like' as const,
       label: 'PSG generico',
       type: 'diagnostico' as const,
     };
-    // Usamos el fixture de G3 que comparte estructura
     const { data } = parseByFormat(PHILIPS_SLEEPWARE_G3_COMPLETO, info);
     expect(data.paciente_apellido).toBe('PEREZ');
   });

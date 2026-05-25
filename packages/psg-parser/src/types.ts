@@ -194,6 +194,16 @@ export interface PSGRecord {
   fc_minima_lpm?: number;
   fc_maxima_lpm?: number;
 
+  // --- CPAP / TRATAMIENTO (Sprint 17 — ResMed Trat + BMC Trat) ---
+  cpap_uso_promedio_min?: number;
+  cpap_dias_uso?: number;
+  cpap_dias_total?: number;
+  cpap_dias_4h_porc?: number;
+  cpap_presion_mediana_cmh2o?: number;
+  cpap_presion_p95_cmh2o?: number;
+  cpap_fuga_p95_lpm?: number;
+  estudio_fecha_fin?: string;
+
   // --- SpO2 umbrales adicionales (Sprint 16 — BrainWave usa <88% y <92%) ---
   spo2_menor_88_despertar_min?: number;
   spo2_menor_88_despertar_porc?: number;
