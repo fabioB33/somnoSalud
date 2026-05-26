@@ -240,7 +240,7 @@ Design system compartido entre webapp-somnosalud y webapp-conversor-psg. Compone
 | Monorepo | pnpm workspaces + turborepo | Setup verificado 2026-05-07 bootstrap |
 | Frontend SomnoSalud | Next.js 14 (App Router) + Tailwind + shadcn/ui | Server Actions para mutations, RSC default |
 | Frontend Conversor PSG | Vite + React + pdf.js + JSZip | Cero backend — 100% client-side por privacidad clínica |
-| Backend / DB / Auth | Supabase (PostgreSQL + RLS multi-tenant + Auth + Storage) | Project a crear Fase 0 |
+| Backend / DB / Auth | Supabase (PostgreSQL + RLS + Auth + Storage) | ✅ Sprint 2.B+9.A-E — project `somnosalud-platform` Org Pampa Labs sa-east-1 plan Free. 5 migraciones aplicadas, 6 RLS policies, 0 lints. `@supabase/ssr@0.10.3` + magic link auth + 4 Server Actions de evaluations + auth gate `/eval/*` + `/mis-resultados` + consent persist DB (3 capas) |
 | Deploy | Vercel (somnosalud webapp) + GitHub Pages (conversor PSG) | A configurar Fase 0 |
 | Tests unitarios | Vitest | 55+ tests del clinical-engine ya pasando |
 | Tests E2E | Playwright | ✅ Sprint 13 — 19/19 tests passing en local. Sprint 14 agregó job `e2e` al CI con cache Chromium |
@@ -584,6 +584,6 @@ Revisar al go-live B2B (posible cambio a algún esquema más permisivo según va
 
 ---
 
-*Última actualización: 18 Mayo 2026 (Sprint 2.B cerrado — MCP supabase-somnosalud activo, 5 migraciones aplicadas, 0 security lints)*
-*last_synced_with_vault_reality: 2026-05-18*
-*Próxima revisión: post-Sprint 9-supabase (cliente + magic link + sessionStorage → DB)*
+*Última actualización: 26 Mayo 2026 (Sprint 18 cerrado — Engine Hipóxico Azarbarzin 2019 + 159/159 tests monorepo. Sprints 17 + 9.A/B/C/D/E + 2.B + 18 sincronizados al Vault)*
+*last_synced_with_vault_reality: 2026-05-26*
+*Próxima revisión: post-Sprint 19 (frontend Vite+React reemplaza legacy-v0/index.html, cierra DEBT-conversor-psg-migration-roadmap)*
