@@ -64,12 +64,14 @@ El legacy `legacy-v0/index.html` sigue 100% funcional standalone (`python3 -m ht
 - Coexistencia con legacy-v0 mantenida.
 - Detalle: [[../sprints/sprint-19-frontend-vite-conversor-psg/SPRINT-19-FRONTEND-VITE-CONVERSOR-PSG]].
 
-### Sprint 19.B — Pendiente (features iterativas frontend)
+### Sprint 19.B — ✅ closed-verified (2026-05-26)
 
-- Download ZIP multi-archivo (integración JSZip).
-- Tab Engine Hipóxico UI completo (score grande + barras de componentes + flags clínicos).
-- Tab Methodology con explicación del scoring + DOI/PMID.
-- Log técnico expandido.
+- ZIP multi-archivo con JSZip + BOM UTF-8 + filename `CSV_PSG_<timestamp>.zip` (3 tests vitest).
+- `<EnginePanel>` con 2 tabs: **Resultados** (score grande coloreado por catClass + 12 metric cards + 6 breakdown bars + perfil A/B/C + flags clínicos + tabla detalle 11 filas) y **Methodology** (7 secciones explicando scoring + cita Azarbarzin 2019 con DOI link).
+- Integración: `<FileRow>` botón "Score Hipóxico" condicional + `<App>` state `engineFileId` + render condicional panel + botón "Descargar todos (ZIP)".
+- **19/19 tests vitest** (16 CSV + 3 ZIP). Vite build verde 4.11s.
+- Log técnico expandido y descripciones específicas quedaron diferidos a 19.C (decisión scope post smoke con Pablo).
+- Detalle: [[../sprints/sprint-19-b-engine-ui-zip/SPRINT-19-B-ENGINE-UI-ZIP]].
 
 ### Sprint 19.C — Pendiente (archivar legacy)
 
@@ -90,7 +92,7 @@ El legacy `legacy-v0/index.html` sigue 100% funcional standalone (`python3 -m ht
 
 ## Scope total estimado
 
-**Progreso global 89% (8/9 items):** 7/7 parsers + auto-detect + router + Engine Hipóxico + Frontend MVP ✅. Quedan Sprint 19.B (features iterativas frontend ~3h) + Sprint 19.C (archivar legacy ~30min). Tiempo invertido: ~17h total (15: 3h + 16: 4h + 17: 3h + 18: 3h + 19: 4h). **Total monorepo tests post-Sprint 19: 175 vitest passing.**
+**Progreso global 95% (8.5/9 items):** 7/7 parsers + auto-detect + router + Engine Hipóxico + Frontend MVP + Engine UI + ZIP + Methodology ✅. Sólo Sprint 19.C (archivar legacy ~30min, requiere confirmación Pablo con smoke real de PDFs IFN) pendiente. Tiempo invertido: ~20h total (15: 3h + 16: 4h + 17: 3h + 18: 3h + 19: 4h + 19.B: 3h). **Total monorepo tests post-Sprint 19.B: 178 vitest passing** (clinical-engine 55 + psg-parser 104 + conversor-psg 19).
 
 ## Prioridad
 

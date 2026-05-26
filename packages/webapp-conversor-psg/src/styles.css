@@ -244,3 +244,316 @@ footer {
   font-size: 11px;
   line-height: 1.5;
 }
+
+/* ===================================================================
+ * Engine Hipóxico panel (Sprint 19.B)
+ * =================================================================== */
+
+.engine-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.engine-tabs-bar {
+  display: flex;
+  gap: 0;
+  background: #1e293b;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.engine-tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  border-bottom: 2px solid transparent;
+  transition: 0.2s;
+}
+
+.engine-tab-btn:hover {
+  color: var(--text);
+}
+
+.engine-tab-btn.active {
+  color: white;
+  border-bottom-color: var(--accent);
+}
+
+.engine-tab-content {
+  padding: 16px;
+}
+
+.engine-card {
+  background: #0f172a;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.engine-card-header {
+  background: #1e293b;
+  color: var(--text);
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.engine-card-body {
+  padding: 14px;
+}
+
+.engine-meta {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.na-note {
+  background: #422006;
+  border-left: 3px solid var(--warn);
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin-bottom: 12px;
+  color: #fcd34d;
+}
+
+.na-text,
+.na-cell {
+  color: #64748b !important;
+}
+
+.score-display {
+  text-align: center;
+  padding: 24px 16px;
+}
+
+.score-big {
+  font-size: 64px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.score-label {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.score-cat {
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.score-cat.score-leve {
+  color: #4ade80;
+}
+.score-cat.score-moderada {
+  color: #fbbf24;
+}
+.score-cat.score-alta {
+  color: #fb923c;
+}
+.score-cat.score-critica {
+  color: #f87171;
+}
+
+.score-desc {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+}
+
+.metric-card {
+  background: #1e293b;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.metric-card .mv {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.metric-card .ml {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.metric-card.na {
+  opacity: 0.4;
+}
+
+.breakdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  font-size: 12px;
+}
+
+.breakdown-bar {
+  flex: 1;
+  height: 16px;
+  background: #1e293b;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.breakdown-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s;
+}
+
+.breakdown-label {
+  min-width: 140px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.breakdown-note {
+  color: #64748b;
+  font-size: 10px;
+}
+
+.breakdown-value {
+  min-width: 50px;
+  text-align: right;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.profile-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.profile-desc {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+.profile-desc strong {
+  color: var(--text);
+}
+
+.flag-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.flag-list li {
+  padding: 6px 10px;
+  margin: 4px 0;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.flag-list li.crit {
+  background: rgba(239, 68, 68, 0.15);
+  border-left: 3px solid var(--err);
+  color: #fca5a5;
+}
+
+.flag-list li.warn {
+  background: rgba(245, 158, 11, 0.15);
+  border-left: 3px solid var(--warn);
+  color: #fcd34d;
+}
+
+.detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.detail-table th {
+  background: #1e293b;
+  color: var(--muted);
+  padding: 6px 8px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.detail-table td {
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+.detail-table tr.detail-total td {
+  font-weight: 700;
+  background: #1e293b;
+}
+
+.method-section {
+  margin: 16px 0;
+  padding: 14px;
+  background: #1e293b;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.method-section h3 {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font-size: 14px;
+}
+
+.method-section p,
+.method-section ul {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #cbd5e1;
+  margin: 8px 0;
+}
+
+.method-section ul {
+  padding-left: 20px;
+}
+
+.method-section li {
+  margin: 4px 0;
+}
+
+.method-section a {
+  color: var(--accent);
+}
+
+.method-formula {
+  background: #0f172a;
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  color: #e2e8f0;
+  margin: 8px 0;
+}

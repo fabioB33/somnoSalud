@@ -70,7 +70,9 @@ created: 2026-05-07
 
 - ✅ **Sprint 19 closed-verified (2026-05-26):** Frontend Vite+React Conversor PSG MVP. Bootstrap `webapp-conversor-psg` con Vite 5 + React 18 + TS estricto + pdfjs-dist@4 + jszip. Workspace dep `@somnosalud/psg-parser` consumida directo (cero duplicación de lógica). Estructura: `src/lib/` (schema 224 cols + csv builder + filename builder + pdf.js wrapper) + `src/hooks/usePsgFiles.ts` orquesta pipeline (extractText → detectFormat → parseByFormat → computeHypoxicScore) + `src/components/` (Dropzone con drag&drop + keyboard a11y, FileList, FileRow con Download CSV individual). **16 tests vitest** del CSV builder (escape comas/quotes/newlines + filename format + schema length). `pnpm build` Vite verde, `dist/` 3.5 MB (pdf.js worker bundled). **Total monorepo: 175 vitest tests passing** (clinical-engine 55 + psg-parser 104 + conversor-psg 16). Coexistencia con legacy-v0 mantenida. **Progreso Conversor PSG migración: 89% (8/9 items)** — quedan Sprint 19.B (ZIP + Engine UI tabs + Methodology, ~3h) + 19.C (archivar legacy, ~30min) para cierre formal DEBT. Detalle: [[sprints/sprint-19-frontend-vite-conversor-psg/SPRINT-19-FRONTEND-VITE-CONVERSOR-PSG]].
 
-**Próxima sesión sugerida:** Sprint 19.B (Engine Hipóxico UI tabs + Download ZIP + Methodology tab, ~3h, cierra features iterativas del Conversor PSG) o Sprint 3 (deploy Vercel preview ~2h para que Pablo vea webapp en producción cuando lo visite Jorge).
+- ✅ **Sprint 19.B closed-verified (2026-05-26):** Features iterativas del Conversor PSG completadas. **ZIP multi-archivo** (`buildZip` con JSZip + BOM UTF-8 + filename `CSV_PSG_<timestamp>.zip`). **`<EnginePanel>`** React con 2 tabs: Resultados (score grande coloreado + 12 metric cards + 6 breakdown bars + perfil A/B/C badge + flag-list crit/warn + tabla detalle 11 filas) y Methodology (7 secciones explicando scoring Azarbarzin 2019 + DOI link). Integración en `App.tsx` (state engineFileId + zipBusy + handleDownloadAll + render condicional EnginePanel) + `<FileRow>` botón "Score Hipóxico" condicional. **19/19 tests vitest** (16 CSV + 3 ZIP nuevos). Vite build verde 4.11s, bundle main 668 kB (gzip 200 kB). **Total monorepo: 178 vitest tests**. **Progreso Conversor PSG: 95% (8.5/9)** — solo falta Sprint 19.C archivar legacy-v0 con confirmación Pablo. Detalle: [[sprints/sprint-19-b-engine-ui-zip/SPRINT-19-B-ENGINE-UI-ZIP]].
+
+**Próxima sesión sugerida:** Sprint 19.C (archivar legacy-v0/, ~30min + smoke real Pablo) → cierra DEBT-conversor-psg-migration-roadmap formalmente. O alternativa: Sprint 3 (deploy Vercel preview, ~2h) para que Pablo vea webapp principal en producción cuando lo visite Jorge.
 
 ---
 
@@ -174,5 +176,5 @@ created: 2026-05-07
 
 ---
 
-*Última actualización: 2026-05-26 (Sprint 19 frontend Vite MVP cerrado — Conversor PSG 89%)*
-*Próxima revisión: post-Sprint 19.B (UI tabs Engine Hipóxico + ZIP) o Sprint 3 (Vercel preview)*
+*Última actualización: 2026-05-26 (Sprint 19.B cerrado — Engine UI + ZIP. Conversor PSG 95%, falta solo 19.C archivar legacy)*
+*Próxima revisión: post-Sprint 19.C (cierre formal DEBT-conversor-psg) o Sprint 3 (Vercel preview)*
