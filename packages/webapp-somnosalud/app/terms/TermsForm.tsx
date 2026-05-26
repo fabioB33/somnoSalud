@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
 
+import { acceptConsent } from '@/app/consent/actions';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -18,7 +19,11 @@ import { useConsent } from '@/hooks/useConsent';
  * Cuando se acepta:
  * 1. Setea cookie `somno_consent_v1=accepted` (1 ano TTL, SameSite=Strict).
  * 2. Loguea timestamp en sessionStorage para auditoria local.
- * 3. Redirige a la URL recibida en `redirectTo` (default /eval/profile).
+ * 3. Sprint 9.E: invoca Server Action `acceptConsent()` que persiste
+ *    `profiles.consent_terms_accepted_at` + `consent_terms_version` +
+ *    audit_log entry. Fire-and-forget: si falla, NO bloquea redirect
+ *    (la cookie ya esta seteada, el user puede continuar).
+ * 4. Redirige a la URL recibida en `redirectTo` (default /eval/profile).
  *
  * Es Client Component porque necesita useState + useRouter + writeable cookies
  * desde el browser. La pantalla parent (page.tsx) sigue siendo Server Component
@@ -42,7 +47,7 @@ export function TermsForm({ redirectTo }: { redirectTo: string }) {
     // 1. Setear cookie consent (server-readable por middleware Capa 1).
     accept();
 
-    // 2. Log local timestamp para auditoria (Sprint 11+ migra a Supabase tabla audit_log).
+    // 2. Log local timestamp para auditoria.
     if (typeof window !== 'undefined') {
       try {
         const log = {
@@ -59,7 +64,16 @@ export function TermsForm({ redirectTo }: { redirectTo: string }) {
       }
     }
 
-    // 3. Redirect a la pantalla original (default /eval/profile).
+    // 3. Sprint 9.E: persistir consent a DB (profiles + audit_log).
+    // Fire-and-forget: si falla, NO bloquea el redirect — la cookie ya esta.
+    void acceptConsent().then((res) => {
+      if (!res.ok) {
+        // Sprint futuro: toast Sonner con retry. Por ahora solo console.
+        console.warn('[consent] acceptConsent DB persist fallo:', res);
+      }
+    });
+
+    // 4. Redirect a la pantalla original (default /eval/profile).
     router.push(redirectTo);
   };
 
