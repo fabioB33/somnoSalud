@@ -43,12 +43,15 @@ El legacy `legacy-v0/index.html` sigue 100% funcional standalone (`python3 -m ht
 - **Progreso migración:** **7/7 parsers (100%)** ✅. Quedan Sprint 18 (engine) + Sprint 19 (frontend).
 - Detalle: [[../sprints/sprint-17-parsers-tratamiento/SPRINT-17-PARSERS-TRATAMIENTO]].
 
-### Sprint 18 — Engine Hipóxico modular + tests con DOI (~5-7 h)
+### Sprint 18 — ✅ closed-verified (2026-05-26)
 
-- **Engine Hipóxico:** función `computeHypoxicScorePSG()` del legacy líneas 1648-1738. Score 0-100 con 6 componentes (Azarbarzin 2019 hypoxic burden + variantes IFN).
-- Migrar a `src/engine/hypoxic.ts` + agregar DOI a `clinical-engine/src/references.ts` (NO duplicar — `references.ts` es SSOT).
-- Tests vitest con casos clínicos: severo / moderado / leve / normal.
-- Considerar mover el engine a `clinical-engine/` si es lógica clínica pura (decisión de arquitectura a tomar en Sprint 18 con triangulación).
+- **Engine Hipóxico:** `computeHypoxicScore(record: PSGRecord)` migrado a `psg-parser/src/engine/hypoxic.ts` (~230 LOC TS estricto).
+- 6 componentes (carga / ciclicidad / profundidad / mod basal / mod temporal / mod clínico). Max teórico 100, real ~76 sin señal cruda SpO2.
+- 4 categorías clinicas: leve (≤15) / moderada (16-39) / alta (40-69) / crítica (≥70).
+- DOI/PMID Azarbarzin 2019 (10.1093/eurheartj/ehy624, PMID 30376054) agregado a `clinical-engine/src/references.ts` como `REF_HYPOXIC_AZARBARZIN_2019` (SSOT del monorepo).
+- Decisión arquitectónica: engine vive en `psg-parser` (no `clinical-engine`) porque consume `PSGRecord` y es scoring específico de polisomnografía.
+- **15 tests vitest** cubriendo 4 categorías + perfil C + mod temporal REM-predominant + edge cases. Total psg-parser: 104/104.
+- Detalle: [[../sprints/sprint-18-engine-hipoxico/SPRINT-18-ENGINE-HIPOXICO]].
 
 ### Sprint 19 — Frontend Vite+React (~5-8 h)
 

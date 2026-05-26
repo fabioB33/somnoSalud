@@ -16,7 +16,7 @@ Parser modular TypeScript de PDFs polisomnográficos. Reusable desde cualquier a
 | BMC Tratamiento | ✅ | ✅ 10 | 17 |
 | BMC Poligrafía | ✅ | ✅ 4 | 17 |
 | **Auto-detect + router** | ✅ | ✅ 15 | 16+17 |
-| Engine Hipóxico | ⏳ | ⏳ | 18 |
+| Engine Hipóxico | ✅ | ✅ 15 | 18 |
 | Frontend Vite+React | ⏳ | ⏳ | 19 |
 
 El legacy `packages/webapp-conversor-psg/legacy-v0/index.html` (1.887 LOC) sigue funcionando standalone mientras esta migración completa los Sprints 16-19. Ver [[DEBT-conversor-psg-migration-roadmap]] en el Vault.

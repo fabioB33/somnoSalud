@@ -5,7 +5,8 @@
  * Sprint 16: + BrainWave PSG, Philips Alice NightOne, ResMed AirView Diag,
  *            + detectFormat / parseByFormat router.
  * Sprint 17: + ResMed Trat + BMC Trat + BMC Poligrafo. **7/7 parsers completos.**
- * Sprints 18-19: Engine Hipoxico + frontend Vite+React.
+ * Sprint 18: + Engine Hipoxico (Azarbarzin 2019).
+ * Sprint 19: frontend Vite+React reemplaza legacy.
  */
 
 export type {
@@ -36,3 +37,11 @@ export { parseResMedTratamiento } from './parsers/resmed-tratamiento';
 
 export { detectFormat } from './detect';
 export { parseByFormat, UnknownFormatError, UnsupportedFormatError } from './router';
+
+export { computeHypoxicScore } from './engine/hypoxic';
+export type {
+  HypoxicCategoryClass,
+  HypoxicComponentBreakdown,
+  HypoxicFlag,
+  HypoxicScore,
+} from './engine/types';

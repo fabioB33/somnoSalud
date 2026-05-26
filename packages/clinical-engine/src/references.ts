@@ -432,6 +432,20 @@ export const REFERENCES: Record<string, ScientificReference> = {
     evidenceLevel: 'A',
     notes: 'Stimulus Control: cama solo para sueño/sexo. Si despierta >15-20 min, salir de cama. Asociación cama-sueño crítica.',
   },
+
+  // ===================================================================
+  // HYPOXIC BURDEN — Carga Hipoxica acumulativa nocturna (PSG)
+  // ===================================================================
+
+  REF_HYPOXIC_AZARBARZIN_2019: {
+    id: 'REF_HYPOXIC_AZARBARZIN_2019',
+    citation: 'Azarbarzin A, Sands SA, Stone KL, Taranto-Montemurro L, Messineo L, Terrill PI, Ancoli-Israel S, Ensrud K, Purcell S, White DP, Redline S, Wellman A. The hypoxic burden of sleep apnoea predicts cardiovascular disease-related mortality: the Osteoporotic Fractures in Men Study and the Sleep Heart Health Study. Eur Heart J. 2019;40(14):1149-1157.',
+    doi: '10.1093/eurheartj/ehy624',
+    pmid: '30376054',
+    usedBy: ['psg-parser/engine/hypoxic.ts'],
+    evidenceLevel: 'A',
+    notes: 'Hypoxic Burden (HB) como predictor independiente de mortalidad cardiovascular en SAHOS. Implementacion psg-parser computa score 0-100 con 6 componentes (carga + ciclicidad + profundidad + mod basal/temporal/clinico). Sin senal cruda SpO2, HB se aproxima con T90/T85/T80 percentiles del TC.',
+  },
 };
 
 /**
