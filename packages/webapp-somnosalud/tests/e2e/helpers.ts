@@ -3,6 +3,11 @@ import type { Page } from '@playwright/test';
 /**
  * Helpers reusables para los tests E2E del flow de evaluacion.
  *
+ * Sprint 9.D (2026-05-26): /eval/* requiere login obligatorio. Los helpers
+ * que llevan al user a /eval/* deben primero crear un test user efimero
+ * via Supabase admin API + setear las cookies de sesion. Despues sigue
+ * el flow normal con cookie consent + sessionStorage profile.
+ *
  * Cada helper deja el estado en una pantalla especifica para que el
  * test puede continuar desde ahi. Algunos helpers usan
  * page.evaluate(sessionStorage) para acelerar el setup cuando NO se
@@ -10,12 +15,152 @@ import type { Page } from '@playwright/test';
  */
 
 /**
- * Setea cookie de consent + sessionStorage de profile para saltar
- * los pasos welcome/disclaimer/terms/profile cuando un test
- * arranca desde mas adelante en el flow.
+ * Crea un test user efimero via Supabase admin API + retorna los tokens
+ * de sesion para setear en cookies del browser. Requiere SUPABASE_SECRET_KEY
+ * en process.env (cargado en playwright.config via dotenv).
  *
- * Despues llamar a esto, page.goto('/eval/safety') etc. funciona
- * sin redirect.
+ * El email es aleatorio para evitar colision entre runs. Para cleanup
+ * post-test, ver `deleteTestUser(userId)`.
+ */
+export async function createTestUser(): Promise<{
+  userId: string;
+  email: string;
+  accessToken: string;
+  refreshToken: string;
+}> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const secretKey = process.env.SUPABASE_SECRET_KEY;
+  if (!supabaseUrl || !secretKey) {
+    throw new Error(
+      'Test users requieren NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SECRET_KEY en .env.local',
+    );
+  }
+
+  const email = `e2e-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@test.somnosalud.local`;
+  const password = `Test-${Math.random().toString(36).slice(2, 18)}!`;
+
+  // 1. Crear user via admin API (email_confirm: true skipea verificacion).
+  const createRes = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
+    method: 'POST',
+    headers: {
+      apikey: secretKey,
+      Authorization: `Bearer ${secretKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password, email_confirm: true }),
+  });
+  if (!createRes.ok) {
+    throw new Error(
+      `createTestUser admin.createUser falló: ${createRes.status} ${await createRes.text()}`,
+    );
+  }
+  const created = (await createRes.json()) as { id: string };
+
+  // 2. Sign in para obtener access + refresh tokens (no podemos con admin
+  // API porque devuelve solo metadata, no tokens activos).
+  const signInRes = await fetch(
+    `${supabaseUrl}/auth/v1/token?grant_type=password`,
+    {
+      method: 'POST',
+      headers: {
+        apikey: secretKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    },
+  );
+  if (!signInRes.ok) {
+    throw new Error(
+      `createTestUser signIn falló: ${signInRes.status} ${await signInRes.text()}`,
+    );
+  }
+  const session = (await signInRes.json()) as {
+    access_token: string;
+    refresh_token: string;
+  };
+
+  return {
+    userId: created.id,
+    email,
+    accessToken: session.access_token,
+    refreshToken: session.refresh_token,
+  };
+}
+
+/**
+ * Borra el test user creado por createTestUser via admin API.
+ * Llamar en `afterEach` o `afterAll` para mantener auth.users limpia.
+ *
+ * Best-effort: si falla, NO rompe el test (solo log).
+ */
+export async function deleteTestUser(userId: string): Promise<void> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const secretKey = process.env.SUPABASE_SECRET_KEY;
+  if (!supabaseUrl || !secretKey) return;
+
+  try {
+    await fetch(`${supabaseUrl}/auth/v1/admin/users/${userId}`, {
+      method: 'DELETE',
+      headers: {
+        apikey: secretKey,
+        Authorization: `Bearer ${secretKey}`,
+      },
+    });
+  } catch (err) {
+    // Best-effort: log y seguir. Cleanup job admin periodico maneja los
+    // huerfanos si esto fallara.
+    console.warn('[e2e cleanup] deleteTestUser fallo:', err);
+  }
+}
+
+/**
+ * Setea las cookies de sesion Supabase en el browser context para que el
+ * middleware reconozca al user como autenticado. Cookie name sigue la
+ * convencion `sb-<project-ref>-auth-token` que usa @supabase/ssr.
+ */
+export async function setSupabaseSessionCookies(
+  page: Page,
+  tokens: { accessToken: string; refreshToken: string },
+): Promise<void> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const projectRef = new URL(supabaseUrl).hostname.split('.')[0];
+
+  // @supabase/ssr serializa la session en formato JSON base64 con prefijo.
+  // Replicamos el formato esperado para que el middleware pueda parsearlo.
+  const sessionValue = JSON.stringify({
+    access_token: tokens.accessToken,
+    refresh_token: tokens.refreshToken,
+    token_type: 'bearer',
+    expires_in: 3600,
+    expires_at: Math.floor(Date.now() / 1000) + 3600,
+  });
+  const encoded = `base64-${Buffer.from(sessionValue).toString('base64')}`;
+
+  await page.context().addCookies([
+    {
+      name: `sb-${projectRef}-auth-token`,
+      value: encoded,
+      domain: 'localhost',
+      path: '/',
+      expires: Math.floor(Date.now() / 1000) + 3600,
+      httpOnly: false,
+      secure: false,
+      sameSite: 'Lax',
+    },
+  ]);
+}
+
+/**
+ * Setea sesion auth (test user efimero) + cookie consent + sessionStorage
+ * profile para saltar los pasos welcome/login/disclaimer/terms/profile
+ * cuando un test arranca desde mas adelante en el flow.
+ *
+ * Despues llamar a esto, page.goto('/eval/safety') etc. funciona sin
+ * redirects ni del auth gate ni del compliance gate.
+ *
+ * **Importante:** retorna `userId` del test user creado. El test puede
+ * usarlo en `afterEach` para llamar `deleteTestUser(userId)` y mantener
+ * limpio el auth.users del project.
  */
 export async function skipToEvalWithProfile(
   page: Page,
@@ -25,7 +170,7 @@ export async function skipToEvalWithProfile(
     weightKg?: number;
     heightCm?: number;
   } = {},
-): Promise<void> {
+): Promise<{ userId: string; email: string }> {
   const age = options.age ?? 30;
   const sex = options.sex ?? 'male';
   const weightKg = options.weightKg ?? 75;
@@ -40,7 +185,14 @@ export async function skipToEvalWithProfile(
   );
   const dobIso = dob.toISOString().slice(0, 10);
 
-  // Setear cookie consent BEFORE navegar (middleware Capa 1).
+  // Sprint 9.D: crear test user + setear cookies de sesion (auth gate).
+  const testUser = await createTestUser();
+  await setSupabaseSessionCookies(page, {
+    accessToken: testUser.accessToken,
+    refreshToken: testUser.refreshToken,
+  });
+
+  // Setear cookie consent (compliance gate Capa 1).
   await page.context().addCookies([
     {
       name: 'somno_consent_v1',
@@ -70,6 +222,8 @@ export async function skipToEvalWithProfile(
     },
     { dobIso, sex, weightKg, heightCm },
   );
+
+  return { userId: testUser.userId, email: testUser.email };
 }
 
 /**
@@ -128,16 +282,29 @@ export async function skipToResults(page: Page): Promise<void> {
 }
 
 /**
- * Acepta T&C (consent cookie via UI real). Util cuando queremos
- * probar el flujo de consent + no skipearlo.
+ * Crea test user + acepta T&C (consent cookie via UI real). Util cuando
+ * queremos probar el flujo de consent + no skipearlo.
+ *
+ * Sprint 9.D: /disclaimer requiere auth, asi que pre-creamos test user
+ * antes de navegar. Retorna userId para cleanup del test.
  */
-export async function acceptConsent(page: Page): Promise<void> {
+export async function acceptConsent(
+  page: Page,
+): Promise<{ userId: string; email: string }> {
+  const testUser = await createTestUser();
+  await setSupabaseSessionCookies(page, {
+    accessToken: testUser.accessToken,
+    refreshToken: testUser.refreshToken,
+  });
+
   await page.goto('/disclaimer');
   await page.getByRole('link', { name: /Continuar a términos/i }).click();
   await page.waitForURL(/\/terms/);
   await page.getByRole('checkbox', { name: /Leí y acepto/i }).check();
   await page.getByRole('button', { name: /Aceptar y continuar/i }).click();
   await page.waitForURL(/\/eval\/profile/);
+
+  return { userId: testUser.userId, email: testUser.email };
 }
 
 /**

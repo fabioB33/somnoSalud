@@ -25,23 +25,28 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { PublicFooter } from '@/components/layout/PublicFooter';
+import { createClient } from '@/lib/supabase/server';
 
 /**
  * HomePage — pantalla de bienvenida de SomnoSalud (Sprint 8.6 expandida).
  *
- * Server Component (default). Renderiza:
- * - Header: logo + status pill.
- * - Hero: titulo + descripcion + CTA + tagline tiempos.
- * - Seccion "Como funciona": 4 steps numerados.
- * - Seccion "Que vas a recibir": preview card de resultados.
- * - 2 cards: orientativo + respaldo cientifico.
- * - FAQ Accordion: 5 preguntas frecuentes.
- * - PublicFooter compartido.
+ * Server Component async. Sprint 9.D: detecta sesion para rutear el CTA
+ * "Empezar evaluacion":
+ * - Anonimo: -> /login?next=/disclaimer (forzar auth antes de eval).
+ * - Logueado: -> /disclaimer (flow normal post-login).
  *
- * El CTA "Empezar evaluacion" lleva a /disclaimer (primer paso del
- * flow compliance gates ADR-003).
+ * Compliance: el login obligatorio garantiza que el consent informado
+ * (Ley 26.529) tenga un sujeto identificable, y que cualquier dato
+ * clinico procesado (Ley 25.326) sea atribuible a un user con derecho
+ * de acceso/rectificacion/supresion.
  */
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const evalCtaHref = user ? '/disclaimer' : '/login?next=/disclaimer';
+
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="border-b border-border/40 backdrop-blur-sm">
@@ -94,7 +99,7 @@ export default function HomePage() {
 
             <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
               <Button size="lg" asChild>
-                <Link href="/disclaimer">
+                <Link href={evalCtaHref}>
                   Empezar evaluación
                   <ArrowRight aria-hidden="true" />
                 </Link>
@@ -454,7 +459,7 @@ export default function HomePage() {
               10 minutos. Sin obligaciones. Resultados al final.
             </p>
             <Button size="lg" asChild className="mt-6">
-              <Link href="/disclaimer">
+              <Link href={evalCtaHref}>
                 Empezar evaluación
                 <ArrowRight aria-hidden="true" />
               </Link>

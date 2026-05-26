@@ -1,20 +1,40 @@
 import { test, expect } from '@playwright/test';
 
-import { skipToEvalWithProfile, acceptConsent } from './helpers';
+import {
+  acceptConsent,
+  createTestUser,
+  setSupabaseSessionCookies,
+  skipToEvalWithProfile,
+} from './helpers';
 
-test.describe('Capa 1 — middleware bloquea /eval/* sin cookie', () => {
-  test('T2: /eval/profile sin cookie redirige a /terms con searchParam', async ({
+test.describe('Auth gate Sprint 9.D — middleware bloquea /eval/* sin sesion', () => {
+  test('T2a: /eval/profile sin auth redirige a /login?next=/eval/profile', async ({
     page,
   }) => {
-    // Sin pre-setear cookie.
-    const response = await page.goto('/eval/profile');
-    // Esperamos redirect a /terms?redirect=...
+    // Sin sesion ni cookies — el auth gate corre primero.
+    await page.goto('/eval/profile');
+    await page.waitForURL(/\/login\?next=/);
+    expect(page.url()).toContain('/login');
+    expect(page.url()).toContain('next=%2Feval%2Fprofile');
+  });
+
+  test('T2b: /eval/profile con auth pero sin consent → redirect a /terms', async ({
+    page,
+  }) => {
+    // Auth OK pero sin cookie consent. Compliance gate Capa 1 corre.
+    const testUser = await createTestUser();
+    await setSupabaseSessionCookies(page, {
+      accessToken: testUser.accessToken,
+      refreshToken: testUser.refreshToken,
+    });
+
+    await page.goto('/eval/profile');
     await page.waitForURL(/\/terms\?redirect=/);
     expect(page.url()).toContain('/terms');
     expect(page.url()).toContain('redirect=%2Feval%2Fprofile');
   });
 
-  test('/eval/profile con cookie consent permite acceso', async ({ page }) => {
+  test('/eval/profile con auth + consent permite acceso', async ({ page }) => {
     await skipToEvalWithProfile(page, { age: 30 });
     const response = await page.goto('/eval/profile');
     expect(response?.status()).toBe(200);
@@ -23,10 +43,10 @@ test.describe('Capa 1 — middleware bloquea /eval/* sin cookie', () => {
     ).toBeVisible();
   });
 
-  test('/eval/menor-no-permitido NO requiere consent (exception del middleware)', async ({
+  test('/eval/menor-no-permitido NO requiere auth ni consent (excepcion)', async ({
     page,
   }) => {
-    // SIN cookie.
+    // Sin sesion ni cookie consent.
     const response = await page.goto('/eval/menor-no-permitido');
     expect(response?.status()).toBe(200);
     await expect(
