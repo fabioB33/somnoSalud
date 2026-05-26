@@ -1,0 +1,246 @@
+/**
+ * Estilos del Conversor PSG (Sprint 19).
+ * Paleta migrada del legacy-v0/index.html lineas 8-12.
+ */
+
+:root {
+  --bg: #0f172a;
+  --panel: #1e293b;
+  --panel2: #334155;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --accent: #38bdf8;
+  --accent2: #0284c7;
+  --ok: #22c55e;
+  --warn: #f59e0b;
+  --err: #ef4444;
+  --border: #475569;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.app-header {
+  margin-bottom: 24px;
+}
+
+.app-header h1 {
+  font-size: 24px;
+  margin: 0 0 4px;
+  color: var(--accent);
+}
+
+.subtitle {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 0;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+.dropzone {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 48px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--panel);
+  user-select: none;
+}
+
+.dropzone:hover,
+.dropzone.drag,
+.dropzone:focus-visible {
+  border-color: var(--accent);
+  background: var(--panel2);
+  outline: none;
+}
+
+.dropzone svg {
+  width: 48px;
+  height: 48px;
+  opacity: 0.6;
+  margin-bottom: 12px;
+  color: var(--accent);
+}
+
+.dropzone p {
+  margin: 4px 0;
+  font-size: 15px;
+}
+
+.dropzone .hint {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.btn {
+  background: var(--accent2);
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--accent);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn.small {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.btn.secondary {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+}
+
+.btn.ok {
+  background: var(--ok);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.counter {
+  font-size: 13px;
+  color: var(--muted);
+  margin-left: auto;
+}
+
+.file-list {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.file-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--panel2);
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.file-row .name {
+  flex: 1;
+  font-size: 13px;
+  word-break: break-word;
+  min-width: 200px;
+}
+
+.file-row .status {
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.status.pending {
+  background: #475569;
+  color: white;
+}
+
+.status.processing {
+  background: var(--warn);
+  color: white;
+}
+
+.status.success {
+  background: var(--ok);
+  color: white;
+}
+
+.status.error {
+  background: var(--err);
+  color: white;
+}
+
+.format-label {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: ui-monospace, monospace;
+}
+
+.error-msg {
+  font-size: 12px;
+  color: var(--err);
+  flex-basis: 100%;
+}
+
+.info-box {
+  background: #0c2540;
+  border-left: 3px solid var(--accent);
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-top: 12px;
+}
+
+.warn-box {
+  background: #422006;
+  border-left: 3px solid var(--warn);
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-top: 12px;
+}
+
+code {
+  background: #020617;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+}
+
+footer {
+  margin-top: 24px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}

@@ -53,12 +53,28 @@ El legacy `legacy-v0/index.html` sigue 100% funcional standalone (`python3 -m ht
 - **15 tests vitest** cubriendo 4 categorías + perfil C + mod temporal REM-predominant + edge cases. Total psg-parser: 104/104.
 - Detalle: [[../sprints/sprint-18-engine-hipoxico/SPRINT-18-ENGINE-HIPOXICO]].
 
-### Sprint 19 — Frontend Vite+React (~5-8 h)
+### Sprint 19 — ✅ MVP closed-verified (2026-05-26)
 
-- Reemplazar `legacy-v0/index.html` con Vite + React + pdf.js + JSZip modular en `packages/webapp-conversor-psg/src/`.
-- Componentes: Dropzone, FileList, FileRow, EnginePanel, CSVExport, ZipExport.
-- Coexistencia temporal: `legacy-v0/` queda accesible hasta paridad confirmada. Después se mueve a `legacy-v0/_archived/` con README explicando que vive ahí por referencia histórica.
-- Smoke E2E (Playwright o manual): subir 1 PDF de cada equipo + verificar CSV output coincide con el del legacy.
+- Bootstrap Vite + React 18 + TS estricto + pnpm workspace dep `@somnosalud/psg-parser`.
+- Componentes: Dropzone (drag&drop + click + keyboard a11y), FileList, FileRow (status badge + Download CSV individual).
+- Hook `usePsgFiles` orquesta pipeline: extractText (pdf.js) → detectFormat → parseByFormat → computeHypoxicScore.
+- `src/lib/`: schema (224 columnas + MAPPING_INFORME + EXTRA_INFORME), csv builder, filename builder, pdf.js wrapper.
+- **16 tests vitest passing** (CSV escape edge cases + filename format + schema length).
+- `pnpm build` Vite verde (`dist/` 3.5 MB con pdf.js worker bundled).
+- Coexistencia con legacy-v0 mantenida.
+- Detalle: [[../sprints/sprint-19-frontend-vite-conversor-psg/SPRINT-19-FRONTEND-VITE-CONVERSOR-PSG]].
+
+### Sprint 19.B — Pendiente (features iterativas frontend)
+
+- Download ZIP multi-archivo (integración JSZip).
+- Tab Engine Hipóxico UI completo (score grande + barras de componentes + flags clínicos).
+- Tab Methodology con explicación del scoring + DOI/PMID.
+- Log técnico expandido.
+
+### Sprint 19.C — Pendiente (archivar legacy)
+
+- Cuando Pablo confirme paridad con PDFs reales, mover `legacy-v0/` → `legacy-v0/_archived/`.
+- README explicando que vive ahí por referencia histórica + cómo correrlo si se necesita.
 
 ### Sub-DEBT futuro — PDFs reales anonimizados
 
@@ -74,7 +90,7 @@ El legacy `legacy-v0/index.html` sigue 100% funcional standalone (`python3 -m ht
 
 ## Scope total estimado
 
-~10-15 h restantes en 2 sprints (18 + 19). Sprint 15: ~3 h, Sprint 16: ~4 h, Sprint 17: ~3 h. **Progreso migración: 7/7 parsers (100%) + detect + router + 89/89 tests.**
+**Progreso global 89% (8/9 items):** 7/7 parsers + auto-detect + router + Engine Hipóxico + Frontend MVP ✅. Quedan Sprint 19.B (features iterativas frontend ~3h) + Sprint 19.C (archivar legacy ~30min). Tiempo invertido: ~17h total (15: 3h + 16: 4h + 17: 3h + 18: 3h + 19: 4h). **Total monorepo tests post-Sprint 19: 175 vitest passing.**
 
 ## Prioridad
 

@@ -584,6 +584,6 @@ Revisar al go-live B2B (posible cambio a algún esquema más permisivo según va
 
 ---
 
-*Última actualización: 26 Mayo 2026 (Sprint 18 cerrado — Engine Hipóxico Azarbarzin 2019 + 159/159 tests monorepo. Sprints 17 + 9.A/B/C/D/E + 2.B + 18 sincronizados al Vault)*
+*Última actualización: 26 Mayo 2026 (Sprint 19 cerrado — frontend Vite+React MVP Conversor PSG + 175/175 tests monorepo. Conversor PSG 89% migración)*
 *last_synced_with_vault_reality: 2026-05-26*
-*Próxima revisión: post-Sprint 19 (frontend Vite+React reemplaza legacy-v0/index.html, cierra DEBT-conversor-psg-migration-roadmap)*
+*Próxima revisión: post-Sprint 19.B (UI tabs Engine Hipóxico + ZIP) o Sprint 3 (Vercel preview)*

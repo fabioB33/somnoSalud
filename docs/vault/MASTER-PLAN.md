@@ -68,7 +68,9 @@ created: 2026-05-07
 
 - ✅ **Sprint 18 closed-verified (2026-05-26):** Engine Hipóxico Azarbarzin 2019 + DOI/PMID centralizado + 15 tests. `computeHypoxicScore(record: PSGRecord)` migrado 1:1 desde legacy líneas 1648-1737 a `psg-parser/src/engine/hypoxic.ts` (~230 LOC TS estricto). 6 componentes (carga + ciclicidad + profundidad + mod basal/temporal/clínico), 4 categorías clínicas (leve/moderada/alta/crítica). `REF_HYPOXIC_AZARBARZIN_2019` agregado a `clinical-engine/src/references.ts` (DOI 10.1093/eurheartj/ehy624, PMID 30376054, Eur Heart J 2019;40(14):1149-1157, evidence A) — cross-package import respeta regla #13 NO-HARDCODED. Decisión arquitectónica documentada: engine vive en `psg-parser` (consume PSGRecord) NO `clinical-engine` (cuestionarios + safety). Limitaciones documentadas: sin señal cruda SpO2, max real ~76 (no 100). **104/104 tests psg-parser** + **55/55 clinical-engine** = **159/159 vitest tests monorepo**. Detalle: [[sprints/sprint-18-engine-hipoxico/SPRINT-18-ENGINE-HIPOXICO]].
 
-**Próxima sesión sugerida:** Sprint 19 (frontend Vite+React reemplaza `legacy-v0/index.html` del Conversor PSG, cierra DEBT-conversor-psg-migration-roadmap definitivamente, ~5-8 h) o Sprint 3 (deploy Vercel preview ~2 h para que Pablo vea webapp en producción cuando lo visite Jorge).
+- ✅ **Sprint 19 closed-verified (2026-05-26):** Frontend Vite+React Conversor PSG MVP. Bootstrap `webapp-conversor-psg` con Vite 5 + React 18 + TS estricto + pdfjs-dist@4 + jszip. Workspace dep `@somnosalud/psg-parser` consumida directo (cero duplicación de lógica). Estructura: `src/lib/` (schema 224 cols + csv builder + filename builder + pdf.js wrapper) + `src/hooks/usePsgFiles.ts` orquesta pipeline (extractText → detectFormat → parseByFormat → computeHypoxicScore) + `src/components/` (Dropzone con drag&drop + keyboard a11y, FileList, FileRow con Download CSV individual). **16 tests vitest** del CSV builder (escape comas/quotes/newlines + filename format + schema length). `pnpm build` Vite verde, `dist/` 3.5 MB (pdf.js worker bundled). **Total monorepo: 175 vitest tests passing** (clinical-engine 55 + psg-parser 104 + conversor-psg 16). Coexistencia con legacy-v0 mantenida. **Progreso Conversor PSG migración: 89% (8/9 items)** — quedan Sprint 19.B (ZIP + Engine UI tabs + Methodology, ~3h) + 19.C (archivar legacy, ~30min) para cierre formal DEBT. Detalle: [[sprints/sprint-19-frontend-vite-conversor-psg/SPRINT-19-FRONTEND-VITE-CONVERSOR-PSG]].
+
+**Próxima sesión sugerida:** Sprint 19.B (Engine Hipóxico UI tabs + Download ZIP + Methodology tab, ~3h, cierra features iterativas del Conversor PSG) o Sprint 3 (deploy Vercel preview ~2h para que Pablo vea webapp en producción cuando lo visite Jorge).
 
 ---
 
@@ -172,5 +174,5 @@ created: 2026-05-07
 
 ---
 
-*Última actualización: 2026-05-26 (sync post Sprint 18 engine hipoxico)*
-*Próxima revisión: post-Sprint 19 (frontend Vite + cierre DEBT-conversor-psg-migration-roadmap)*
+*Última actualización: 2026-05-26 (Sprint 19 frontend Vite MVP cerrado — Conversor PSG 89%)*
+*Próxima revisión: post-Sprint 19.B (UI tabs Engine Hipóxico + ZIP) o Sprint 3 (Vercel preview)*
