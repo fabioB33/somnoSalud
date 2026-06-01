@@ -29,7 +29,7 @@ type EngineTab = 'results' | 'methodology';
  * Panel modal con tabs: Resultados (score + metricas + breakdown + flags +
  * detalle) y Metodología (explicación del scoring + DOI Azarbarzin 2019).
  *
- * Migrado desde legacy-v0/index.html lineas 1746-1845 + buildMethodologyTabPSG.
+ * Migrado desde legacy-v0/_archived/index.html lineas 1746-1845 + buildMethodologyTabPSG.
  */
 export function EnginePanel({ record, hypoxic, onClose }: EnginePanelProps) {
   const [tab, setTab] = useState<EngineTab>('results');

@@ -1,7 +1,7 @@
 /**
  * CSV builder formato long: parametro,valor,campo_informe_personalizado
  *
- * Migrado 1:1 desde legacy-v0/index.html lineas 1422-1439.
+ * Migrado 1:1 desde legacy-v0/_archived/index.html lineas 1422-1439.
  * Genera CSV en formato long con 212 columnas del SCHEMA + 25 filas
  * extras del EXTRA_INFORME (campos del formulario IFN que NO existen
  * en el PDF — se exportan vacios).

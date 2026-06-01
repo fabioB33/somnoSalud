@@ -1,7 +1,7 @@
 /**
  * Wrapper async sobre pdf.js para extraer texto plano de PDFs PSG.
  *
- * Migrado desde legacy-v0/index.html lineas 203-214. Cambios respecto al
+ * Migrado desde legacy-v0/_archived/index.html lineas 203-214. Cambios respecto al
  * legacy:
  * - pdf.js cargado via npm en lugar de CDN.
  * - Worker configurado con `?url` import de Vite (bundled).

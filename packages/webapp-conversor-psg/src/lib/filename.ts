@@ -1,7 +1,7 @@
 /**
  * Builder del nombre de archivo CSV.
  *
- * Migrado 1:1 desde legacy-v0/index.html lineas 1441-1456. Formato:
+ * Migrado 1:1 desde legacy-v0/_archived/index.html lineas 1441-1456. Formato:
  *   Apellido_Nombre_YYYYMMDD_HHMM.csv
  * Ej: Osinaga_Matias_20260326_2155.csv
  *

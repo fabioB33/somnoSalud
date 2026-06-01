@@ -1,7 +1,7 @@
 /**
  * Schema OSINAGA-compatible para CSV de PSG.
  *
- * Migrado 1:1 desde legacy-v0/index.html lineas 1284-1419.
+ * Migrado 1:1 desde legacy-v0/_archived/index.html lineas 1284-1419.
  *
  * - `SCHEMA`: 212 columnas en orden canonico (coincide con el CSV de OSINAGA
  *   generado previamente por IFN).

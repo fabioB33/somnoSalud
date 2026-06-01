@@ -584,6 +584,6 @@ Revisar al go-live B2B (posible cambio a algún esquema más permisivo según va
 
 ---
 
-*Última actualización: 26 Mayo 2026 (Sprint 19.B cerrado — Engine Hipóxico UI + ZIP multi-archivo + Methodology tab. Total monorepo: 178/178 tests. Conversor PSG 95% migración)*
+*Última actualización: 26 Mayo 2026 (Sprint 19.C cerrado — archivado legacy + cierre formal DEBT-conversor-psg-migration-roadmap. Migración Conversor PSG 100%, 178/178 tests monorepo)*
 *last_synced_with_vault_reality: 2026-05-26*
-*Próxima revisión: post-Sprint 19.C (cierre formal DEBT-conversor-psg con smoke real de Pablo) o Sprint 3 (Vercel preview)*
+*Próxima revisión: post-Sprint 3 (Vercel preview deploy webapp-somnosalud)*

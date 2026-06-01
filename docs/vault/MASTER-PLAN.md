@@ -72,7 +72,9 @@ created: 2026-05-07
 
 - ✅ **Sprint 19.B closed-verified (2026-05-26):** Features iterativas del Conversor PSG completadas. **ZIP multi-archivo** (`buildZip` con JSZip + BOM UTF-8 + filename `CSV_PSG_<timestamp>.zip`). **`<EnginePanel>`** React con 2 tabs: Resultados (score grande coloreado + 12 metric cards + 6 breakdown bars + perfil A/B/C badge + flag-list crit/warn + tabla detalle 11 filas) y Methodology (7 secciones explicando scoring Azarbarzin 2019 + DOI link). Integración en `App.tsx` (state engineFileId + zipBusy + handleDownloadAll + render condicional EnginePanel) + `<FileRow>` botón "Score Hipóxico" condicional. **19/19 tests vitest** (16 CSV + 3 ZIP nuevos). Vite build verde 4.11s, bundle main 668 kB (gzip 200 kB). **Total monorepo: 178 vitest tests**. **Progreso Conversor PSG: 95% (8.5/9)** — solo falta Sprint 19.C archivar legacy-v0 con confirmación Pablo. Detalle: [[sprints/sprint-19-b-engine-ui-zip/SPRINT-19-B-ENGINE-UI-ZIP]].
 
-**Próxima sesión sugerida:** Sprint 19.C (archivar legacy-v0/, ~30min + smoke real Pablo) → cierra DEBT-conversor-psg-migration-roadmap formalmente. O alternativa: Sprint 3 (deploy Vercel preview, ~2h) para que Pablo vea webapp principal en producción cuando lo visite Jorge.
+- ✅ **Sprint 19.C closed-verified (2026-05-26):** Archivado formal de `legacy-v0/index.html` (94 KB, 1.887 LOC) a `legacy-v0/_archived/` con `git mv` (historial preservado) + README archivado con instrucciones de recovery + smoke comparativo + tabla de migraciones Sprints 15-19.B. `package.json` description + README del package + 7 docstrings en `src/` actualizados al nuevo path. Verificación: typecheck verde + 19/19 vitest + Vite build 2.88s + cero refs stale al path viejo. **Cierra DEBT-conversor-psg-migration-roadmap (closed-verified 2026-05-26).** Migración 100% completada. Detalle: [[sprints/sprint-19-c-archivar-legacy/SPRINT-19-C-ARCHIVAR-LEGACY]].
+
+**Próxima sesión sugerida:** Sprint 3 (deploy Vercel preview webapp-somnosalud, ~2h) para que Pablo y Jorge vean producción cuando se vean esta semana. Setup operativo de Fabio en Vercel + Supabase Redirect URLs documentado en [[processes/DEPLOY-WORKFLOW]] §B. Alternativa: Sprint 3.B (Conversor PSG a Vercel separado) o pausa total esperando smoke real de Pablo.
 
 ---
 
@@ -176,5 +178,5 @@ created: 2026-05-07
 
 ---
 
-*Última actualización: 2026-05-26 (Sprint 19.B cerrado — Engine UI + ZIP. Conversor PSG 95%, falta solo 19.C archivar legacy)*
-*Próxima revisión: post-Sprint 19.C (cierre formal DEBT-conversor-psg) o Sprint 3 (Vercel preview)*
+*Última actualización: 2026-05-26 (Sprint 19.C cerrado — archivado legacy + cierre formal DEBT-conversor-psg-migration-roadmap. Migración Conversor PSG 100%)*
+*Próxima revisión: post-Sprint 3 (Vercel preview deploy webapp-somnosalud)*

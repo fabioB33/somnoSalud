@@ -18,8 +18,8 @@ import { buildZip, downloadZip } from './lib/zip';
  *    - "Score Hipóxico" → abre EnginePanel con score Azarbarzin 2019.
  * 4. Botón "Descargar todos (ZIP)" arma ZIP con BOM-prefixed CSVs.
  *
- * Sprint 19.C (pendiente): mover legacy-v0 → legacy-v0/_archived cuando
- * Pablo confirme paridad funcional con PDFs reales.
+ * Sprint 19.C (2026-05-26): legacy v0 archivado en legacy-v0/_archived/.
+ * Smoke real con PDFs IFN de Pablo queda como verificación post-cierre.
  */
 export function App() {
   const { files, addFiles, removeFile, clear, processAll } = usePsgFiles();

@@ -1,14 +1,20 @@
 ---
-title: "Deuda Técnica — migración Conversor PSG legacy → modular (Sprints 16-19 pendientes)"
+title: "Deuda Técnica — migración Conversor PSG legacy → modular (Sprints 15-19.C ✅ CERRADO 2026-05-26)"
 date: 2026-05-14
-tags: [deuda-tecnica, psg-parser, conversor-psg, migration, fase-2, open]
-status: open
+closed_at: 2026-05-26
+closed_by: sprint-19-c-archivar-legacy
+tags: [deuda-tecnica, psg-parser, conversor-psg, migration, fase-2, closed-verified]
+status: closed-verified
 priority: medium
-scope: sprint-16-17-18-19
+scope: sprint-15-16-17-18-19-19b-19c
 detected_during: sprint-15-psg-parser-bootstrap
 related:
   - "[[../sprints/sprint-15-psg-parser-bootstrap/SPRINT-15-PSG-PARSER-BOOTSTRAP]]"
+  - "[[../sprints/sprint-19-c-archivar-legacy/SPRINT-19-C-ARCHIVAR-LEGACY]]"
 ---
+
+> [!success] Cerrado 2026-05-26 (Sprint 19.C)
+> Migración Conversor PSG legacy → modular **100% completada**. 7/7 parsers + auto-detect + router + Engine Hipóxico Azarbarzin 2019 + Frontend Vite+React + Engine UI + ZIP + Methodology + archivado legacy con READMEs. **178 vitest tests passing** (clinical-engine 55 + psg-parser 104 + conversor-psg 19). Legacy preservado en `packages/webapp-conversor-psg/legacy-v0/_archived/index.html` por referencia histórica + smoke comparativo futuro con PDFs reales de Pablo. Tiempo total invertido: ~20.5 h (Sprint 15: 3h, 16: 4h, 17: 3h, 18: 3h, 19: 4h, 19.B: 3h, 19.C: 0.5h).
 
 # DEBT-conversor-psg-migration-roadmap
 

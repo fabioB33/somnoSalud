@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Frontend Vite + React + pdf.js + JSZip — utility client-side para parsear PDFs polisomnograficos. Sprint 19 MVP: Vite + React UI consumiendo @somnosalud/psg-parser (7 parsers + computeHypoxicScore Azarbarzin 2019). Legacy v0 coexiste en legacy-v0/index.html hasta paridad confirmada.",
+  "description": "Frontend Vite + React + pdf.js + JSZip — utility client-side para parsear PDFs polisomnograficos. Consume @somnosalud/psg-parser (7 parsers + computeHypoxicScore Azarbarzin 2019). Legacy v0 archivado en legacy-v0/_archived/ post Sprint 19.C — cierre DEBT-conversor-psg-migration-roadmap.",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

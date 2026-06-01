@@ -1,7 +1,7 @@
 /**
  * ZIP multi-archivo con JSZip.
  *
- * Migrado desde legacy-v0/index.html lineas 1631-1643. Toma N archivos
+ * Migrado desde legacy-v0/_archived/index.html lineas 1631-1643. Toma N archivos
  * procesados con success + genera ZIP con cada CSV usando su filename
  * canonico (Apellido_Nombre_YYYYMMDD_HHMM.csv). Incluye BOM
  * para que Excel detecte UTF-8 correctamente.
