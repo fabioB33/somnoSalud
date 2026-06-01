@@ -65,19 +65,36 @@ Antes de cualquier merge a `main` que vaya a deployarse:
    - **Output Directory:** `.next` (default)
    - **Install Command:** `pnpm install --frozen-lockfile` (root del monorepo)
 
-2. **Variables de entorno** (Vercel → Project Settings → Environment Variables):
-   - `NEXT_PUBLIC_SUPABASE_URL` (Production + Preview)
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Production + Preview)
-   - `SUPABASE_SERVICE_ROLE_KEY` (Production solo, NUNCA expose al client)
-   - `RESEND_API_KEY` (Production, Fase 1)
-   - `SENTRY_DSN`, `SENTRY_AUTH_TOKEN` (Production, Fase 1)
-   - `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` (Fase 1)
+2. **Variables de entorno** (Vercel → Project Settings → Environment Variables).
+   **CRÍTICO:** nombres deben coincidir EXACTO con `.env.example` (formato keys Supabase 2025+):
 
-3. **Dominio custom** (Sprint 3, decisión Pablo):
+   Required (Production + Preview):
+   - `NEXT_PUBLIC_SUPABASE_URL` — `https://goxdopciwvahrxdeirft.supabase.co`
+   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — formato `sb_publishable_*` (NO el viejo JWT anon)
+   - `SUPABASE_SECRET_KEY` — formato `sb_secret_*` (NO el viejo `SERVICE_ROLE_KEY`)
+   - `SUPABASE_PROJECT_REF` — `goxdopciwvahrxdeirft`
+
+   NO setear en Vercel (solo local + MCP):
+   - `SUPABASE_ACCESS_TOKEN` — uso exclusivo del MCP local de Cowork, NO la app
+
+   Opcionales Fase 1+ (cuando se activen):
+   - `RESEND_API_KEY` + `RESEND_FROM_EMAIL` (cuando exista DNS verify)
+   - `NEXT_PUBLIC_SENTRY_DSN` + `SENTRY_ORG` + `SENTRY_PROJECT` + `SENTRY_AUTH_TOKEN`
+   - `NEXT_PUBLIC_POSTHOG_KEY` + `NEXT_PUBLIC_POSTHOG_HOST` (Fase 1 analytics)
+
+3. **Supabase Redirect URLs — CRÍTICO post primer deploy (Sprint 3):**
+   - Tomar la URL preview generada por Vercel (ej. `https://somnosalud-xxx.vercel.app`).
+   - Abrir [https://supabase.com/dashboard/project/goxdopciwvahrxdeirft/auth/url-configuration](https://supabase.com/dashboard/project/goxdopciwvahrxdeirft/auth/url-configuration).
+   - Sección **Redirect URLs** → Add: `https://<vercel-url>/auth/callback`.
+   - **Sin esto el magic link rompe** — el click del email redirige a Supabase, que valida el `redirect_to` contra esta lista. Si la URL preview no está, el flow falla.
+   - Si Vercel genera URLs por preview branch distintas, considerar usar el dominio production fijo o agregar wildcard si Supabase lo permite.
+
+4. **Dominio custom** (sprint aparte, decisión Fabio/Pablo):
    - Si `somnosalud.com.ar` (recomendado): apuntar A record / CNAME a Vercel + verificar SSL.
    - Subdominio Pampa Labs alternativo: `somnosalud.pampalabs.com`.
+   - **Al agregar dominio custom:** repetir paso 3 con la URL nueva.
 
-4. **Branch protection** GitHub:
+5. **Branch protection** GitHub:
    - `main` requiere PR review + CI verde antes de merge.
    - Vercel preview se genera automáticamente para cada PR.
 
