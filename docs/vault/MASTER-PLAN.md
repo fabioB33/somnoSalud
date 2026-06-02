@@ -74,7 +74,9 @@ created: 2026-05-07
 
 - ✅ **Sprint 19.C closed-verified (2026-05-26):** Archivado formal de `legacy-v0/index.html` (94 KB, 1.887 LOC) a `legacy-v0/_archived/` con `git mv` (historial preservado) + README archivado con instrucciones de recovery + smoke comparativo + tabla de migraciones Sprints 15-19.B. `package.json` description + README del package + 7 docstrings en `src/` actualizados al nuevo path. Verificación: typecheck verde + 19/19 vitest + Vite build 2.88s + cero refs stale al path viejo. **Cierra DEBT-conversor-psg-migration-roadmap (closed-verified 2026-05-26).** Migración 100% completada. Detalle: [[sprints/sprint-19-c-archivar-legacy/SPRINT-19-C-ARCHIVAR-LEGACY]].
 
-**Próxima sesión sugerida:** Sprint 3 (deploy Vercel preview webapp-somnosalud, ~2h) para que Pablo y Jorge vean producción cuando se vean esta semana. Setup operativo de Fabio en Vercel + Supabase Redirect URLs documentado en [[processes/DEPLOY-WORKFLOW]] §B. Alternativa: Sprint 3.B (Conversor PSG a Vercel separado) o pausa total esperando smoke real de Pablo.
+- ✅ **Sprint 3 closed-verified (2026-06-02):** Webapp-somnosalud live en producción Vercel. **URL pública:** `https://somno-salud-webapp-somnosalud.vercel.app`. Mirror repo `fabioB33/somnoSalud` con auto-deploy on push to main. **3 usuarios reales registrados + 2 logueados verificados vía auth.users admin API:** Fabio (cgc.fboschetti@gmail.com last_sign_in 23:18 UTC) + Pablo (pabloferrero@ifn.com.ar last_sign_in 21:27 UTC) + Jorge (creado pero rate-limited antes de completar). Smoke HTTP 7 rutas con codes esperados (200/307/404). **Hotfix mid-sprint** (commit `9527b55`): bug magic link redirigía a localhost → fix defense-in-depth con helper `lib/site-url.ts` (precedencia `NEXT_PUBLIC_SITE_URL` → `VERCEL_PROJECT_PRODUCTION_URL` → `VERCEL_URL` → header origin → localhost) + corrección Site URL en Supabase dashboard. **DEBT-resend-smtp-supabase elevado a `high` priority** post-smoke (rate limit 4 emails/h chocó múltiples veces durante debug). Detalle: [[sprints/sprint-3-vercel-preview/SPRINT-3-VERCEL-PREVIEW]] + [[hotfixes/2026-05-26-magic-link-localhost-redirect/HOTFIX]].
+
+**Próxima sesión sugerida:** Sprint Resend SMTP custom (~2h, **requires DNS access del dominio `somnosalud.com.ar` — bloqueante hasta confirmar acceso con Jorge/Pablo**) destrabaría rate limit + sender profesional. Alternativa si no hay DNS: Sprint Stripe B2C (~6-8h, esperando precios Jorge brief 2026-05-18) o Sprint 3.B (Conversor PSG a Vercel separado post smoke Pablo).
 
 ---
 
@@ -178,5 +180,5 @@ created: 2026-05-07
 
 ---
 
-*Última actualización: 2026-05-26 (Sprint 19.C cerrado — archivado legacy + cierre formal DEBT-conversor-psg-migration-roadmap. Migración Conversor PSG 100%)*
-*Próxima revisión: post-Sprint 3 (Vercel preview deploy webapp-somnosalud)*
+*Última actualización: 2026-06-02 (Sprint 3 cerrado — webapp-somnosalud live producción Vercel + 3 users reales + hotfix magic link localhost + DEBT Resend elevado a high)*
+*Próxima revisión: post-Sprint Resend SMTP (destrabar rate limit) o Sprint Stripe B2C*

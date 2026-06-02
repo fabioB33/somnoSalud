@@ -241,7 +241,7 @@ Design system compartido entre webapp-somnosalud y webapp-conversor-psg. Compone
 | Frontend SomnoSalud | Next.js 14 (App Router) + Tailwind + shadcn/ui | Server Actions para mutations, RSC default |
 | Frontend Conversor PSG | Vite + React + pdf.js + JSZip | Cero backend — 100% client-side por privacidad clínica |
 | Backend / DB / Auth | Supabase (PostgreSQL + RLS + Auth + Storage) | ✅ Sprint 2.B+9.A-E — project `somnosalud-platform` Org Pampa Labs sa-east-1 plan Free. 5 migraciones aplicadas, 6 RLS policies, 0 lints. `@supabase/ssr@0.10.3` + magic link auth + 4 Server Actions de evaluations + auth gate `/eval/*` + `/mis-resultados` + consent persist DB (3 capas) |
-| Deploy | Vercel (somnosalud webapp) + GitHub Pages (conversor PSG) | A configurar Fase 0 |
+| Deploy | Vercel (somnosalud webapp) + GitHub Pages (conversor PSG) | ✅ Sprint 3 (2026-06-02) webapp-somnosalud live en `https://somno-salud-webapp-somnosalud.vercel.app`. Auto-deploy on push to main vía mirror repo `fabioB33/somnoSalud`. 3 users reales registrados, 2 logueados. Conversor PSG pendiente Sprint 3.B |
 | Tests unitarios | Vitest | 55+ tests del clinical-engine ya pasando |
 | Tests E2E | Playwright | ✅ Sprint 13 — 19/19 tests passing en local. Sprint 14 agregó job `e2e` al CI con cache Chromium |
 | Error tracking | Sentry | ✅ Sprint 14 — `@sentry/nextjs@10.53.1` instalado **idle** (DSN vacío = no envía). Activable con `NEXT_PUBLIC_SENTRY_DSN` post deploy Vercel |
@@ -381,7 +381,7 @@ Repo limpio con CI verde + ambos productos deployados con dominio profesional.
 - ⏳ Sprint 1: pnpm-lock commiteado + CI verde
 - ✅ Sprint 2.A: OS curado (2026-05-08) — 21 agents archivados, lista relevante 25+1
 - ✅ Sprint 2.B: Project Supabase + schema inicial + MCP activo (2026-05-18) — 5 migraciones, 6 RLS policies, 0 security lints
-- ⏳ Sprint 3: Deploy webapp-somnosalud a Vercel + dominio (preview)
+- ✅ Sprint 3: Deploy webapp-somnosalud a Vercel preview cerrado 2026-06-02. URL `https://somno-salud-webapp-somnosalud.vercel.app`. 3 users reales (Fabio+Pablo+Jorge), 2 logueados. Hotfix mid-sprint para magic link localhost (commit `9527b55`)
 - ⏳ Sprint 4: Deploy webapp-conversor-psg a GitHub Pages
 - ⏳ Sprint 9-supabase: Cliente Supabase + magic link + `sessionStorage → DB`
 
@@ -584,6 +584,6 @@ Revisar al go-live B2B (posible cambio a algún esquema más permisivo según va
 
 ---
 
-*Última actualización: 26 Mayo 2026 (Sprint 19.C cerrado — archivado legacy + cierre formal DEBT-conversor-psg-migration-roadmap. Migración Conversor PSG 100%, 178/178 tests monorepo)*
-*last_synced_with_vault_reality: 2026-05-26*
-*Próxima revisión: post-Sprint 3 (Vercel preview deploy webapp-somnosalud)*
+*Última actualización: 02 Jun 2026 (Sprint 3 cerrado — webapp-somnosalud live producción Vercel + 3 users reales + hotfix magic link. DEBT-resend-smtp-supabase elevado a high priority)*
+*last_synced_with_vault_reality: 2026-06-02*
+*Próxima revisión: post-Sprint Resend SMTP custom (destrabar rate limit 4/h) o Sprint Stripe B2C*
