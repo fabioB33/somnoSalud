@@ -55,10 +55,43 @@ Antes de cualquier merge a `main` que vaya a deployarse:
 
 > Setup inicial documentado en Sprint 3 (Fase 0). Una vez configurado, los deploys son automáticos desde `main`.
 
+### B.0 Doble remote git (formalizado 2026-05-26)
+
+**Contexto:** Vercel Hobby plan (free) deploya repos personales de GitHub sin cargo extra; los repos de organizaciones (`itsomnosalud/Somnosalud`) requieren plan Pro o conexión vía GitHub App con permisos especiales. Para evitar costo + simplificar el setup, mantenemos **dos remotes** en el repo local:
+
+| Remote | URL | Para qué |
+|---|---|---|
+| `origin` | `git@github.com:itsomnosalud/Somnosalud.git` | Repo canónico de la organización. Aquí ven Jorge / Pablo / cualquiera con acceso a la org. **Push principal de cada sprint.** |
+| `vercel` | `git@github.com:fabioB33/somnoSalud.git` | Mirror personal de Fabio. **Sólo lo conoce Vercel** para auto-deploy. NO es source of truth. |
+
+**Workflow operativo (sprint normal):**
+
+```bash
+# 1. Trabajar normalmente, pushear a origin (org)
+git push origin main
+
+# 2. Antes de querer ver el cambio en producción Vercel, mirror a vercel
+git push vercel main
+```
+
+**Atajo opcional** — push a ambos en una línea (alias en `~/.gitconfig`):
+
+```ini
+[alias]
+    pushall = !git push origin main && git push vercel main
+```
+
+**Reglas:**
+
+- `origin` es **canónico**. PRs, issues, releases, code review viven ahí.
+- `vercel` es **mirror**. NO se aceptan PRs ahí. Si alguien clona desde `fabioB33/somnoSalud`, dirigirlo al de la org.
+- **Re-sync** si divergen: `git fetch vercel && git push vercel main --force-with-lease` (sólo Fabio, sólo con confirmación de Jorge).
+- El MCP `github` sigue apuntando a `itsomnosalud/Somnosalud`.
+
 ### B.1 Setup inicial (Sprint 3, una sola vez)
 
-1. **Conectar repo a Vercel** desde el dashboard del Org Pampa Labs:
-   - Import Project → `itsomnosalud/Somnosalud`
+1. **Conectar repo a Vercel** desde el dashboard de Fabio (cuenta personal `fabioB33`):
+   - Import Project → `fabioB33/somnoSalud` (mirror del repo canónico — ver §B.0 arriba)
    - **Root Directory:** `packages/webapp-somnosalud`
    - **Framework Preset:** Next.js
    - **Build Command:** `pnpm --filter @somnosalud/webapp-somnosalud build` (Vercel auto-detecta turbo/pnpm cuando ve `pnpm-workspace.yaml`)
