@@ -2,6 +2,7 @@
 
 import { headers } from 'next/headers';
 
+import { resolveSiteUrl } from '@/lib/site-url';
 import { createClient } from '@/lib/supabase/server';
 
 export type LoginActionResult =
@@ -12,8 +13,16 @@ export type LoginActionResult =
  * signInWithOtp — envia magic link al email del paciente.
  *
  * Sprint 9.A: usa SMTP default de Supabase (rate limit 4/hora). El email
- * llega con un link a `${origin}/auth/callback?code=...` que el Route
+ * llega con un link a `${siteUrl}/auth/callback?code=...` que el Route
  * Handler intercambia por una session.
+ *
+ * Sprint 3 hotfix (2026-05-26): la URL absoluta se resuelve con
+ * `resolveSiteUrl()` que prioriza NEXT_PUBLIC_SITE_URL → VERCEL_PROJECT_PRODUCTION_URL
+ * → VERCEL_URL → header origin → localhost fallback. Esto evita el bug
+ * donde el email del magic link llevaba a localhost cuando se enviaba
+ * desde producción Vercel (header `origin` puede llegar vacío atrás del
+ * edge proxy de Vercel, y como fallback Supabase usaba su Site URL que
+ * apuntaba a localhost por config previa de development).
  *
  * Si el email no existe en auth.users, Supabase lo crea on-the-fly y
  * dispara el trigger handle_new_user() que popula public.profiles.
@@ -33,16 +42,14 @@ export async function signInWithOtp(
     return { ok: false, error: 'El email no tiene un formato válido.' };
   }
 
-  const origin = headers().get('origin');
-  if (!origin) {
-    return { ok: false, error: 'No se pudo determinar la URL de la app.' };
-  }
+  const requestOrigin = headers().get('origin');
+  const siteUrl = resolveSiteUrl({ requestOrigin });
 
   const supabase = createClient();
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: `${origin}/auth/callback`,
+      emailRedirectTo: `${siteUrl}/auth/callback`,
     },
   });
 
