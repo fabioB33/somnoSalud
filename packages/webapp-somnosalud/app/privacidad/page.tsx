@@ -4,6 +4,7 @@ import { Lock, Stethoscope } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { PublicFooter } from '@/components/layout/PublicFooter';
+import { FadeIn } from '@/components/motion/FadeIn';
 
 /**
  * Pantalla /privacidad — politica de privacidad publica.
@@ -27,35 +28,45 @@ export default function PrivacidadPage() {
   return (
     <div className="flex min-h-dvh flex-col">
       <main className="container max-w-3xl flex-1 py-12 md:py-20">
-        <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-3 py-1 text-xs font-medium text-muted-foreground">
-          <Lock size={14} aria-hidden="true" />
-          Política de privacidad · vigente desde 2026-05
-        </div>
+        <FadeIn>
+          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-somno-accent/20 bg-somno-tint-info px-3.5 py-1.5 text-xs font-medium text-somno-accent-soft">
+            <Lock size={14} aria-hidden="true" />
+            Política de privacidad · vigente desde 2026-05
+          </div>
 
-        <h1 className="mb-3 text-3xl font-bold tracking-tight md:text-4xl">
-          Política de privacidad
-        </h1>
-        <p className="mb-8 text-base text-muted-foreground">
-          Versión 1 · Marco legal: Ley 25.326 (Protección de Datos
-          Personales) + Ley 26.529 (Derechos del Paciente) + Decreto
-          1089/2012 (datos genéticos).
-        </p>
+          <h1 className="mb-4 font-display text-5xl font-normal leading-[1.05] tracking-tight md:text-6xl">
+            Política de privacidad
+          </h1>
+          <p className="mb-8 text-base leading-relaxed text-muted-foreground">
+            Versión 1 · Marco legal: Ley 25.326 (Protección de Datos
+            Personales) + Ley 26.529 (Derechos del Paciente) + Decreto
+            1089/2012 (datos genéticos).
+          </p>
+        </FadeIn>
 
-        <Alert variant="info" className="mb-8">
-          <Stethoscope className="h-5 w-5" aria-hidden="true" />
-          <AlertTitle>Resumen en 30 segundos</AlertTitle>
-          <AlertDescription>
-            <ul className="ml-5 mt-2 list-disc space-y-1 text-sm">
-              <li>Tus respuestas se guardan localmente en tu navegador (sessionStorage). Si cerrás la pestaña, se pierden.</li>
-              <li>NO enviamos datos clínicos a servidores externos en esta etapa pre-launch.</li>
-              <li>Cuando habilitemos cuentas (próximas semanas), vas a poder optar por guardar tu evaluación en nuestra base de datos encriptada con acceso exclusivo tuyo.</li>
-              <li>NUNCA vendemos data ni mostramos publicidad.</li>
-              <li>Responsable de Tratamiento: <strong>Dr. Pablo Ferrero / IFN</strong>.</li>
-            </ul>
-          </AlertDescription>
-        </Alert>
+        <FadeIn delay={0.1}>
+          <Alert
+            variant="info"
+            className="mb-10 rounded-2xl border-somno-accent/25 bg-somno-tint-info"
+          >
+            <Stethoscope className="h-5 w-5 text-somno-accent" aria-hidden="true" />
+            <AlertTitle className="font-semibold text-somno-accent-soft">
+              Resumen en 30 segundos
+            </AlertTitle>
+            <AlertDescription className="text-foreground/85">
+              <ul className="mt-2 space-y-1.5 text-sm">
+                <li className="flex gap-2"><span className="mt-2 size-1.5 shrink-0 rounded-full bg-somno-accent" aria-hidden="true" /><span>Tus respuestas se guardan localmente en tu navegador (sessionStorage). Si cerrás la pestaña, se pierden.</span></li>
+                <li className="flex gap-2"><span className="mt-2 size-1.5 shrink-0 rounded-full bg-somno-accent" aria-hidden="true" /><span>NO enviamos datos clínicos a servidores externos en esta etapa pre-launch.</span></li>
+                <li className="flex gap-2"><span className="mt-2 size-1.5 shrink-0 rounded-full bg-somno-accent" aria-hidden="true" /><span>Cuando habilitemos cuentas (próximas semanas), vas a poder optar por guardar tu evaluación en nuestra base de datos encriptada con acceso exclusivo tuyo.</span></li>
+                <li className="flex gap-2"><span className="mt-2 size-1.5 shrink-0 rounded-full bg-somno-warm" aria-hidden="true" /><span>NUNCA vendemos data ni mostramos publicidad.</span></li>
+                <li className="flex gap-2"><span className="mt-2 size-1.5 shrink-0 rounded-full bg-somno-accent" aria-hidden="true" /><span>Responsable de Tratamiento: <strong className="text-foreground">Dr. Pablo Ferrero / IFN</strong>.</span></li>
+              </ul>
+            </AlertDescription>
+          </Alert>
+        </FadeIn>
 
-        <section className="space-y-6 text-sm leading-relaxed text-foreground/90">
+        <FadeIn delay={0.15}>
+          <section className="glass-card space-y-7 p-8 text-sm leading-relaxed text-foreground/85">
           <div>
             <h2 className="mb-3 text-lg font-semibold text-foreground">
               1. ¿Quién recolecta los datos?
@@ -221,16 +232,26 @@ export default function PrivacidadPage() {
               pedirte re-aceptar antes de continuar usando la herramienta.
             </p>
           </div>
-        </section>
+          </section>
+        </FadeIn>
 
-        <div className="mt-10 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-          <Button asChild>
-            <Link href="/">Volver al inicio</Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link href="/terms">Ver términos y condiciones</Link>
-          </Button>
-        </div>
+        <FadeIn delay={0.2}>
+          <div className="mt-10 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+            <Button
+              asChild
+              className="h-12 rounded-full px-6 text-base shadow-glow-accent transition-all hover:shadow-[0_0_44px_rgba(129,140,248,0.45)]"
+            >
+              <Link href="/">Volver al inicio</Link>
+            </Button>
+            <Button
+              variant="outline"
+              asChild
+              className="h-12 rounded-full border-white/[0.10] bg-white/[0.02] px-6 text-base hover:bg-white/[0.06]"
+            >
+              <Link href="/terms">Ver términos y condiciones</Link>
+            </Button>
+          </div>
+        </FadeIn>
       </main>
 
       <PublicFooter />

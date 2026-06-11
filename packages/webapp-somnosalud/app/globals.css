@@ -4,27 +4,27 @@
 
 @layer base {
   :root {
-    /* shadcn/ui tokens — paleta dark base */
-    --background: 232 39% 14%;          /* #1a1a2e */
+    /* shadcn/ui tokens — paleta dark base (v2 UX polish 2026-06-11) */
+    --background: 234 33% 9%;            /* #0f0f1e — más profundo que v1 */
     --foreground: 210 40% 98%;
-    --card: 220 47% 17%;                /* #16213e */
+    --card: 232 28% 14%;                 /* #1c1d2f — translúcida en glass cards */
     --card-foreground: 210 40% 98%;
-    --popover: 220 47% 17%;
+    --popover: 232 28% 14%;
     --popover-foreground: 210 40% 98%;
-    --primary: 232 89% 74%;             /* #818cf8 SomnoSalud purple */
-    --primary-foreground: 232 39% 14%;
-    --secondary: 220 30% 25%;
+    --primary: 232 89% 74%;              /* #818cf8 cool accent */
+    --primary-foreground: 234 33% 9%;
+    --secondary: 220 22% 22%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 220 30% 25%;
-    --muted-foreground: 215 20% 70%;
+    --muted: 220 22% 22%;
+    --muted-foreground: 215 18% 72%;
     --accent: 232 89% 74%;
-    --accent-foreground: 232 39% 14%;
-    --destructive: 0 75% 60%;
+    --accent-foreground: 234 33% 9%;
+    --destructive: 0 70% 60%;
     --destructive-foreground: 210 40% 98%;
-    --border: 220 30% 25%;
-    --input: 220 30% 25%;
+    --border: 220 22% 24%;
+    --input: 220 22% 24%;
     --ring: 232 89% 74%;
-    --radius: 0.625rem;
+    --radius: 0.75rem;                   /* +0.125 vs v1 — más generoso */
   }
 }
 
@@ -36,15 +36,138 @@
     @apply h-full;
   }
   body {
-    @apply min-h-full text-foreground antialiased;
-    /* Paleta SomnoSalud: gradient diagonal del bg-from al bg-to.
-       Usamos CSS directo en lugar de @apply bg-somno-gradient porque
-       la utility custom de Tailwind solo se genera si aparece en JSX
-       (con JIT), y este body es el unico consumer. */
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    background-attachment: fixed;
+    @apply min-h-full text-foreground antialiased font-sans;
+    /* Body base oscuro. El mesh + spotlight viven en un ::before fixed
+       que cubre 100dvh detrás de todo el contenido (no scroll). */
+    background-color: #0f0f1e;
     min-height: 100dvh;
-    font-feature-settings: 'rlig' 1, 'calt' 1;
+    font-feature-settings: 'rlig' 1, 'calt' 1, 'ss01' 1;
+    overflow-x: hidden;
+  }
+
+  /* ─── Mesh background ambient (capa fija detrás de todo) ─────────────
+     Tres radial-gradients superpuestos que dan profundidad sin overload.
+     Cool purple top-left + warm gold bottom-right + indigo soft center.
+     Drift lento opcional (12s) — respeta prefers-reduced-motion abajo.
+  */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -2;
+    background:
+      radial-gradient(at 18% 8%, rgba(129, 140, 248, 0.16) 0%, transparent 50%),
+      radial-gradient(at 82% 92%, rgba(231, 201, 137, 0.09) 0%, transparent 55%),
+      radial-gradient(at 50% 50%, rgba(99, 102, 241, 0.06) 0%, transparent 65%);
+    animation: mesh-drift 18s ease-in-out infinite;
+  }
+
+  /* Gradient base sutil de body (debajo del mesh). */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -3;
+    background: linear-gradient(135deg, #0f0f1e 0%, #171830 100%);
+  }
+
+  @keyframes mesh-drift {
+    0%, 100% {
+      transform: translate3d(0, 0, 0) scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: translate3d(12px, -8px, 0) scale(1.04);
+      opacity: 0.92;
+    }
+  }
+
+  /* ─── Display typography (Fraunces) ──────────────────────────────────
+     Solo donde se aplique font-display (h1 de hero, score reveal, etc).
+     Inter sigue siendo default sans para body + UI.
+  */
+  .font-display {
+    font-feature-settings: 'ss01' 1, 'ss02' 1, 'ss03' 1, 'kern' 1;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer components {
+  /* ─── Glass card primitive ───────────────────────────────────────────
+     Usado en cards key (welcome, login, results score box).
+     - Background semi-transparente (delega al mesh detrás).
+     - Backdrop blur sutil — NO en todas las cards para no overload (perf).
+     - Border + inset highlight top (efecto bisel sutil).
+     - Shadow xl + glow accent en hover (para CTA cards).
+  */
+  .glass-card {
+    @apply relative overflow-hidden rounded-2xl border border-white/[0.08];
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.04) 0%,
+      rgba(255, 255, 255, 0.02) 100%
+    );
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.06) inset,
+      0 12px 24px -8px rgba(0, 0, 0, 0.40),
+      0 2px 6px -2px rgba(0, 0, 0, 0.20);
+  }
+
+  /* Variant "elevated" para cards primarias (login, score box). */
+  .glass-card-elevated {
+    @apply glass-card;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.03) 100%
+    );
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.10) inset,
+      0 24px 48px -16px rgba(0, 0, 0, 0.55),
+      0 8px 16px -8px rgba(0, 0, 0, 0.35),
+      0 0 48px -8px rgba(129, 140, 248, 0.22);
+  }
+
+  /* Subtle hover lift para cards interactivas. */
+  .card-hover-lift {
+    @apply transition-all duration-300 ease-somno-out;
+  }
+  .card-hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.10) inset,
+      0 28px 48px -12px rgba(0, 0, 0, 0.55),
+      0 0 36px -4px rgba(129, 140, 248, 0.28);
+  }
+
+  /* ─── Badge tints (info / warn / success / danger) ───────────────────
+     Para chips de estado, evidence labels, etc. NO usar para alerts
+     fuertes (esos usan shadcn Alert variant).
+  */
+  .badge-tint-info {
+    @apply bg-somno-tint-info text-somno-accent-soft border border-somno-accent/20;
+  }
+  .badge-tint-warm {
+    @apply bg-somno-tint-warn text-somno-warm-soft border border-somno-warm/20;
+  }
+  .badge-tint-success {
+    background: rgba(110, 200, 154, 0.10);
+    color: #a7e2c2;
+    border: 1px solid rgba(110, 200, 154, 0.22);
+  }
+
+  /* ─── Section spacing canónico ───────────────────────────────────────
+     Aplica padding vertical responsive consistente en secciones de page.
+  */
+  .section-y {
+    @apply py-16 md:py-24;
+  }
+  .section-y-sm {
+    @apply py-10 md:py-16;
   }
 }
 
@@ -66,12 +189,25 @@
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
+  body::before,
+  body::after {
+    display: none !important;
+  }
 
   main,
   section,
   article,
   div {
     background: transparent !important;
+  }
+
+  /* Quitar el glass effect en print — colapsa a card plana negra sobre blanco. */
+  .glass-card,
+  .glass-card-elevated {
+    background: white !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+    border-color: #ccc !important;
   }
 
   /* Forzar texto legible en modo print sobre fondo blanco. */
@@ -90,6 +226,12 @@
   .text-somno-accent,
   .text-primary {
     color: #4f46e5 !important;
+  }
+
+  /* Mantener warm gold para insights en print (legible). */
+  .text-somno-warm,
+  .text-somno-warm-soft {
+    color: #a07a2a !important;
   }
 
   /* Bordes visibles en print. */
@@ -129,9 +271,10 @@
    migrañas, atención sensible) pueden configurar su OS para reducir
    animaciones. Respetamos esa preferencia globalmente.
 
-   Tailwind animate-* + transition-* + animation custom (accordion-up/
-   down de tailwindcss-animate) se desactivan. Se mantienen los
-   colores/estilos finales — sólo desaparece el efecto motion.
+   Tailwind animate-* + transition-* + animation custom + mesh drift +
+   Framer Motion (que respeta reduced-motion via useReducedMotion hook
+   en cada wrapper) se desactivan. Se mantienen los colores/estilos
+   finales — sólo desaparece el efecto motion.
 */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -142,5 +285,8 @@
     transition-duration: 0.001ms !important;
     transition-delay: 0ms !important;
     scroll-behavior: auto !important;
+  }
+  body::before {
+    animation: none !important;
   }
 }

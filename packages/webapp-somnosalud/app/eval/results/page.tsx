@@ -50,12 +50,12 @@ export default function ResultsPage() {
       {/* Disclaimer reforzado ABAJO (segunda vez, principio de safety) */}
       <DisclaimerBanner variant="reinforced" />
 
-      <footer className="border-t border-border/40 py-6 text-center text-xs text-muted-foreground print:border-foreground/40">
+      <footer className="border-t border-white/[0.06] py-8 text-center text-xs text-muted-foreground print:border-foreground/40">
         <p>
-          <strong>SomnoSalud</strong> · Plataforma médica digital · Buenos
-          Aires, Argentina
+          <strong className="text-foreground/85">SomnoSalud</strong> ·
+          Plataforma médica digital · Buenos Aires, Argentina
         </p>
-        <p className="mt-1">
+        <p className="mt-1.5">
           Director médico responsable: Dr. Pablo Ferrero — M.N. 119.783 ·
           Instituto Ferrero de Neurología y Sueño (IFN)
         </p>

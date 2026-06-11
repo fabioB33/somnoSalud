@@ -12,7 +12,7 @@ import Link from 'next/link';
  */
 export function PublicFooter() {
   return (
-    <footer className="mt-auto border-t border-border/40 py-8 print:hidden">
+    <footer className="mt-auto border-t border-white/[0.06] py-10 print:hidden">
       <div className="container">
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="text-center text-xs text-muted-foreground sm:text-left">

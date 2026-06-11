@@ -1,40 +1,29 @@
-import { ProgressBar } from '@/components/eval/ProgressBar';
+import { FadeIn } from '@/components/motion/FadeIn';
+import { StepHeader } from '@/components/eval/StepHeader';
 
 import { LabForm } from './LabForm';
 
 /**
- * Pantalla /eval/lab — 7 parametros de laboratorio relevantes al
- * sueno. OPCIONAL — el paciente puede saltar.
+ * Pantalla /eval/lab — 7 parametros de laboratorio (OPCIONAL).
  *
- * Parametros (LAB_PARAMETERS del clinical-engine):
- * - vitD (Vitamina D 25-OH-D)
- * - b12 (Vitamina B12)
- * - iron (Hierro)
- * - ferritin (Ferritina)
- * - magnesium (Magnesio)
- * - tsh (TSH)
- * - glucose (Glucosa)
- *
- * Cada uno con su unidad + rango optimal/normal del clinical-engine.
+ * Sprint UX polish 2026-06-11: StepHeader reusable + FadeIn.
  */
 export default function LabPage() {
   return (
     <main className="min-h-dvh">
-      <div className="container max-w-2xl py-8 md:py-12">
-        <ProgressBar current={10} total={12} />
-        <h1 className="mb-3 mt-4 text-3xl font-bold tracking-tight md:text-4xl">
-          Análisis de laboratorio{' '}
-          <span className="text-base font-normal text-muted-foreground">
-            (opcional)
-          </span>
-        </h1>
-        <p className="mb-8 text-base text-muted-foreground">
-          Si tenés a mano resultados recientes (últimos 6 meses) de algunos
-          parámetros, ingresalos para enriquecer las recomendaciones. Si
-          no, podés saltar este paso sin afectar tu evaluación.
-        </p>
+      <div className="container max-w-2xl py-10 md:py-14">
+        <FadeIn>
+          <StepHeader
+            step={10}
+            title="Análisis de laboratorio"
+            eyebrow="Paso 10 de 12 · Opcional"
+            description="Si tenés a mano resultados recientes (últimos 6 meses) de algunos parámetros, ingresalos para enriquecer las recomendaciones. Si no, podés saltar este paso sin afectar tu evaluación."
+          />
+        </FadeIn>
 
-        <LabForm />
+        <FadeIn delay={0.1}>
+          <LabForm />
+        </FadeIn>
       </div>
     </main>
   );

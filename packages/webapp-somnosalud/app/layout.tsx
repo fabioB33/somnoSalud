@@ -1,14 +1,28 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Fraunces } from 'next/font/google';
 import './globals.css';
 
 import { PublicHeader } from '@/components/layout/PublicHeader';
 import { Toaster } from '@/components/ui/sonner';
 
+/**
+ * Tipografía pareada SomnoSalud v2.0 (Sprint UX polish 2026-06-11).
+ *
+ * - Inter (sans serif) → body, UI, forms.
+ * - Fraunces (serif display) → H1 de hero, score numbers grandes,
+ *   pull-quotes editoriales. Se aplica con className `font-display`.
+ */
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
+});
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  variable: '--font-fraunces',
+  display: 'swap',
+  axes: ['SOFT', 'opsz'],
 });
 
 export const metadata: Metadata = {
@@ -30,7 +44,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es-AR" className={inter.variable}>
+    <html lang="es-AR" className={`${inter.variable} ${fraunces.variable}`}>
       <body className="font-sans">
         <PublicHeader />
         {children}

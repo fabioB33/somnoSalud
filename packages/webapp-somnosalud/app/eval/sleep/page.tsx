@@ -1,31 +1,28 @@
-import { ProgressBar } from '@/components/eval/ProgressBar';
+import { FadeIn } from '@/components/motion/FadeIn';
+import { StepHeader } from '@/components/eval/StepHeader';
 
 import { SleepForm } from './SleepForm';
 
 /**
- * Pantalla /eval/sleep — Diario de sueno (form custom, no escalar).
+ * Pantalla /eval/sleep — Diario de sueno (form custom).
  *
- * 7 campos heterogeneos sobre patron de sueno tipico del paciente.
- * No usa <QuestionnaireForm> porque los inputs son heterogeneos
- * (number, time, slider 1-10).
- *
- * Estos datos alimentan el clinical-engine engine/phenotype y
- * engine/precision en /eval/results (Sprint 8).
+ * Sprint UX polish 2026-06-11: StepHeader reusable + FadeIn.
  */
 export default function SleepPage() {
   return (
     <main className="min-h-dvh">
-      <div className="container max-w-2xl py-8 md:py-12">
-        <ProgressBar current={9} total={12} />
-        <h1 className="mb-3 mt-4 text-3xl font-bold tracking-tight md:text-4xl">
-          Diario de sueño
-        </h1>
-        <p className="mb-8 text-base text-muted-foreground">
-          Pensá en cómo dormís <strong>típicamente</strong> en las últimas
-          2 semanas (no en una mala noche puntual).
-        </p>
+      <div className="container max-w-2xl py-10 md:py-14">
+        <FadeIn>
+          <StepHeader
+            step={9}
+            title="Diario de sueño"
+            description="Pensá en cómo dormís típicamente en las últimas 2 semanas (no en una mala noche puntual)."
+          />
+        </FadeIn>
 
-        <SleepForm />
+        <FadeIn delay={0.1}>
+          <SleepForm />
+        </FadeIn>
       </div>
     </main>
   );

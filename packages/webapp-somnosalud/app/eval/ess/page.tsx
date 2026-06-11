@@ -1,12 +1,12 @@
-import { ProgressBar } from '@/components/eval/ProgressBar';
+import { FadeIn } from '@/components/motion/FadeIn';
+import { StepHeader } from '@/components/eval/StepHeader';
 
 import { ESSForm } from './ESSForm';
 
 /**
  * Pantalla /eval/ess — Epworth Sleepiness Scale (Johns 1991).
  *
- * 8 items, escala 0-3 con labels uniformes (probabilidad de dormirse
- * en distintas situaciones).
+ * Sprint UX polish 2026-06-11: StepHeader reusable + FadeIn.
  *
  * Reference: Johns MW. A new method for measuring daytime sleepiness:
  * the Epworth sleepiness scale. Sleep. 1991;14(6):540-545.
@@ -14,25 +14,26 @@ import { ESSForm } from './ESSForm';
 export default function ESSPage() {
   return (
     <main className="min-h-dvh">
-      <div className="container max-w-3xl py-8 md:py-12">
-        <ProgressBar current={4} total={12} />
-        <h1 className="mb-3 mt-4 text-3xl font-bold tracking-tight md:text-4xl">
-          Epworth Sleepiness Scale (ESS)
-        </h1>
-        <p className="mb-2 text-base text-muted-foreground">
-          ¿Qué tan probable es que te duermas (no solo te sientas
-          cansado/a) en cada una de las siguientes situaciones?
-        </p>
-        <p className="mb-2 text-sm text-muted-foreground">
-          Pensá cómo te has sentido habitualmente en las últimas semanas,
-          aunque no hayas vivido alguna de estas situaciones recientemente.
-        </p>
-        <p className="mb-8 text-xs text-muted-foreground">
-          Instrumento validado: Johns MW.{' '}
-          <em>Sleep. 1991;14(6):540-545.</em>
-        </p>
+      <div className="container max-w-3xl py-10 md:py-14">
+        <FadeIn>
+          <StepHeader
+            step={4}
+            title="Epworth Sleepiness Scale (ESS)"
+            description="¿Qué tan probable es que te duermas (no solo te sientas cansado/a) en cada una de las siguientes situaciones?"
+          />
+          <p className="mb-2 text-sm leading-relaxed text-muted-foreground">
+            Pensá cómo te has sentido habitualmente en las últimas semanas,
+            aunque no hayas vivido alguna de estas situaciones recientemente.
+          </p>
+          <p className="mb-8 text-xs text-muted-foreground">
+            Instrumento validado: Johns MW.{' '}
+            <em>Sleep. 1991;14(6):540-545.</em>
+          </p>
+        </FadeIn>
 
-        <ESSForm />
+        <FadeIn delay={0.1}>
+          <ESSForm />
+        </FadeIn>
       </div>
     </main>
   );
