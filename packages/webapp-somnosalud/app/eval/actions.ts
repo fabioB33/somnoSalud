@@ -2,9 +2,12 @@
 
 import { revalidatePath } from 'next/cache';
 
+import { sendResultsEmail } from '@/lib/email/send';
 import { createClient } from '@/lib/supabase/server';
 import type { EvalState } from '@/hooks/usePersistEval';
 import type { BuildResultsOutput } from '@/lib/results-builder';
+
+type SupabaseClientType = ReturnType<typeof createClient>;
 
 /**
  * Server Actions del flow /eval/* (Sprint 9.C-persist-eval).
@@ -169,8 +172,56 @@ export async function markEvaluationCompleted(
     payload: { evaluation_id: evaluationId },
   });
 
+  // Sprint 9.G: results email best-effort (post-completion).
+  // No bloquea la action si falla — solo loggea silencioso.
+  await maybeSendResultsEmail(supabase, evaluationId, user.id, user.email ?? null);
+
   revalidatePath('/mis-resultados');
   return { ok: true };
+}
+
+/**
+ * Sprint 9.G — dispara results email post-completion (best-effort).
+ *
+ * NO usa flag en DB porque cada evaluation es 1 envío. Si el user re-completa
+ * la misma evaluation (improbable, idempotencia ya cubre en update), no
+ * mandamos de nuevo porque `markEvaluationCompleted` retorna early si
+ * `status === 'completed'`.
+ *
+ * Si el wrapper Resend no está configurado (sin API key) → no-op silencioso.
+ */
+async function maybeSendResultsEmail(
+  supabase: SupabaseClientType,
+  evaluationId: string,
+  userId: string,
+  userEmail: string | null,
+): Promise<void> {
+  if (!userEmail) return;
+  try {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('display_name')
+      .eq('id', userId)
+      .maybeSingle();
+
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? '';
+    const resultsUrl = siteUrl
+      ? `${siteUrl}/mis-resultados/${evaluationId}`
+      : `/mis-resultados/${evaluationId}`;
+
+    await sendResultsEmail({
+      to: userEmail,
+      patientFirstName: profile?.display_name ?? 'paciente',
+      evaluationDate: new Date().toLocaleDateString('es-AR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      }),
+      resultsUrl,
+    });
+  } catch {
+    /* best-effort */
+  }
 }
 
 /**
