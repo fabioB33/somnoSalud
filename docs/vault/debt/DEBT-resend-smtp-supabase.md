@@ -12,9 +12,17 @@ related:
   - "[[../sprints/sprint-14-observabilidad-ci/SPRINT-14-OBSERVABILIDAD-CI]]"
   - "[[../sprints/sprint-3-vercel-preview/SPRINT-3-VERCEL-PREVIEW]]"
   - "[[../hotfixes/2026-05-26-magic-link-localhost-redirect/HOTFIX]]"
+  - "[[../runbooks/RUNBOOK-resend-smtp-supabase-activation]]"
 ---
 
 # DEBT-resend-smtp-supabase
+
+> [!danger] Hallazgo empírico 2026-06-19 — corrige premisa del DEBT
+> Verificación DNS autoritativa (`dig @8.8.8.8`) confirmó que **`somnosalud.com.ar` NO está registrado** (`status: NXDOMAIN`, sin NS/A/SOA). El dominio `somnosalud.com` (.com) está registrado por un **tercero** (AWS `13.248.243.5`). El dominio del cliente `ifn.com.ar` sí existe (Cloudflare). **No se puede usar `noreply@somnosalud.com.ar` hasta registrar el dominio** o elegir otro sender. 4 caminos documentados en el runbook.
+>
+> **Segundo hallazgo:** el rate limit que rompe el login en vivo es del **magic link, que lo manda Supabase Auth — NO la app.** Por lo tanto, setear `RESEND_API_KEY` en Vercel NO destraba el login; hay que configurar **SMTP custom en el dashboard de Supabase Auth**. El wrapper de la app (`lib/email/*`) ya está completo y solo activa welcome/results emails (futuros).
+>
+> Runbook operativo completo con FASES 0-5 + tabla "quién hace qué": [[../runbooks/RUNBOOK-resend-smtp-supabase-activation]].
 
 > [!warning] Elevado a priority `high` el 2026-06-02
 > Durante smoke real de Sprint 3, el rate limit Supabase SMTP default (4 emails/hora **por project**, no por destinatario) chocó múltiples veces durante el debug del bug magic link localhost. Con Pablo + Jorge + Fabio activos + cualquier paciente prueba, esto va a chocar regularmente y bloquear iteración.
