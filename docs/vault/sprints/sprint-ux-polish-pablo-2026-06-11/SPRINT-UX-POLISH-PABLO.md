@@ -2,13 +2,18 @@
 title: "Sprint UX Polish — Refresh visual completo post-feedback Pablo (fea)"
 date: 2026-06-11
 sprint_number: ux-polish-pablo
-status: code-pending-merge
+status: closed-verified
+status_history:
+  - "2026-06-11: code-pending-merge (Sprint entregado en branch feat/sprint-ux-polish-pablo-2026-06-11)"
+  - "2026-06-19: code-pending-merge → CLOSED-VERIFIED (audit empírico confirmó commit a5c6747 ancestor de main desde 2026-06-19 via merge fast-forward Sprint 8 → main del submodule. Drift documental corregido.)"
+last_synced_with_vault_reality: 2026-06-19
+merged_via_commit: "a5c6747 (feat(ux-polish): refresh visual completo post-feedback Pablo, ahora en main)"
 parent_debts: []
 related:
   - "[[../sprint-9-c-persist-eval/SPRINT-9-C-PERSIST-EVAL]]"
   - "[[../sprint-3-vercel-preview/SPRINT-3-VERCEL-PREVIEW]]"
   - "[[../../architecture/adr/ADR-003-compliance-gates-en-codigo]]"
-tags: [sprint, ux, ui, design-system, framer-motion, fraunces, glass-morphism, pablo-feedback, code-pending-merge]
+tags: [sprint, ux, ui, design-system, framer-motion, fraunces, glass-morphism, pablo-feedback, closed-verified]
 ---
 
 # Sprint UX Polish — Refresh visual completo
