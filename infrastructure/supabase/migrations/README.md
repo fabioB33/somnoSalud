@@ -82,3 +82,35 @@ Claude Code. Confirmación en `mcp__supabase-somnosalud__list_migrations`:
 ```
 
 Post-aplicación, `get_advisors(security)` retornó `lints: []` (0 WARN).
+
+## Aplicación efectiva (2026-06-19) — migraciones 0006, 0007, 0008, 0010
+
+Las migraciones `0006_diary_entries`, `0007_premium_waitlist`, `0008_clinician_links`
+y `0010_profile_role` se aplicaron al project IFN (`goxdopciwvahrxdeirft`) el
+**2026-06-19** durante la preparación de la demo de SomnoSalud Mobile
+(validación interna / inversor).
+
+**Contexto:** la app móvil (`products/somnosalud-mobile-app`) hace `INSERT` en
+`diary_entries` y consulta `clinician_links` + `profiles.role`. Esas tablas/columnas
+existían como archivos de migración acá pero **no estaban aplicadas en prod**, por
+lo que el diario fallaba en silencio (diseño best-effort) y el backoffice del doctor
+quedaba vacío. Verificado empíricamente vía REST API antes de aplicar.
+
+**Cómo se aplicaron:** vía Management API (`POST /v1/projects/{ref}/database/query`)
+con el `SUPABASE_ACCESS_TOKEN` del entorno, usando un SQL consolidado e idempotente.
+Bundle reproducible + runbook en
+`products/somnosalud-mobile-app/demo-prep/` (`01-migraciones-faltantes.sql`,
+`02-verificacion.sql`, `03-seed-datos-demo.sql`, `RUNBOOK-DEMO.md`).
+
+**Verificación post-aplicación:** 6 tablas públicas (audit_log, clinician_links,
+diary_entries, evaluations, premium_waitlist, profiles), RLS=true en las 6,
+`profiles.role` con default `'patient'`, 11 policies en las tablas nuevas + la policy
+`evaluations_select_linked_clinician`.
+
+> [!warning] El registro `supabase_migrations.schema_migrations` NO refleja estas 4
+> Como se aplicaron por query directo (no vía CLI `db push` ni `apply_migration` del
+> MCP), el tracker `supabase_migrations.schema_migrations` sigue listando solo las 5
+> primeras (init_profiles … harden_definer_functions). La DB tiene las tablas, pero
+> el registro de migraciones no las menciona. **Drift conocido, documentado acá.**
+> Para cerrarlo formalmente cuando se retome el flujo CLI/MCP: registrar las 4 con
+> `apply_migration` (no-op de schema, solo deja el registro) o `supabase migration repair`.
