@@ -1,15 +1,21 @@
 ---
-title: "Sprint 9.A — Cliente Supabase + magic link auth + middleware (smoke H4 diferido a 9.B)"
+title: "Sprint 9.A — Cliente Supabase + magic link auth + middleware (smoke H4 completado vía 9.B)"
 date: 2026-05-18
 closed_at: 2026-05-18
+last_synced_with_vault_reality: 2026-06-19
 sprint_number: 9.A
-status: closed-pending-smoke
+status: closed-verified
+status_history:
+  - "2026-05-18: closed-pending-smoke (sprint cerrado funcional + tests pero smoke H4 RLS user-isolation diferido a Sprint 9.B donde requería flow real)"
+  - "2026-06-19: closed-pending-smoke → CLOSED-VERIFIED (audit empírico — Sprint 9.B cerró el smoke H4 al verificar trigger handle_new_user con cuenta real. Drift documental corregido.)"
+verified_via: "[[../sprint-9-b-login-ux/SPRINT-9-B-LOGIN-UX]] sección 'Verificación DB end-to-end (E2)'"
 parent_debts: []
 related:
   - "[[../sprint-2-b-supabase-schema/SPRINT-2-B-SUPABASE-SCHEMA]]"
+  - "[[../sprint-9-b-login-ux/SPRINT-9-B-LOGIN-UX]]"
   - "[[../../processes/SPRINT-CLOSURE-CHECKLIST]]"
   - "[[../../processes/DEPLOY-WORKFLOW]]"
-tags: [sprint, supabase, auth, magic-link, ssr, middleware, fase-1, backend]
+tags: [sprint, supabase, auth, magic-link, ssr, middleware, fase-1, backend, closed-verified]
 ---
 
 # Sprint 9.A — Cliente Supabase + magic link auth

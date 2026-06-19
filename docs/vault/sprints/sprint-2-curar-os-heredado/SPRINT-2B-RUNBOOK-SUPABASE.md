@@ -1,9 +1,14 @@
 ---
 title: "Sprint 2.B — Runbook crear project Supabase + setear MCP supabase-somnosalud"
 date: 2026-05-08
-last_synced_with_vault_reality: 2026-05-08
-tags: [sprint, sprint-2b, supabase, mcp, runbook, fase-0, somnosalud, ownership-fabio]
-status: pending-fabio
+last_synced_with_vault_reality: 2026-06-19
+tags: [sprint, sprint-2b, supabase, mcp, runbook, fase-0, somnosalud, ownership-fabio, closed-superseded]
+status: closed-superseded
+status_history:
+  - "2026-05-08: pending-fabio (runbook listo, Fabio ejecuta cuando puede)"
+  - "2026-05-14: ejecutado parcialmente (project goxdopciwvahrxdeirft creado + MCP supabase-somnosalud configurado en .mcp.json con comentario explícito)"
+  - "2026-06-19: closed-superseded (audit empírico confirmó MCP activo + project existente desde 2026-05-14 — runbook obsoleto, ya hecho)"
+superseded_via_commit: "Ver .mcp.json sección supabase-somnosalud _comment línea: 'Sprint 2.B (2026-05-14): project somnosalud-platform creado Org Pampa Labs, region sa-east-1, plan Free. Ref: goxdopciwvahrxdeirft.'"
 related:
   - "[[SPRINT-2-CURAR-OS-HEREDADO]]"
   - "[[../../MASTER-PLAN]]"

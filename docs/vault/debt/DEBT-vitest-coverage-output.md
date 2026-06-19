@@ -1,11 +1,13 @@
 ---
 title: "Deuda Técnica — vitest sin coverage output rompe turbo cache"
 date: 2026-05-08
-tags: [deuda-tecnica, testing, vitest, turbo, cache, infraestructura, open]
+last_updated: 2026-06-19
+tags: [deuda-tecnica, testing, vitest, turbo, cache, infraestructura, open, cosmetic]
 status: open
 priority: low
 scope: sprint-2
 detected_during: sprint-1-cleanup-os-heredado
+notes_2026_06_19: "Audit confirmó que el warning sigue presente pero NO bloquea ningún CI ni rompe builds — solo es ruido en logs. Fix recomendado (30 min) en próximo sprint que toque infrastructure/testing: agregar a vitest.config.ts → coverage: {reporter: ['text', 'json', 'html'], reportsDirectory: 'coverage'}. Mientras tanto, low priority OK."
 related:
   - "[[../sprints/sprint-1-cleanup-os-heredado/SPRINT-1-CLEANUP-OS-HEREDADO]]"
 ---
